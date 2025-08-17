@@ -95,12 +95,6 @@ absen/
    - Open browser: `http://localhost/absen`
    - Login admin: `http://localhost/absen/login.php`
 
-## 👤 Default Login
-
-**Admin Account:**
-- Username: `admin`
-- Password: `admin123`
-
 ## 📱 Usage
 
 ### For Students/Staff:
