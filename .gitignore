@@ -1,0 +1,140 @@
+# PHP
+*.log
+*.tmp
+*.cache
+error_log
+error.log
+
+# XAMPP specific
+.htaccess
+php_errors.log
+
+# Environment and Configuration
+config.php
+.env
+.env.local
+.env.production
+
+# Database
+*.sql.backup
+*.sql.gz
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploads and User Generated Content
+uploads/
+files/
+media/
+app/images/uploads/
+app/images/profile/
+app/images/selfie/
+
+# Keep default images but ignore uploaded ones
+!app/images/default-avatar.png
+!app/images/logo*.png
+!app/images/icon/
+
+# Cache and temporary files
+cache/
+tmp/
+temp/
+sessions/
+
+# Composer
+vendor/
+composer.lock
+
+# Node modules (if using any frontend tools)
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Windows
+ehthumbs.db
+Desktop.ini
+
+# Build and distribution
+dist/
+build/
+*.zip
+*.tar.gz
+*.rar
+
+# Backup files
+backup/
+*.backup
+*.bak
+*.old
+
+# Configuration backups
+config.backup.php
+database.backup.sql
+
+# Development tools
+.sass-cache/
+*.css.map
+*.js.map
+
+# Security sensitive files
+private/
+secrets/
+keys/
+certificates/
+
+# Log files
+logs/
+*.log
+access.log
+error.log
+debug.log
+
+# Session files
+session_files/
+sess_*
+
+# Temporary PHP files
+*.php~
+*.php.tmp
+
+# PHPStorm
+.idea/
+
+# VS Code
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
