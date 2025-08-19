@@ -448,6 +448,63 @@ $skr = date('Y-m-d');
             border-color: #4640DE;
             color: #4640DE;
         }
+
+        .period-selector {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .form-modern {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #E0E0E0;
+            border-radius: 8px;
+            background: white;
+            color: #121F3E;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .form-modern:focus {
+            outline: none;
+            border-color: #4640DE;
+            box-shadow: 0 0 0 3px rgba(70, 64, 222, 0.1);
+        }
+
+        .period-stats {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #ABB3C4;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #121F3E;
+        }
+
+        @media (max-width: 768px) {
+            .period-stats {
+                flex-direction: column;
+                gap: 15px;
+                margin-top: 15px;
+            }
+        }
     </style>
 
     <title><?= $d_aplikasi['nama_aplikasi']; ?> - Data Absensi</title>
@@ -544,23 +601,102 @@ $skr = date('Y-m-d');
                         <div class="modern-card">
                             <div class="d-flex justify-content-between align-items-center mb-4">
                                 <div>
-                                    <h3 class="content-title mb-0">Data Absensi Hari Ini</h3>
-                                    <p class="content-desc mb-0"><?= date('d F Y'); ?> - Kelola data kehadiran siswa</p>
+                                    <h3 class="content-title mb-0">Data Absensi</h3>
+                                    <p class="content-desc mb-0">Monitor dan kelola data absensi siswa per bulan</p>
                                 </div>
                                 <div class="d-flex gap-2">
-                                    <a href="absensi_export.php" class="btn-modern success">
-                                        <i class="fas fa-download"></i>
-                                        Export
-                                    </a>
-                                    <input type="date" class="btn-modern primary" value="<?= date('Y-m-d'); ?>" onchange="filterByDate(this.value)">
+                                    <button class="btn-modern success" onclick="exportData('excel')">
+                                        <i class="fas fa-file-excel"></i>
+                                        Export Excel
+                                    </button>
+                                    <button class="btn-modern danger" onclick="exportData('pdf')">
+                                        <i class="fas fa-file-pdf"></i>
+                                        Export PDF
+                                    </button>
+                                    <button class="btn-modern warning" onclick="testPDFExport()" style="background: linear-gradient(135deg, #ffc107, #e0a800); border: none; color: white;">
+                                        <i class="fas fa-vial"></i>
+                                        Test PDF
+                                    </button>
                                 </div>
                             </div>
 
+                            <!-- Period Selector -->
+                            <div class="period-selector">
+                                <div class="row align-items-center">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Pilih Periode:</label>
+                                        <?php
+                                        $selected_month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
+                                        ?>
+                                        <select class="form-modern" id="monthYear" onchange="loadPeriodData()">
+                                            <?php
+                                            for ($i = 0; $i < 12; $i++) {
+                                                $date = date('Y-m', strtotime("-$i month"));
+                                                $display = date('F Y', strtotime("-$i month"));
+                                                $selected = ($date == $selected_month) ? 'selected' : '';
+                                                echo "<option value='$date' $selected>$display</option>";
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="period-stats">
+                                            <div class="stat-item">
+                                                <span class="stat-label">Total Masuk</span>
+                                                <span class="stat-value" id="totalMasuk">
+                                                    <?php
+                                                    $total_masuk = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], 
+                                                        "SELECT * FROM absensi WHERE DATE_FORMAT(tanggal, '%Y-%m') = '$selected_month' AND masuk IS NOT NULL AND ijin IS NULL AND status_tidak_masuk IS NULL"));
+                                                    echo $total_masuk;
+                                                    ?>
+                                                </span>
+                                            </div>
+                                            <div class="stat-item">
+                                                <span class="stat-label">Total Sakit/Izin/Alpha</span>
+                                                <span class="stat-value" id="totalTidakMasuk">
+                                                    <?php
+                                                    $total_tidak_masuk_all = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], 
+                                                        "SELECT * FROM absensi WHERE DATE_FORMAT(tanggal, '%Y-%m') = '$selected_month' AND (ijin IS NOT NULL OR status_tidak_masuk IS NOT NULL)"));
+                                                    echo $total_tidak_masuk_all;
+                                                    ?>
+                                                </span>
+                                            </div>
+                                            <div class="stat-item">
+                                                <span class="stat-label">Persentase Kehadiran</span>
+                                                <span class="stat-value" id="persentaseKehadiran">
+                                                    <?php
+                                                    $total_siswa = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM karyawan"));
+                                                    $total_hari_kerja = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], 
+                                                        "SELECT DISTINCT tanggal FROM absensi WHERE DATE_FORMAT(tanggal, '%Y-%m') = '$selected_month'"));
+                                                    $total_expected = $total_siswa * $total_hari_kerja;
+                                                    $persentase = $total_expected > 0 ? round(($total_masuk / $total_expected) * 100, 1) : 0;
+                                                    echo $persentase . '%';
+                                                    ?>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Filter Tabs -->
                             <div class="filter-tabs">
-                                <a href="#" class="filter-tab active" onclick="filterAttendance('all')">Semua</a>
-                                <a href="#" class="filter-tab" onclick="filterAttendance('present')">Hadir</a>
-                                <a href="#" class="filter-tab" onclick="filterAttendance('absent')">Tidak Hadir</a>
-                                <a href="#" class="filter-tab" onclick="filterAttendance('permission')">Izin</a>
+                                <button class="filter-tab active" onclick="filterAttendance('all', this)">
+                                    <i class="fas fa-list"></i>
+                                    Semua
+                                </button>
+                                <button class="filter-tab" onclick="filterAttendance('present', this)">
+                                    <i class="fas fa-check-circle"></i>
+                                    Hadir
+                                </button>
+                                <button class="filter-tab" onclick="filterAttendance('absent', this)">
+                                    <i class="fas fa-times-circle"></i>
+                                    Tidak Hadir
+                                </button>
+                                <button class="filter-tab" onclick="filterAttendance('permission', this)">
+                                    <i class="fas fa-clock"></i>
+                                    Izin
+                                </button>
                             </div>
 
                             <div class="table-responsive">
@@ -575,31 +711,81 @@ $skr = date('Y-m-d');
                                             <th>Jam Pulang</th>
                                             <th>Status</th>
                                             <th>Keterangan</th>
+                                            <th>Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <?php
                                         $no = 1;
-                                        // Query untuk semua siswa dan status absensi hari ini
+                                        $selected_month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
+                                        $selected_date = date('Y-m-d'); // Today's date for checking attendance
+                                        
+                                        // Query untuk data absensi per bulan
                                         $attendance = mysqli_query($GLOBALS["___mysqli_ston"], "
-                                            SELECT k.*, a.masuk, a.pulang, a.ijin 
+                                            SELECT k.*, a.tanggal, a.masuk, a.pulang, a.ijin, a.status_tidak_masuk 
                                             FROM karyawan k 
-                                            LEFT JOIN absensi a ON k.nik = a.nik AND a.tanggal = '$skr' 
-                                            ORDER BY k.nama ASC
+                                            LEFT JOIN absensi a ON k.nik = a.nik AND DATE_FORMAT(a.tanggal, '%Y-%m') = '$selected_month'
+                                            ORDER BY k.nama ASC, a.tanggal DESC
                                         ");
                                         
+                                        $student_data = array();
                                         while ($data = mysqli_fetch_array($attendance)) {
-                                            if ($data['masuk'] && !$data['ijin']) {
+                                            if (!isset($student_data[$data['nik']])) {
+                                                $student_data[$data['nik']] = array(
+                                                    'info' => $data,
+                                                    'attendance' => array()
+                                                );
+                                            }
+                                            if ($data['tanggal']) {
+                                                $student_data[$data['nik']]['attendance'][] = $data;
+                                            }
+                                        }
+                                        
+                                        foreach ($student_data as $nik => $student) {
+                                            $data = $student['info'];
+                                            $attendance_records = $student['attendance'];
+                                            
+                                            $total_hadir = 0;
+                                            $total_ijin = 0;
+                                            $total_alpha = 0;
+                                            $total_sakit = 0;
+                                            $last_attendance = null;
+                                            
+                                            foreach ($attendance_records as $record) {
+                                                if ($record['ijin']) {
+                                                    $total_ijin++;
+                                                } elseif ($record['masuk']) {
+                                                    $total_hadir++;
+                                                } elseif ($record['status_tidak_masuk']) {
+                                                    if ($record['status_tidak_masuk'] == 'alpha') $total_alpha++;
+                                                    elseif ($record['status_tidak_masuk'] == 'sakit') $total_sakit++;
+                                                    elseif ($record['status_tidak_masuk'] == 'izin') $total_ijin++;
+                                                }
+                                                if (!$last_attendance || $record['tanggal'] > $last_attendance['tanggal']) {
+                                                    $last_attendance = $record;
+                                                }
+                                            }
+                                            
+                                            // Check if student has attendance today
+                                            $today_attendance = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], 
+                                                "SELECT * FROM absensi WHERE nik = '$nik' AND tanggal = '$selected_date'"));
+                                            
+                                            // Determine overall status for the month
+                                            if ($total_hadir > ($total_ijin + $total_alpha + $total_sakit)) {
                                                 $status = 'present';
-                                                $status_text = 'Hadir';
+                                                $status_text = "Hadir ($total_hadir hari)";
                                                 $status_class = 'status-present';
-                                            } elseif ($data['ijin']) {
+                                            } elseif (($total_ijin + $total_sakit + $total_alpha) > 0) {
                                                 $status = 'permission';
-                                                $status_text = 'Izin';
+                                                $absence_details = [];
+                                                if ($total_ijin > 0) $absence_details[] = "Izin: $total_ijin";
+                                                if ($total_sakit > 0) $absence_details[] = "Sakit: $total_sakit";
+                                                if ($total_alpha > 0) $absence_details[] = "Alpha: $total_alpha";
+                                                $status_text = implode(", ", $absence_details);
                                                 $status_class = 'status-permission';
                                             } else {
                                                 $status = 'absent';
-                                                $status_text = 'Tidak Hadir';
+                                                $status_text = "Tidak Ada Data";
                                                 $status_class = 'status-absent';
                                             }
                                         ?>
@@ -618,15 +804,17 @@ $skr = date('Y-m-d');
                                             </td>
                                             <td><?= $data['job_title']; ?></td>
                                             <td>
-                                                <?php if ($data['masuk']) { ?>
-                                                    <span class="time-badge"><?= date('H:i', strtotime($data['masuk'])); ?></span>
+                                                <?php if ($last_attendance && $last_attendance['masuk']) { ?>
+                                                    <span class="time-badge"><?= date('H:i', strtotime($last_attendance['masuk'])); ?></span>
+                                                    <br><small class="text-muted"><?= date('d/m', strtotime($last_attendance['tanggal'])); ?></small>
                                                 <?php } else { ?>
                                                     <span class="text-muted">-</span>
                                                 <?php } ?>
                                             </td>
                                             <td>
-                                                <?php if ($data['pulang'] && $data['pulang'] != '0') { ?>
-                                                    <span class="time-badge"><?= date('H:i', strtotime($data['pulang'])); ?></span>
+                                                <?php if ($last_attendance && $last_attendance['pulang'] && $last_attendance['pulang'] != '0') { ?>
+                                                    <span class="time-badge"><?= date('H:i', strtotime($last_attendance['pulang'])); ?></span>
+                                                    <br><small class="text-muted"><?= date('d/m', strtotime($last_attendance['tanggal'])); ?></small>
                                                 <?php } else { ?>
                                                     <span class="text-muted">-</span>
                                                 <?php } ?>
@@ -637,8 +825,34 @@ $skr = date('Y-m-d');
                                                 </span>
                                             </td>
                                             <td>
-                                                <?php if ($data['ijin']) { ?>
-                                                    <?= $data['ijin']; ?>
+                                                <div style="font-size: 12px;">
+                                                    <div>Hadir: <?= $total_hadir; ?> hari</div>
+                                                    <?php if ($total_ijin > 0) { ?>
+                                                        <div>Izin: <?= $total_ijin; ?> hari</div>
+                                                    <?php } ?>
+                                                    <?php if ($total_sakit > 0) { ?>
+                                                        <div>Sakit: <?= $total_sakit; ?> hari</div>
+                                                    <?php } ?>
+                                                    <?php if ($total_alpha > 0) { ?>
+                                                        <div>Alpha: <?= $total_alpha; ?> hari</div>
+                                                    <?php } ?>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <?php if (!$today_attendance || (!$today_attendance['masuk'] && !$today_attendance['ijin'] && !$today_attendance['status_tidak_masuk'])) { ?>
+                                                    <button class="btn-modern warning" onclick="markAbsent('<?= $data['nik']; ?>', '<?= $data['nama']; ?>')">
+                                                        <i class="fas fa-user-times"></i>
+                                                        Tandai Tidak Masuk
+                                                    </button>
+                                                <?php } elseif ($today_attendance && $today_attendance['status_tidak_masuk']) { ?>
+                                                    <span class="status-badge status-permission">
+                                                        <?= ucfirst($today_attendance['status_tidak_masuk']); ?>
+                                                    </span>
+                                                    <br>
+                                                    <button class="btn-modern primary" style="font-size: 10px; padding: 4px 8px; margin-top: 5px;" onclick="markAbsent('<?= $data['nik']; ?>', '<?= $data['nama']; ?>', '<?= $today_attendance['status_tidak_masuk']; ?>')">
+                                                        <i class="fas fa-edit"></i>
+                                                        Edit
+                                                    </button>
                                                 <?php } else { ?>
                                                     <span class="text-muted">-</span>
                                                 <?php } ?>
@@ -650,6 +864,70 @@ $skr = date('Y-m-d');
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for marking absent students -->
+    <div class="modal fade" id="absentModal" tabindex="-1" aria-labelledby="absentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="border-radius: 16px;">
+                <div class="modal-header" style="border-bottom: 1px solid #f0f0f0;">
+                    <h5 class="modal-title" id="absentModalLabel">
+                        <i class="fas fa-user-times me-2"></i>
+                        Tandai Siswa Tidak Masuk
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <p>Siswa: <strong id="studentName"></strong></p>
+                        <p class="text-muted">Tanggal: <?= date('d F Y'); ?></p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Pilih Status Ketidakhadiran:</label>
+                        <div class="row">
+                            <div class="col-12 mb-2">
+                                <div class="form-check" style="padding: 10px; border: 2px solid #E0E0E0; border-radius: 8px;">
+                                    <input class="form-check-input" type="radio" name="absentStatus" id="statusAlpha" value="alpha">
+                                    <label class="form-check-label" for="statusAlpha">
+                                        <strong>Alpha</strong><br>
+                                        <small class="text-muted">Tidak masuk tanpa keterangan</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-12 mb-2">
+                                <div class="form-check" style="padding: 10px; border: 2px solid #E0E0E0; border-radius: 8px;">
+                                    <input class="form-check-input" type="radio" name="absentStatus" id="statusSakit" value="sakit">
+                                    <label class="form-check-label" for="statusSakit">
+                                        <strong>Sakit</strong><br>
+                                        <small class="text-muted">Tidak masuk karena sakit</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-12 mb-2">
+                                <div class="form-check" style="padding: 10px; border: 2px solid #E0E0E0; border-radius: 8px;">
+                                    <input class="form-check-input" type="radio" name="absentStatus" id="statusIzin" value="izin">
+                                    <label class="form-check-label" for="statusIzin">
+                                        <strong>Izin</strong><br>
+                                        <small class="text-muted">Tidak masuk dengan izin</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid #f0f0f0;">
+                    <button type="button" class="btn-modern secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                        Batal
+                    </button>
+                    <button type="button" class="btn-modern success" onclick="saveAbsentStatus()">
+                        <i class="fas fa-save"></i>
+                        Simpan Status
+                    </button>
                 </div>
             </div>
         </div>
@@ -674,13 +952,13 @@ $skr = date('Y-m-d');
             e.closest('.sidebar-item').classList.add('active')
         }
 
-        function filterAttendance(status) {
+        function filterAttendance(status, element) {
             const rows = document.querySelectorAll('tbody tr');
             const tabs = document.querySelectorAll('.filter-tab');
             
             // Update active tab
             tabs.forEach(tab => tab.classList.remove('active'));
-            event.target.classList.add('active');
+            element.classList.add('active');
             
             // Filter rows
             rows.forEach(row => {
@@ -692,9 +970,112 @@ $skr = date('Y-m-d');
             });
         }
 
-        function filterByDate(date) {
-            window.location.href = `?date=${date}`;
+        function loadPeriodData() {
+            const selectedMonth = document.getElementById('monthYear').value;
+            window.location.href = `?month=${selectedMonth}`;
         }
+
+        function exportData(format) {
+            const selectedMonth = document.getElementById('monthYear').value;
+            
+            if (format === 'excel') {
+                window.open(`absensi_export.php?format=excel&month=${selectedMonth}`, '_blank');
+            } else if (format === 'pdf') {
+                // Direct PDF export with better approach
+                window.open(`absensi_export_pdf_direct.php?month=${selectedMonth}&download=1`, '_blank');
+            }
+        }
+
+        function testPDFExport() {
+            const selectedMonth = document.getElementById('monthYear').value;
+            
+            // Show options to user
+            const choice = confirm('Pilih PDF Export:\nOK = Direct PDF View\nCancel = Force Download');
+            
+            if (choice) {
+                // Direct PDF view
+                window.open(`absensi_export_pdf_direct.php?month=${selectedMonth}`, '_blank');
+            } else {
+                // Force download
+                window.open(`absensi_export_pdf_force.php?month=${selectedMonth}`, '_blank');
+            }
+        }
+
+        // Variables for absent modal
+        let currentStudentNik = '';
+        let currentStudentName = '';
+
+        function markAbsent(nik, name, currentStatus = '') {
+            currentStudentNik = nik;
+            currentStudentName = name;
+            
+            document.getElementById('studentName').textContent = name;
+            
+            // Clear previous selections
+            document.querySelectorAll('input[name="absentStatus"]').forEach(radio => {
+                radio.checked = false;
+            });
+            
+            // If editing existing status, select the current one
+            if (currentStatus) {
+                document.getElementById('status' + currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)).checked = true;
+            }
+            
+            const modal = new bootstrap.Modal(document.getElementById('absentModal'));
+            modal.show();
+        }
+
+        function saveAbsentStatus() {
+            const selectedStatus = document.querySelector('input[name="absentStatus"]:checked');
+            
+            if (!selectedStatus) {
+                alert('Mohon pilih status ketidakhadiran');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('nik', currentStudentNik);
+            formData.append('status', selectedStatus.value);
+            formData.append('tanggal', '<?= date('Y-m-d'); ?>');
+            
+            fetch('controller/mark_absent.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Status ketidakhadiran berhasil disimpan');
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menyimpan data');
+            });
+            
+            const modal = bootstrap.Modal.getInstance(document.getElementById('absentModal'));
+            modal.hide();
+        }
+
+        // Add styles for checked radio buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('input[name="absentStatus"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    document.querySelectorAll('.form-check').forEach(check => {
+                        check.style.borderColor = '#E0E0E0';
+                        check.style.backgroundColor = 'white';
+                    });
+                    
+                    if (this.checked) {
+                        this.closest('.form-check').style.borderColor = '#4640DE';
+                        this.closest('.form-check').style.backgroundColor = 'rgba(70, 64, 222, 0.05)';
+                    }
+                });
+            });
+        });
     </script>
 </body>
 

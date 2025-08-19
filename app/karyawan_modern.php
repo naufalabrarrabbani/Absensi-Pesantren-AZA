@@ -414,6 +414,103 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
             display: flex;
             gap: 5px;
         }
+
+        .modal-modern {
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-modern .modal-header {
+            background: linear-gradient(135deg, #4640DE 0%, #5a52e8 100%);
+            color: white;
+            border-radius: 20px 20px 0 0;
+            padding: 20px 30px;
+            border: none;
+        }
+
+        .modal-modern .modal-title {
+            font-weight: 600;
+            font-size: 20px;
+        }
+
+        .modal-modern .modal-body {
+            padding: 30px;
+        }
+
+        .modal-modern .modal-footer {
+            padding: 20px 30px;
+            border: none;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .form-modern {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #E0E0E0;
+            border-radius: 12px;
+            background: white;
+            color: #121F3E;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .form-modern:focus {
+            outline: none;
+            border-color: #4640DE;
+            box-shadow: 0 0 0 3px rgba(70, 64, 222, 0.1);
+        }
+
+        .form-label-modern {
+            font-weight: 500;
+            color: #121F3E;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group-modern {
+            margin-bottom: 20px;
+        }
+
+        .btn-close-modern {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            opacity: 0.8;
+        }
+
+        .btn-close-modern:hover {
+            opacity: 1;
+            color: white;
+        }
+
+        .file-upload-area {
+            border: 2px dashed #E0E0E0;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .file-upload-area:hover {
+            border-color: #4640DE;
+            background: rgba(70, 64, 222, 0.02);
+        }
+
+        .file-upload-area.dragover {
+            border-color: #4640DE;
+            background: rgba(70, 64, 222, 0.05);
+        }
+
+        #filePreview {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
     </style>
 
     <title><?= $d_aplikasi['nama_aplikasi']; ?> - Data Siswa</title>
@@ -492,7 +589,7 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
 
                 <div class="d-flex justify-content-between align-items-center nav-input-container">
                     <div class="nav-input-group">
-                        <input type="text" class="nav-input" placeholder="Search students...">
+                        <input type="text" class="nav-input" placeholder="Search students..." id="searchInput" onkeyup="searchStudents()">
                         <button class="btn-nav-input">
                             <i class="fas fa-search" style="color: #ABB3C4;"></i>
                         </button>
@@ -505,6 +602,22 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
             </div>
 
             <div class="content">
+                <?php if (isset($_GET['success'])): ?>
+                <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 12px; border: none; background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white;">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>Berhasil!</strong> <?= base64_decode($_GET['success']); ?>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <?php endif; ?>
+
+                <?php if (isset($_GET['error'])): ?>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius: 12px; border: none; background: linear-gradient(135deg, #F44336 0%, #e53935 100%); color: white;">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Error!</strong> <?= base64_decode($_GET['error']); ?>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <?php endif; ?>
+
                 <div class="row">
                     <div class="col-12">
                         <div class="modern-card">
@@ -513,7 +626,7 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                                     <h3 class="content-title mb-0">Daftar Siswa</h3>
                                     <p class="content-desc mb-0">Kelola data siswa di sistem absensi</p>
                                 </div>
-                                <a href="karyawan_add.php" class="btn-modern primary">
+                                <a href="#" class="btn-modern primary" data-bs-toggle="modal" data-bs-target="#addStudentModal">
                                     <i class="fas fa-plus"></i>
                                     Tambah Siswa
                                 </a>
@@ -528,7 +641,6 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                                             <th>NIK</th>
                                             <th>Nama</th>
                                             <th>Kelas</th>
-                                            <th>Area</th>
                                             <th>Status</th>
                                             <th>Aksi</th>
                                         </tr>
@@ -555,7 +667,6 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                                                 <small class="text-muted"><?= $student['no_telp']; ?></small>
                                             </td>
                                             <td><?= $student['job_title']; ?></td>
-                                            <td><?= $student['area']; ?></td>
                                             <td>
                                                 <span class="status-badge <?= $status == 'active' ? 'status-active' : 'status-inactive'; ?>">
                                                     <?= $status == 'active' ? 'Aktif' : 'Tidak Aktif'; ?>
@@ -566,7 +677,7 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                                                     <a href="karyawan_detail.php?id=<?= $student['id']; ?>" class="btn-modern primary">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
-                                                    <a href="karyawan_edit.php?id=<?= $student['id']; ?>" class="btn-modern warning">
+                                                    <a href="karyawan_edit_modern.php?id=<?= $student['nik']; ?>" class="btn-modern warning">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
                                                     <a href="karyawan_delete.php?id=<?= $student['id']; ?>" class="btn-modern danger" onclick="return confirm('Yakin ingin menghapus?')">
@@ -586,12 +697,191 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
         </div>
     </div>
 
+    <!-- Add Student Modal -->
+    <div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content modal-modern">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addStudentModalLabel">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Tambah Siswa Baru
+                    </h5>
+                    <button type="button" class="btn-close-modern" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form action="controller/karyawan_simpan.php" method="POST" enctype="multipart/form-data" id="addStudentForm">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label for="nik" class="form-label-modern">
+                                        <i class="fas fa-id-card me-1"></i>
+                                        NISN
+                                    </label>
+                                    <input type="text" class="form-modern" id="nik" name="nik" placeholder="Masukkan NISN" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label for="nama" class="form-label-modern">
+                                        <i class="fas fa-user me-1"></i>
+                                        Nama Lengkap
+                                    </label>
+                                    <input type="text" class="form-modern" id="nama" name="nama" placeholder="Masukkan nama lengkap" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label for="job_title" class="form-label-modern">
+                                        <i class="fas fa-graduation-cap me-1"></i>
+                                        Kelas
+                                    </label>
+                                    <select class="form-modern" id="job_title" name="job_title" required>
+                                        <option value="">-- Pilih Kelas --</option>
+                                        <?php
+                                        $sql_jt = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM jobtitle");
+                                        if(mysqli_num_rows($sql_jt) != 0){
+                                            while($d_jt = mysqli_fetch_assoc($sql_jt)){
+                                                echo '<option value="'.$d_jt['kode_jobtitle'].'">'.$d_jt['jobtitle'].'</option>';
+                                            }
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label for="no_telp" class="form-label-modern">
+                                        <i class="fas fa-phone me-1"></i>
+                                        No. Telepon
+                                    </label>
+                                    <input type="text" class="form-modern" id="no_telp" name="no_telp" placeholder="Masukkan nomor telepon">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label for="jenis_kelamin" class="form-label-modern">
+                                        <i class="fas fa-venus-mars me-1"></i>
+                                        Jenis Kelamin
+                                    </label>
+                                    <select class="form-modern" id="jenis_kelamin" name="jenis_kelamin" required>
+                                        <option value="">-- Pilih Jenis Kelamin --</option>
+                                        <option value="Laki-laki">Laki-laki</option>
+                                        <option value="Perempuan">Perempuan</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label for="agama" class="form-label-modern">
+                                        <i class="fas fa-pray me-1"></i>
+                                        Agama
+                                    </label>
+                                    <select class="form-modern" id="agama" name="agama" required>
+                                        <option value="">-- Pilih Agama --</option>
+                                        <option value="Islam">Islam</option>
+                                        <option value="Kristen">Kristen</option>
+                                        <option value="Katolik">Katolik</option>
+                                        <option value="Hindu">Hindu</option>
+                                        <option value="Buddha">Buddha</option>
+                                        <option value="Konghucu">Konghucu</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label for="lokasi" class="form-label-modern">
+                                        <i class="fas fa-map-marker-alt me-1"></i>
+                                        Lokasi
+                                    </label>
+                                    <select class="form-modern" id="lokasi" name="lokasi" required>
+                                        <?php
+                                        $sql_l = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM lokasi");
+                                        if(mysqli_num_rows($sql_l) != 0){
+                                            while($d_l = mysqli_fetch_assoc($sql_l)){
+                                                echo '<option value="'.$d_l['lokasi'].'">'.$d_l['lokasi'].'</option>';
+                                            }
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label for="nama_ayah" class="form-label-modern">
+                                        <i class="fas fa-male me-1"></i>
+                                        Nama Ayah
+                                    </label>
+                                    <input type="text" class="form-modern" id="nama_ayah" name="nama_ayah" placeholder="Masukkan nama ayah">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label for="start_date" class="form-label-modern">
+                                        <i class="fas fa-calendar-alt me-1"></i>
+                                        Tanggal Mulai
+                                    </label>
+                                    <input type="date" class="form-modern" id="start_date" name="start_date" value="<?= date('Y-m-d'); ?>" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label for="end_date" class="form-label-modern">
+                                        <i class="fas fa-calendar-check me-1"></i>
+                                        Tanggal Selesai
+                                    </label>
+                                    <input type="date" class="form-modern" id="end_date" name="end_date" value="<?= date('Y-m-d', strtotime('+1 year')); ?>" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group-modern">
+                            <label for="file" class="form-label-modern">
+                                <i class="fas fa-camera me-1"></i>
+                                Foto Siswa
+                            </label>
+                            <div class="file-upload-area" onclick="document.getElementById('file').click()">
+                                <i class="fas fa-cloud-upload-alt" style="font-size: 32px; color: #ABB3C4; margin-bottom: 10px;"></i>
+                                <p class="mb-0" style="color: #ABB3C4;">Klik untuk upload foto atau drag & drop</p>
+                                <p class="mb-0" style="color: #ABB3C4; font-size: 12px;">Format: JPG, PNG, GIF (Max: 2MB)</p>
+                                <img id="filePreview" style="display: none;">
+                            </div>
+                            <input type="file" class="d-none" id="file" name="file" accept="image/*" onchange="previewFile()">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-modern" style="background: #6c757d; color: white;" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i>
+                            Batal
+                        </button>
+                        <button type="submit" class="btn-modern success">
+                            <i class="fas fa-save me-1"></i>
+                            Simpan Siswa
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
 
     <script>
         const navbar = document.querySelector('.col-navbar')
         const cover = document.querySelector('.screen-cover')
-
         const sidebar_items = document.querySelectorAll('.sidebar-item')
 
         function toggleNavbar() {
@@ -605,6 +895,119 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
             })
             e.closest('.sidebar-item').classList.add('active')
         }
+
+        // File preview function
+        function previewFile() {
+            const file = document.getElementById('file').files[0];
+            const preview = document.getElementById('filePreview');
+            const uploadArea = document.querySelector('.file-upload-area');
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    uploadArea.innerHTML = `
+                        <img src="${e.target.result}" style="max-width: 100px; max-height: 100px; border-radius: 8px;">
+                        <p class="mb-0 mt-2" style="color: #4640DE; font-weight: 500;">${file.name}</p>
+                        <p class="mb-0" style="color: #ABB3C4; font-size: 12px;">Klik untuk ganti foto</p>
+                    `;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Drag and drop functionality
+        const fileUploadArea = document.querySelector('.file-upload-area');
+        const fileInput = document.getElementById('file');
+
+        fileUploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+
+        fileUploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+        });
+
+        fileUploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                previewFile();
+            }
+        });
+
+        // Form validation
+        document.getElementById('addStudentForm').addEventListener('submit', function(e) {
+            const nik = document.getElementById('nik').value;
+            const nama = document.getElementById('nama').value;
+            const job_title = document.getElementById('job_title').value;
+            
+            if (!nik || !nama || !job_title) {
+                e.preventDefault();
+                alert('Mohon lengkapi data NISN, Nama, dan Kelas');
+                return false;
+            }
+            
+            // Validate NISN format (hanya angka)
+            if (!/^\d+$/.test(nik)) {
+                e.preventDefault();
+                alert('NISN harus berupa angka');
+                return false;
+            }
+        });
+
+        // Auto-fill end date when start date changes
+        document.getElementById('start_date').addEventListener('change', function() {
+            const startDate = new Date(this.value);
+            const endDate = new Date(startDate);
+            endDate.setFullYear(endDate.getFullYear() + 1);
+            
+            document.getElementById('end_date').value = endDate.toISOString().split('T')[0];
+        });
+
+        // Search functionality
+        function searchStudents() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const table = document.querySelector('.modern-table tbody');
+            const rows = table.querySelectorAll('tr');
+
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                let found = false;
+                
+                // Search in NIK, Name, Class columns
+                for (let i = 2; i <= 4; i++) {
+                    if (cells[i] && cells[i].textContent.toLowerCase().includes(filter)) {
+                        found = true;
+                        break;
+                    }
+                }
+                
+                if (found || filter === '') {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                if (alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            });
+        }, 5000);
     </script>
 </body>
 

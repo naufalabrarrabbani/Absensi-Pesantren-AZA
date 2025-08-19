@@ -11,6 +11,7 @@ php_errors.log
 
 # Environment and Configuration
 config.php
+koneksi.php
 .env
 .env.local
 .env.production

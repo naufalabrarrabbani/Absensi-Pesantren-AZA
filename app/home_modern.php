@@ -18,10 +18,10 @@ $s_karyawan = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from karyawan")
 $t_karyawan = mysqli_num_rows($s_karyawan);
 
 $skr = date('Y-m-d');
-$s_absen = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from absensi where tanggal='$skr' and ijin is NULL order by masuk DESC");
+$s_absen = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from absensi where tanggal='$skr' and ijin is NULL and masuk IS NOT NULL and status_tidak_masuk IS NULL order by masuk DESC");
 $t_absen = mysqli_num_rows($s_absen);
 
-$s_pulang = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from absensi where tanggal='$skr' AND pulang !='0' order by pulang DESC");
+$s_pulang = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from absensi where tanggal='$skr' AND pulang !='0' AND masuk IS NOT NULL AND status_tidak_masuk IS NULL order by pulang DESC");
 $t_pulang = mysqli_num_rows($s_pulang);
 
 $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from aplikasi"));
@@ -638,7 +638,7 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
 
                             <div class="statistics-list">
                                 <?php
-                                $students_present = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT k.foto FROM absensi a JOIN karyawan k ON a.nik = k.nik WHERE a.tanggal='$skr' AND a.ijin IS NULL ORDER BY a.masuk DESC LIMIT 4");
+                                $students_present = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT k.foto FROM absensi a JOIN karyawan k ON a.nik = k.nik WHERE a.tanggal='$skr' AND a.ijin IS NULL AND a.masuk IS NOT NULL AND a.status_tidak_masuk IS NULL ORDER BY a.masuk DESC LIMIT 4");
                                 $count = 0;
                                 while ($peg = mysqli_fetch_array($students_present)) {
                                     if ($count >= 4) break;
@@ -663,7 +663,16 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                         <div class="statistics-card stats-absent">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="d-flex flex-column justify-content-between align-items-start">
-                                    <h5 class="statistics-value"><?= $t_karyawan - $t_absen; ?></h5>
+                                    <?php
+                                    // Count students who are absent (no attendance record or marked as sakit/izin/alpha)
+                                    $total_tidak_masuk_query = mysqli_query($GLOBALS["___mysqli_ston"], "
+                                        SELECT COUNT(*) as total FROM karyawan k 
+                                        LEFT JOIN absensi a ON k.nik = a.nik AND a.tanggal = '$skr'
+                                        WHERE a.nik IS NULL OR (a.masuk IS NULL AND a.ijin IS NULL) OR a.status_tidak_masuk IS NOT NULL
+                                    ");
+                                    $total_tidak_masuk = mysqli_fetch_array($total_tidak_masuk_query)['total'];
+                                    ?>
+                                    <h5 class="statistics-value"><?= $total_tidak_masuk; ?></h5>
                                     <p class="statistics-desc">Tidak Masuk</p>
                                 </div>
                                 <button class="btn-statistics" style="background: #f8f9fa;">
@@ -673,7 +682,12 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
 
                             <div class="statistics-list">
                                 <?php
-                                $students_absent = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT k.foto FROM karyawan k LEFT JOIN absensi a ON k.nik = a.nik AND a.tanggal='$skr' WHERE a.nik IS NULL ORDER BY k.id DESC LIMIT 4");
+                                $students_absent = mysqli_query($GLOBALS["___mysqli_ston"], "
+                                    SELECT k.foto FROM karyawan k 
+                                    LEFT JOIN absensi a ON k.nik = a.nik AND a.tanggal = '$skr'
+                                    WHERE a.nik IS NULL OR (a.masuk IS NULL AND a.ijin IS NULL) OR a.status_tidak_masuk IS NOT NULL
+                                    ORDER BY k.id DESC LIMIT 4
+                                ");
                                 $count = 0;
                                 while ($peg = mysqli_fetch_array($students_absent)) {
                                     if ($count >= 4) break;
@@ -684,9 +698,9 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                                      class="statistics-image"
                                      onerror="this.src='images/default-avatar.png'">
                                 <?php } ?>
-                                <?php if (($t_karyawan - $t_absen) > 4) { ?>
+                                <?php if ($total_tidak_masuk > 4) { ?>
                                 <div class="statistics-icon plus">
-                                    <span>+<?= ($t_karyawan - $t_absen) - 4; ?></span>
+                                    <span>+<?= $total_tidak_masuk - 4; ?></span>
                                 </div>
                                 <?php } ?>
                             </div>
@@ -708,7 +722,7 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
 
                             <div class="statistics-list">
                                 <?php
-                                $students_home = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT k.foto FROM absensi a JOIN karyawan k ON a.nik = k.nik WHERE a.tanggal='$skr' AND a.pulang != '0' ORDER BY a.pulang DESC LIMIT 4");
+                                $students_home = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT k.foto FROM absensi a JOIN karyawan k ON a.nik = k.nik WHERE a.tanggal='$skr' AND a.pulang != '0' AND a.masuk IS NOT NULL AND a.status_tidak_masuk IS NULL ORDER BY a.pulang DESC LIMIT 4");
                                 $count = 0;
                                 while ($peg = mysqli_fetch_array($students_home)) {
                                     if ($count >= 4) break;
@@ -793,7 +807,7 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
 
                         <div class="document-card">
                             <?php
-                            $recent_activity = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT a.*, k.nama, k.foto FROM absensi a JOIN karyawan k ON a.nik = k.nik WHERE a.tanggal='$skr' ORDER BY a.masuk DESC LIMIT 8");
+                            $recent_activity = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT a.*, k.nama, k.foto FROM absensi a JOIN karyawan k ON a.nik = k.nik WHERE a.tanggal='$skr' AND a.masuk IS NOT NULL AND a.status_tidak_masuk IS NULL ORDER BY a.masuk DESC LIMIT 8");
                             while ($activity = mysqli_fetch_array($recent_activity)) {
                             ?>
                             <div class="document-item">
