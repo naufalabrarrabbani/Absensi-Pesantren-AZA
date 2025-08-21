@@ -7,425 +7,415 @@ $t_karyawan = mysqli_num_rows($s_karyawan);
 $skr = date('Y-m-d');
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <title><?= $app['nama_aplikasi'];?> - <?= $app['nama_perusahaan'];?> </title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="keywords" content="Statistics UI Kit Responsive web template, Bootstrap Web Templates, Flat Web Templates, Android Compatible web template, 
-Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, SonyEricsson, Motorola web design" />
-<script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
-<!-- bootstrap-css -->
-<link href="css/bootstrap.css" rel="stylesheet" type="text/css" media="all" />
-<!--// bootstrap-css -->
-<!-- css -->
-<link rel="stylesheet" href="css/style.css" type="text/css" media="all" />
-<!--// css -->
-<!-- font-awesome icons -->
-<link href="css/font-awesome.css" rel="stylesheet"> 
-<!-- //font-awesome icons -->
-<!-- font -->
-<link href='//fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,600,600italic,700,700italic,800,800italic' rel='stylesheet' type='text/css'>
-<!-- //font -->
-<script src="js/jquery-1.11.3.min.js"></script>
-<script src="js/bootstrap.js"></script>
-<!-- circle -->
-<script src="js/circliful.js"></script>
- <script>
-							$( document ).ready(function() { // 6,32 5,38 2,34
-								$("#test-circle").circliful({
-									animation: 1,
-									animationStep: 5,
-									foregroundBorderWidth: 15,
-									backgroundBorderWidth: 15,
-									percent: 71,
-									textSize: 28,
-									text: 'New Users',
-									textStyle: 'font-size: 12px;',
-									textColor: '#666'
-								});
-							});
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Admin - <?= $app['nama_aplikasi'];?></title>
+    
+    <!-- Modern Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-						</script>
-<!-- //circle -->
-<!--chart js-->
-<script src="js/Chart.js"></script>
-<!--//chart js-->
-<script src="js/easyResponsiveTabs.js" type="text/javascript"></script>
-<script type="text/javascript">
-	$(document).ready(function () {
-		$('#horizontalTab').easyResponsiveTabs({
-			type: 'default', //Types: default, vertical, accordion           
-			width: 'auto', //auto or any width like 600px
-			fit: true   // 100% fit in a container
-		});
-	});
-</script>
-<!--Calender -->
-  <link rel="stylesheet" href="css/clndr.css" type="text/css" />
-  <script src="js/underscore-min.js"></script>
-  <script src= "js/moment-2.2.1.js"></script>
-  <script src="js/clndr.js"></script>
-  <script src="js/site.js"></script>
-<!--End Calender-->
-<!-- chart-grid-left -->
-<link rel="stylesheet" href="css/master.css">
-<script src="js/d3.min.js"></script>
-<script src="js/xcharts.min.js"></script>
-<script src="js/rainbow.min.js"></script>
-<!-- //chart-grid-left -->
-<!-- fabochart -->
-<link href="css/fabochart.css" rel="stylesheet" type="text/css">
-<!-- //fabochart -->
-<!--animate-->
-<link href="css/animate.css" rel="stylesheet" type="text/css" media="all">
-<script src="js/wow.min.js"></script>
-	<script>
-		 new WOW().init();
-	</script>
-<!--//end-animate-->
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
 
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 50px 40px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo-section {
+            margin-bottom: 25px;
+        }
+
+        .logo-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .login-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .login-subtitle {
+            color: #7f8c8d;
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7f8c8d;
+            font-size: 18px;
+            z-index: 2;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 18px 18px 18px 55px;
+            border: 2px solid #e1e8ed;
+            border-radius: 15px;
+            font-size: 16px;
+            background: white;
+            outline: none;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .form-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-input:focus + i {
+            color: #667eea;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
+        }
+
+        .login-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .back-home {
+            text-align: center;
+        }
+
+        .back-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.1);
+            text-decoration: none;
+            color: #5a67d8;
+        }
+
+        /* Clock Widget */
+        .clock-widget {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .digital-time {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .digital-date {
+            font-size: 14px;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+
+        /* Loading State */
+        .loading {
+            display: none;
+        }
+
+        .login-btn.loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .login-btn.loading .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .login-container {
+                padding: 40px 30px;
+                margin: 10px;
+            }
+            
+            .login-title {
+                font-size: 24px;
+            }
+            
+            .logo-img {
+                width: 60px;
+                height: 60px;
+            }
+        }
+
+        /* Error States */
+        .error-message {
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c33;
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .form-input.error {
+            border-color: #e74c3c;
+        }
+
+        .form-input.error:focus {
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+        }
+    </style>
 </head>
-<body onload="setFocus()">
-	<div >
-		<div class="container">
-			<div class="logo">
-				<h1 class="wow fadeInDown animated" data-wow-delay=".5s"><?= $app['nama_aplikasi'];?></h1>
-			</div>
-			<!-- header -->
-			
-			<!-- //header -->
-			<div class="content-grids">
-				<!-- content-top-grids -->
-				<div class="content-top-grids">
-					<div class="col-md-4 content-left">
-						
-					</div>
-					<div class="col-md-4 contact-right">
-						<div class="contact-right-top">
-							<div class="contact-right-middle-heading wow fadeInUp animated" data-wow-delay=".5s">
-								<h3><img src="images/logo smp.png" width="50%" alt="Image"></h3>
-							</div>
-							
-						</div>
-						
-						<div class="contact-right-middle">
-							<div class="contact-right-middle-heading wow fadeInUp animated" data-wow-delay=".5s">
-								<h3><img src="images/qr.code.png" width="20%" alt="Image">
-								  LOGIN ADMIN </h3>
-							</div>
-									
-							<div class="login-info">
-								<form method="POST" action="controllers/login_proses.php">
-									<input type="text" class="user" name="username" placeholder="Username" required>
-									<input type="password" class="user" name="password" placeholder="Password" required>
-								
-								<input class="wow fadeInRight animated" data-wow-delay=".5s" type="submit" name="Sign In" value="Login Admin">
-								<a href="index.php"> Kembali ke Home</a>
-</form>
-								
-							</div>
-						</div>
-						
-					</div>
-					<div class="col-md-4 content-right">
-						
-						
-					</div>
-				</div>
-				<!-- //content-top-grids -->
-				<!-- weather-grids -->
-				
-				<!-- //weather-grids -->
-				<!-- graph-tabs -->
-				
-				<!-- //graph-tabs -->
-				<!-- contact-grids -->
-				
-				<!-- //contact-grids -->
-				<!-- chart-grids -->
-				
-				<!-- //chart-grids -->
-				<!-- footer -->
-				
-				<!-- //footer -->
-				<div class="clearfix"> </div>
-				<div class="clearfix"> </div>
-				<div class="copyright" >
-					
-					<p>© 2024 <?= $app['nama_perusahaan'];?>  <img src="" alt=""></p>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- skills-bar -->
-	<script src="js/bars.js"></script>
-	<!-- //skills-bar -->
-	<!-- clock -->
-	<script language="javascript" type="text/javascript" src="js/jquery.thooClock.js"></script>  
-	<script language="javascript">
-		var intVal, myclock;
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="logo-section">
+                <img src="images/logo smp.png" alt="Logo Sekolah" class="logo-img">
+            </div>
+            <h1 class="login-title">
+                <i class="fas fa-user-shield"></i>
+                Login Admin
+            </h1>
+            <p class="login-subtitle"><?= $app['nama_perusahaan'];?></p>
+        </div>
 
-		$(window).resize(function(){
-			window.location.reload()
-		});
+        <!-- Clock Widget -->
+        <div class="clock-widget">
+            <div class="digital-time" id="current-time">00:00:00</div>
+            <div class="digital-date">
+                <?php 
+                $tanggal = date('d M Y');
+                $day = date('D', strtotime($tanggal));
+                $dayList = array(
+                    'Sun' => 'Minggu', 'Mon' => 'Senin', 'Tue' => 'Selasa',
+                    'Wed' => 'Rabu', 'Thu' => 'Kamis', 'Fri' => 'Jumat', 'Sat' => 'Sabtu'
+                );
+                echo $dayList[$day] . ", " . $tanggal;
+                ?>
+            </div>
+        </div>
 
-		$(document).ready(function(){
+        <!-- Error Message -->
+        <div class="error-message" id="errorMessage">
+            Username atau password salah!
+        </div>
 
-			var audioElement = new Audio("");
+        <!-- Login Form -->
+        <form method="POST" action="controllers/login_proses.php" class="form-section" id="loginForm">
+            <div class="input-group">
+                <input type="text" class="form-input" name="username" id="username" placeholder="Masukkan username" required>
+                <i class="fas fa-user"></i>
+            </div>
+            
+            <div class="input-group">
+                <input type="password" class="form-input" name="password" id="password" placeholder="Masukkan password" required>
+                <i class="fas fa-lock"></i>
+            </div>
+            
+            <button type="submit" class="login-btn" id="loginBtn">
+                <i class="fas fa-sign-in-alt"></i>
+                <span class="btn-text">Login Admin</span>
+                <div class="loading"></div>
+            </button>
+        </form>
 
-			//clock plugin constructor
-			$('#myclock').thooClock({
-				size:$(document).height()/1.4,
-				onAlarm:function(){
-					//all that happens onAlarm
-					$('#alarm1').show();
-					alarmBackground(0);
-					//audio element just for alarm sound
-					document.body.appendChild(audioElement);
-					var canPlayType = audioElement.canPlayType("audio/ogg");
-					if(canPlayType.match(/maybe|probably/i)) {
-						audioElement.src = 'alarm.ogg';
-					} else {
-						audioElement.src = 'alarm.mp3';
-					}
-					// erst abspielen wenn genug vom mp3 geladen wurde
-					audioElement.addEventListener('canplay', function() {
-						audioElement.loop = true;
-						audioElement.play();
-					}, false);
-				},
-				showNumerals:true,
-				brandText:'KSO APS-ISS',
-				brandText2:'Indonesia',
-				onEverySecond:function(){
-					//callback that should be fired every second
-				},
-				//alarmTime:'15:10',
-				offAlarm:function(){
-					$('#alarm1').hide();
-					audioElement.pause();
-					clearTimeout(intVal);
-					$('body').css('background-color','#FCFCFC');
-				}
-			});
+        <!-- Back to Home -->
+        <div class="back-home">
+            <a href="index.php" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                Kembali ke Home
+            </a>
+        </div>
+    </div>
 
-		});
+    <script>
+        // Clock function
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            document.getElementById('current-time').textContent = `${hours}:${minutes}:${seconds}`;
+        }
 
+        // Update clock every second
+        updateClock();
+        setInterval(updateClock, 1000);
 
+        // Form handling
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            const btn = document.getElementById('loginBtn');
+            btn.classList.add('loading');
+            btn.querySelector('.btn-text').textContent = 'Memverifikasi...';
+        });
 
-		$('#turnOffAlarm').click(function(){
-			$.fn.thooClock.clearAlarm();
-		});
+        // Focus management
+        function setFocus() {
+            document.getElementById('username').focus();
+        }
 
+        // Auto-focus when page loads
+        window.onload = setFocus;
 
-		$('#set').click(function(){
-			var inp = $('#altime').val();
-			$.fn.thooClock.setAlarm(inp);
-		});
-
-		
-		function alarmBackground(y){
-				var color;
-				if(y===1){
-					color = '#CC0000';
-					y=0;
-				}
-				else{
-					color = '#FCFCFC';
-					y+=1;
-				}
-				$('body').css('background-color',color);
-				intVal = setTimeout(function(){alarmBackground(y);},100);
-		}
-	</script>
-
-	<!-- //clock -->
-	<!-- clock-bottom -->
-	<script type="text/javascript">
-	$(document).ready(function() {
-	// Create two variable with the names of the months and days in an array
-	var monthNames = [ "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "Nopember", "Desember" ]; 
-	var dayNames= ["Minggu","Senin","Selasa","Rabu","Kamis","Jum'at","Sabtu"]
-
-	// Create a newDate() object
-	var newDate = new Date();
-	// Extract the current date from Date object
-	newDate.setDate(newDate.getDate());
-	// Output the day, date, month and year    
-	$('#Date').html(dayNames[newDate.getDay()] + " " + newDate.getDate() + ' ' + monthNames[newDate.getMonth()] + ' ' + newDate.getFullYear());
-
-	setInterval( function() {
-		// Create a newDate() object and extract the seconds of the current time on the visitor's
-		var seconds = new Date().getSeconds();
-		// Add a leading zero to seconds value
-		$("#sec").html(( seconds < 10 ? "0" : "" ) + seconds);
-		},1000);
-		
-	setInterval( function() {
-		// Create a newDate() object and extract the minutes of the current time on the visitor's
-		var minutes = new Date().getMinutes();
-		// Add a leading zero to the minutes value
-		$("#min").html(( minutes < 10 ? "0" : "" ) + minutes);
-		},1000);
-		
-	setInterval( function() {
-		// Create a newDate() object and extract the hours of the current time on the visitor's
-		var hours = new Date().getHours();
-		// Add a leading zero to the hours value
-		$("#hours").html(( hours < 10 ? "0" : "" ) + hours);
-		}, 1000);
-		
-	}); 
-	</script>
-	<!-- clock-bottom -->
-	<!--skycons-icons-->
-	<script src="js/skycons.js"></script>
-		<!--//skycons-icons-->
-		<script>
-				 var icons = new Skycons({"color": "#FFFFFF"}),
-					  list  = [
-						"clear-day"
-					  ],
-					  i;
-
-				  for(i = list.length; i--; )
-					icons.set(list[i], list[i]);
-
-				  icons.play();
-			</script>
-			<script>
-				 var icons = new Skycons({"color": "#f5f5f5"}),
-					  list  = [
-						"clear-night", "partly-cloudy-day",
-						"partly-cloudy-night", "cloudy", "rain", "sleet", "snow", "wind",
-						"fog"
-					  ],
-					  i;
-
-				  for(i = list.length; i--; )
-					icons.set(list[i], list[i]);
-
-				  icons.play();
-			</script>
-		
-		<!-- graph-tabs -->
-		<script src="js/jquery.graphly.min.js"></script>
-		<link rel="stylesheet" media="screen" href="css/bootstrap-responsive.min.css" />
-		<script>
-            $(function() {
-                 $('#negative-positive-graph-button').click(function() {
-                    $('li.active').removeClass('active');
-                    $('#negative-positive-graph-button').parent().addClass('active');
-                    $('.example:visible').not('#negative-positive-container').fadeOut(300, function() {
-                        $('#negative-positive-container').fadeIn(300);
-                    });
-                });
-                $('#line-graph-button').click(function() {
-                    $('li.active').removeClass('active');
-                    $('#line-graph-button').parent().addClass('active');
-                    $('.example:visible').not('#line-graph-container').fadeOut(300, function() {
-                        $('#line-graph-container').fadeIn(300);
-                    });
-                });
-                
-                $('#custom-colours-button').click(function() {
-                    $('li.active').removeClass('active');
-                    $('#custom-colours-button').parent().addClass('active');
-                    $('.example:visible').not('#custom-colours-container').fadeOut(300, function() {
-                        $('#custom-colours-container').fadeIn(300);
-                    });
-                });
-                
-                $('#grouped-graph-button').click(function() {
-                    $('li.active').removeClass('active');
-                    $('#grouped-graph-button').parent().addClass('active');
-                    $('.example:visible').not('#grouped-graph-container').fadeOut(300, function() {
-                        $('#grouped-graph-container').fadeIn(300);
-                    });
-                });
+        // Input validation and animation
+        const inputs = document.querySelectorAll('.form-input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'translateY(-2px)';
             });
-        </script>
-		<script src="js/line_graph.js"></script>
-		<script src="js/custom_colours.js"></script>
-		<script src="js/grouped_graph.js"></script>
-		<script src="js/negative_positive_graph.js"></script>
-		<!-- //graph-tabs -->
-		<!-- chart-grid-left -->
-		<script>
-			(function () {
-			var data = [{"xScale":"ordinal","comp":[],"main":[{"className":".main.l1","data":[{"y":15,"x":"2012-11-19T00:00:00"},{"y":11,"x":"2012-11-20T00:00:00"},{"y":8,"x":"2012-11-21T00:00:00"},{"y":10,"x":"2012-11-22T00:00:00"},{"y":1,"x":"2012-11-23T00:00:00"},{"y":6,"x":"2012-11-24T00:00:00"},{"y":8,"x":"2012-11-25T00:00:00"}]},{"className":".main.l2","data":[{"y":29,"x":"2012-11-19T00:00:00"},{"y":33,"x":"2012-11-20T00:00:00"},{"y":13,"x":"2012-11-21T00:00:00"},{"y":16,"x":"2012-11-22T00:00:00"},{"y":7,"x":"2012-11-23T00:00:00"},{"y":18,"x":"2012-11-24T00:00:00"},{"y":8,"x":"2012-11-25T00:00:00"}]}],"type":"line-dotted","yScale":"linear"},{"xScale":"ordinal","comp":[],"main":[{"className":".main.l1","data":[{"y":12,"x":"2012-11-19T00:00:00"},{"y":18,"x":"2012-11-20T00:00:00"},{"y":8,"x":"2012-11-21T00:00:00"},{"y":7,"x":"2012-11-22T00:00:00"},{"y":6,"x":"2012-11-23T00:00:00"},{"y":12,"x":"2012-11-24T00:00:00"},{"y":8,"x":"2012-11-25T00:00:00"}]},{"className":".main.l2","data":[{"y":29,"x":"2012-11-19T00:00:00"},{"y":33,"x":"2012-11-20T00:00:00"},{"y":13,"x":"2012-11-21T00:00:00"},{"y":16,"x":"2012-11-22T00:00:00"},{"y":7,"x":"2012-11-23T00:00:00"},{"y":18,"x":"2012-11-24T00:00:00"},{"y":8,"x":"2012-11-25T00:00:00"}]}],"type":"cumulative","yScale":"linear"},{"xScale":"ordinal","comp":[],"main":[{"className":".main.l1","data":[{"y":12,"x":"2012-11-19T00:00:00"},{"y":18,"x":"2012-11-20T00:00:00"},{"y":8,"x":"2012-11-21T00:00:00"},{"y":7,"x":"2012-11-22T00:00:00"},{"y":6,"x":"2012-11-23T00:00:00"},{"y":12,"x":"2012-11-24T00:00:00"},{"y":8,"x":"2012-11-25T00:00:00"}]},{"className":".main.l2","data":[{"y":29,"x":"2012-11-19T00:00:00"},{"y":33,"x":"2012-11-20T00:00:00"},{"y":13,"x":"2012-11-21T00:00:00"},{"y":16,"x":"2012-11-22T00:00:00"},{"y":7,"x":"2012-11-23T00:00:00"},{"y":18,"x":"2012-11-24T00:00:00"},{"y":8,"x":"2012-11-25T00:00:00"}]}],"type":"bar","yScale":"linear"}];
-			var order = [0, 1, 0, 2],
-			  i = 0,
-			  xFormat = d3.time.format('%A'),
-			  chart = new xChart('line-dotted', data[order[i]], '#chart', {
-				axisPaddingTop: 5,
-				dataFormatX: function (x) {
-				  return new Date(x);
-				},
-				tickFormatX: function (x) {
-				  return xFormat(x);
-				},
-				timing: 1250
-			  }),
-			  rotateTimer,
-			  toggles = d3.selectAll('.multi button'),
-			  t = 3500;
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'translateY(0)';
+            });
+            
+            input.addEventListener('input', function() {
+                if (this.classList.contains('error')) {
+                    this.classList.remove('error');
+                    document.getElementById('errorMessage').style.display = 'none';
+                }
+            });
+        });
 
-			function updateChart(i) {
-			  var d = data[i];
-			  chart.setData(d);
-			  toggles.classed('toggled', function () {
-				return (d3.select(this).attr('data-type') === d.type);
-			  });
-			  return d;
-			}
+        // Show error message if login failed (you can modify this based on your error handling)
+        if (window.location.search.includes('error=1')) {
+            document.getElementById('errorMessage').style.display = 'block';
+            document.getElementById('username').classList.add('error');
+            document.getElementById('password').classList.add('error');
+        }
 
-			toggles.on('click', function (d, i) {
-			  clearTimeout(rotateTimer);
-			  updateChart(i);
-			});
-
-			function rotateChart() {
-			  i += 1;
-			  i = (i >= order.length) ? 0 : i;
-			  var d = updateChart(order[i]);
-			  rotateTimer = setTimeout(rotateChart, t);
-			}
-			rotateTimer = setTimeout(rotateChart, t);
-			}());
-		</script>
-		<!-- //chart-grid-left -->
-		<!-- fabochart -->
-		<script src="js/fabochart.js"></script>
-		<script>
-		$(document).ready(function () {
-			data = {
-			  '2010' : 300, 
-			  '2011' : 200,
-			  '2012' : 100,
-			  '2013' : 500,
-			  '2014' : 400,
-			  '2015' : 200
-			};
-
-			$("#chart1").faBoChart({
-			  time: 500,
-			  animate: true,
-			  instantAnimate: true,
-			  straight: false,
-			  data: data,
-			  labelTextColor : "#C0392B",
-			});
-			$("#chart2").faBoChart({
-			  time: 2500,
-			  animate: true,
-			  data: data,
-			  straight: true,
-			  labelTextColor : "#C0392B",
-			});
-		});
-		</script>
-		<!-- //fabochart -->
-</body>	
+        // Smooth entrance animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.querySelector('.login-container');
+            container.style.opacity = '0';
+            container.style.transform = 'translateY(30px)';
+            
+            setTimeout(() => {
+                container.style.transition = 'all 0.8s ease-out';
+                container.style.opacity = '1';
+                container.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    </script>
+</body>
+</html>
+        });
+    </script>
+</body>
 </html>
