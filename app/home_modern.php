@@ -24,6 +24,16 @@ $t_absen = mysqli_num_rows($s_absen);
 $s_pulang = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from absensi where tanggal='$skr' AND pulang !='0' AND masuk IS NOT NULL AND status_tidak_masuk IS NULL order by pulang DESC");
 $t_pulang = mysqli_num_rows($s_pulang);
 
+// Query untuk data guru
+$s_guru = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from guru");
+$t_guru = mysqli_num_rows($s_guru);
+
+$s_guru_absen = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from absensi_guru where tanggal='$skr' and ijin is NULL and masuk IS NOT NULL and status_tidak_masuk IS NULL order by masuk DESC");
+$t_guru_absen = mysqli_num_rows($s_guru_absen);
+
+$s_guru_pulang = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from absensi_guru where tanggal='$skr' AND pulang !='0' AND masuk IS NOT NULL AND status_tidak_masuk IS NULL order by pulang DESC");
+$t_guru_pulang = mysqli_num_rows($s_guru_pulang);
+
 $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from aplikasi"));
 ?>
 <!doctype html>
@@ -526,9 +536,19 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                     <span>Siswa</span>
                 </a>
 
+                <a href="guru_modern.php" class="sidebar-item" onclick="toggleActive(this)">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <span>Guru</span>
+                </a>
+
                 <a href="absensi_modern.php" class="sidebar-item" onclick="toggleActive(this)">
                     <i class="fas fa-clipboard-list"></i>
-                    <span>Absensi</span>
+                    <span>Absensi Siswa</span>
+                </a>
+
+                <a href="absensi_guru_modern.php" class="sidebar-item" onclick="toggleActive(this)">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Absensi Guru</span>
                 </a>
 
                 <a href="area_modern.php" class="sidebar-item" onclick="toggleActive(this)">
@@ -743,6 +763,168 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                     </div>
                 </div>
 
+                <!-- Teacher Statistics Section -->
+                <div class="row mt-5">
+                    <div class="col-12">
+                        <h2 class="content-title">Teacher Statistics</h2>
+                        <h5 class="content-desc mb-4">Teacher attendance overview</h5>
+                    </div>
+
+                    <!-- Guru Aktif -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="statistics-card stats-active">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex flex-column justify-content-between align-items-start">
+                                    <h5 class="statistics-value"><?= $t_guru; ?></h5>
+                                    <p class="statistics-desc">Guru Aktif</p>
+                                </div>
+                                <button class="btn-statistics" style="background: #f8f9fa;">
+                                    <i class="fas fa-chalkboard-teacher" style="color: #4640DE;"></i>
+                                </button>
+                            </div>
+
+                            <div class="statistics-list">
+                                <?php
+                                $teachers_active = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT foto FROM guru ORDER BY id DESC LIMIT 4");
+                                $count = 0;
+                                while ($guru = mysqli_fetch_array($teachers_active)) {
+                                    if ($count >= 4) break;
+                                    $count++;
+                                ?>
+                                <img src="images/guru/<?= $guru['foto'] ?: 'default-avatar.png'; ?>" 
+                                     alt="Teacher" 
+                                     class="statistics-image"
+                                     onerror="this.src='images/default-avatar.png'">
+                                <?php } ?>
+                                <?php if ($t_guru > 4) { ?>
+                                <div class="statistics-icon plus">
+                                    <span>+<?= $t_guru - 4; ?></span>
+                                </div>
+                                <?php } ?>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Guru Masuk -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="statistics-card stats-present">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex flex-column justify-content-between align-items-start">
+                                    <h5 class="statistics-value"><?= $t_guru_absen; ?></h5>
+                                    <p class="statistics-desc">Guru Masuk</p>
+                                </div>
+                                <button class="btn-statistics" style="background: #f8f9fa;">
+                                    <i class="fas fa-check" style="color: #4CAF50;"></i>
+                                </button>
+                            </div>
+
+                            <div class="statistics-list">
+                                <?php
+                                $teachers_present = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT g.foto FROM absensi_guru a JOIN guru g ON a.nip = g.nip WHERE a.tanggal='$skr' AND a.ijin IS NULL AND a.masuk IS NOT NULL AND a.status_tidak_masuk IS NULL ORDER BY a.masuk DESC LIMIT 4");
+                                $count = 0;
+                                while ($guru = mysqli_fetch_array($teachers_present)) {
+                                    if ($count >= 4) break;
+                                    $count++;
+                                ?>
+                                <img src="images/guru/<?= $guru['foto'] ?: 'default-avatar.png'; ?>" 
+                                     alt="Teacher" 
+                                     class="statistics-image"
+                                     onerror="this.src='images/default-avatar.png'">
+                                <?php } ?>
+                                <?php if ($t_guru_absen > 4) { ?>
+                                <div class="statistics-icon plus">
+                                    <span>+<?= $t_guru_absen - 4; ?></span>
+                                </div>
+                                <?php } ?>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Guru Tidak Masuk -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="statistics-card stats-absent">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex flex-column justify-content-between align-items-start">
+                                    <?php
+                                    // Count teachers who are absent (no attendance record or marked as sakit/izin/alpha)
+                                    $total_guru_tidak_masuk_query = mysqli_query($GLOBALS["___mysqli_ston"], "
+                                        SELECT COUNT(*) as total FROM guru g 
+                                        LEFT JOIN absensi_guru a ON g.nip = a.nip AND a.tanggal = '$skr'
+                                        WHERE a.nip IS NULL OR (a.masuk IS NULL AND a.ijin IS NULL) OR a.status_tidak_masuk IS NOT NULL
+                                    ");
+                                    $total_guru_tidak_masuk = mysqli_fetch_array($total_guru_tidak_masuk_query)['total'];
+                                    ?>
+                                    <h5 class="statistics-value"><?= $total_guru_tidak_masuk; ?></h5>
+                                    <p class="statistics-desc">Tidak Masuk</p>
+                                </div>
+                                <button class="btn-statistics" style="background: #f8f9fa;">
+                                    <i class="fas fa-times" style="color: #F44336;"></i>
+                                </button>
+                            </div>
+
+                            <div class="statistics-list">
+                                <?php
+                                $teachers_absent = mysqli_query($GLOBALS["___mysqli_ston"], "
+                                    SELECT g.foto FROM guru g 
+                                    LEFT JOIN absensi_guru a ON g.nip = a.nip AND a.tanggal = '$skr'
+                                    WHERE a.nip IS NULL OR (a.masuk IS NULL AND a.ijin IS NULL) OR a.status_tidak_masuk IS NOT NULL
+                                    ORDER BY g.id DESC LIMIT 4
+                                ");
+                                $count = 0;
+                                while ($guru = mysqli_fetch_array($teachers_absent)) {
+                                    if ($count >= 4) break;
+                                    $count++;
+                                ?>
+                                <img src="images/guru/<?= $guru['foto'] ?: 'default-avatar.png'; ?>" 
+                                     alt="Teacher" 
+                                     class="statistics-image"
+                                     onerror="this.src='images/default-avatar.png'">
+                                <?php } ?>
+                                <?php if ($total_guru_tidak_masuk > 4) { ?>
+                                <div class="statistics-icon plus">
+                                    <span>+<?= $total_guru_tidak_masuk - 4; ?></span>
+                                </div>
+                                <?php } ?>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Guru Pulang -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="statistics-card stats-home">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex flex-column justify-content-between align-items-start">
+                                    <h5 class="statistics-value"><?= $t_guru_pulang; ?></h5>
+                                    <p class="statistics-desc">Guru Pulang</p>
+                                </div>
+                                <button class="btn-statistics" style="background: #f8f9fa;">
+                                    <i class="fas fa-home" style="color: #FF9800;"></i>
+                                </button>
+                            </div>
+
+                            <div class="statistics-list">
+                                <?php
+                                $teachers_home = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT g.foto FROM absensi_guru a JOIN guru g ON a.nip = g.nip WHERE a.tanggal='$skr' AND a.pulang != '0' AND a.masuk IS NOT NULL AND a.status_tidak_masuk IS NULL ORDER BY a.pulang DESC LIMIT 4");
+                                $count = 0;
+                                while ($guru = mysqli_fetch_array($teachers_home)) {
+                                    if ($count >= 4) break;
+                                    $count++;
+                                ?>
+                                <img src="images/guru/<?= $guru['foto'] ?: 'default-avatar.png'; ?>" 
+                                     alt="Teacher" 
+                                     class="statistics-image"
+                                     onerror="this.src='images/default-avatar.png'">
+                                <?php } ?>
+                                <?php if ($t_guru_pulang > 4) { ?>
+                                <div class="statistics-icon plus">
+                                    <span>+<?= $t_guru_pulang - 4; ?></span>
+                                </div>
+                                <?php } ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- <div class="row mt-5">
                     <div class="col-12 col-lg-6">
                         <h2 class="content-title">Attendance by Area</h2>
@@ -801,8 +983,8 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
 
                 <!-- Recent Activity -->
                 <div class="row mt-4">
-                    <div class="col-12">
-                        <h2 class="content-title">Recent Activity</h2>
+                    <div class="col-12 col-lg-6">
+                        <h2 class="content-title">Recent Student Activity</h2>
                         <h5 class="content-desc mb-4">Latest student check-ins</h5>
 
                         <div class="document-card">
@@ -830,6 +1012,41 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                                 </div>
                                 <span class="badge bg-primary">
                                     <?= $activity['masuk'] ? date('H:i', strtotime($activity['masuk'])) : '-'; ?>
+                                </span>
+                            </div>
+                            <?php } ?>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-6">
+                        <h2 class="content-title">Recent Teacher Activity</h2>
+                        <h5 class="content-desc mb-4">Latest teacher check-ins</h5>
+
+                        <div class="document-card">
+                            <?php
+                            $recent_teacher_activity = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT a.*, g.nama, g.foto FROM absensi_guru a JOIN guru g ON a.nip = g.nip WHERE a.tanggal='$skr' AND a.masuk IS NOT NULL AND a.status_tidak_masuk IS NULL ORDER BY a.masuk DESC LIMIT 8");
+                            while ($teacher_activity = mysqli_fetch_array($recent_teacher_activity)) {
+                            ?>
+                            <div class="document-item">
+                                <div class="d-flex justify-content-start align-items-center">
+                                    <img src="images/guru/<?= $teacher_activity['foto'] ?: 'default-avatar.png'; ?>" 
+                                         alt="<?= $teacher_activity['nama']; ?>" 
+                                         style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin-right: 15px;"
+                                         onerror="this.src='images/default-avatar.png'">
+                                    <div>
+                                        <h6 class="document-title"><?= $teacher_activity['nama']; ?></h6>
+                                        <p class="document-desc">
+                                            <?php if ($teacher_activity['masuk']) { ?>
+                                                Check in at <?= date('H:i', strtotime($teacher_activity['masuk'])); ?>
+                                            <?php } ?>
+                                            <?php if ($teacher_activity['pulang'] && $teacher_activity['pulang'] != '0') { ?>
+                                                • Check out at <?= date('H:i', strtotime($teacher_activity['pulang'])); ?>
+                                            <?php } ?>
+                                        </p>
+                                    </div>
+                                </div>
+                                <span class="badge bg-success">
+                                    <?= $teacher_activity['masuk'] ? date('H:i', strtotime($teacher_activity['masuk'])) : '-'; ?>
                                 </span>
                             </div>
                             <?php } ?>

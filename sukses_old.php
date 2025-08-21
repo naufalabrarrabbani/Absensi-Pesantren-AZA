@@ -1,10 +1,9 @@
 <?php
 include 'include/koneksi.php';
 include 'include/app.php';
-$s_karyawan = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from karyawan");
+$s_karyawan = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from karyawan where nik='$_GET[nik]'");
 $karyawan = mysqli_fetch_array($s_karyawan);
 $t_karyawan = mysqli_num_rows($s_karyawan);
-$skr = date('Y-m-d');
 ?>
 <!DOCTYPE html>
 <html>
@@ -84,189 +83,16 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 		 new WOW().init();
 	</script>
 <!--//end-animate-->
-    <style>
-        /* Notification Styles */
-        .notification-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        .notification-card {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 450px;
-            width: 90%;
-            position: relative;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            animation: slideIn 0.5s ease-out;
-            text-align: center;
-        }
-
-        .notification-card.berhasil {
-            border-top: 5px solid #4CAF50;
-        }
-
-        .notification-card.gagal {
-            border-top: 5px solid #F44336;
-        }
-
-        .notification-card.sudah {
-            border-top: 5px solid #FF9800;
-        }
-
-        .notification-icon {
-            font-size: 60px;
-            margin-bottom: 20px;
-        }
-
-        .notification-card.berhasil .notification-icon {
-            color: #4CAF50;
-        }
-
-        .notification-card.gagal .notification-icon {
-            color: #F44336;
-        }
-
-        .notification-card.sudah .notification-icon {
-            color: #FF9800;
-        }
-
-        .notification-title {
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #2c3e50;
-        }
-
-        .notification-user {
-            font-size: 18px;
-            color: #667eea;
-            margin-bottom: 15px;
-        }
-
-        .notification-message {
-            font-size: 16px;
-            color: #555;
-            margin-bottom: 20px;
-            line-height: 1.6;
-        }
-
-        .notification-time {
-            font-size: 14px;
-            color: #7f8c8d;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .notification-close {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: #f8f9fa;
-            border: none;
-            border-radius: 50%;
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .notification-close:hover {
-            background: #e9ecef;
-            transform: scale(1.1);
-        }
-
-        .notification-close i {
-            color: #6c757d;
-            font-size: 14px;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-50px) scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-    </style>
 
 </head>
-<body onload="setFocus()">
-    <!-- Success/Error Notification -->
-    <?php if(isset($_GET['status'])): ?>
-    <div class="notification-overlay" id="notificationOverlay">
-        <div class="notification-card <?= $_GET['status']; ?>">
-            <div class="notification-icon">
-                <?php if($_GET['status'] == 'berhasil'): ?>
-                    <i class="fa fa-check-circle"></i>
-                <?php elseif($_GET['status'] == 'gagal'): ?>
-                    <i class="fa fa-times-circle"></i>
-                <?php else: ?>
-                    <i class="fa fa-info-circle"></i>
-                <?php endif; ?>
-            </div>
-            <div class="notification-content">
-                <h3 class="notification-title">
-                    <?php if($_GET['status'] == 'berhasil'): ?>
-                        Absensi Pulang Berhasil!
-                    <?php elseif($_GET['status'] == 'gagal'): ?>
-                        Absensi Pulang Gagal!
-                    <?php else: ?>
-                        Informasi
-                    <?php endif; ?>
-                </h3>
-                <?php if(isset($_GET['nama'])): ?>
-                    <p class="notification-user">
-                        <strong><?= base64_decode($_GET['nama']); ?></strong>
-                    </p>
-                <?php endif; ?>
-                <p class="notification-message">
-                    <?= base64_decode($_GET['pesan']); ?>
-                </p>
-                <div class="notification-time">
-                    <i class="fa fa-clock-o"></i>
-                    <?= date('H:i:s'); ?> - <?= date('d M Y'); ?>
-                </div>
-            </div>
-            <button class="notification-close" onclick="closeNotification()">
-                <i class="fa fa-times"></i>
-            </button>
-        </div>
-    </div>
-    <?php endif; ?>
-
-	<div >
+<body>
+<script language=javascript>
+setTimeout("location.href='masuk'", 2000);
+</script>	
+	<div>
 		<div class="container">
 			<div class="logo">
-				<h1 class="wow fadeInDown animated" data-wow-delay=".5s"><?= $app['nama_aplikasi'];?></h1>
+				<h1>ABSENSI SUKSES</h1>
 			</div>
 			<!-- header -->
 			
@@ -274,13 +100,17 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 			<div class="content-grids">
 				<!-- content-top-grids -->
 				<div class="content-top-grids">
-					<div class="col-md-4 content-left">
-						<div class="clock-grids wow fadeInUp animated" data-wow-delay=".5s">
+					<div class="col-md-2 content-left">
+					</div>
+					<div class="col-md-8 content-middle">
+						<div class="clock-grids">
 							<div class="clock-heading">
-								<h3> WAKTU SAAT INI</h3>
+								<h3><?= $karyawan['nama'];?></h3>
 							</div>
-							<div class="clock-left">
-								<div id="myclock"></div>
+							<div class="clock-center">
+								<p  align="center"><img src="app/images/<?= $karyawan['foto'];?>" width="190px" alt="image" /></p>
+								<p align="center"><b>NIK : <?= $karyawan['nik'];?></b></p>
+							<p align="center"><?php  $d_jt = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from jobtitle where kode_jobtitle ='$karyawan[job_title]'")); echo $d_jt['jobtitle'];?> - <?php  $d_a = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from area where kode_area ='$karyawan[area]'")); echo $d_a['area'];?></p>
 							</div>
 							<div class="clock-bottom">
 								<div class="clock">
@@ -296,106 +126,7 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 							</div>
 						</div>
 					</div>
-					<div class="col-md-4 contact-right">
-						<div class="contact-right-top">
-							<div class="contact-right-middle-heading wow fadeInUp animated" data-wow-delay=".5s">
-								<h3><img src="images/LOGO SMP.PNG" width="50%" alt="Image"></h3>
-							</div>
-							
-						</div>
-						
-						<div class="contact-right-middle">
-							<div class="contact-right-middle-heading wow fadeInUp animated" data-wow-delay=".5s">
-								<h3><img src="images/QR.CODE.png" width="20%" alt="Image">
-								  ABSEN PULANG </h3>
-							</div>
-									
-							<div class="login-info">
-								<form action="controllers/pulang" name="testForm"  method="POST">
-									<input type="text" class="user" onLoad="this.focus();" onChange="document.testForm.submit()" name="nik" placeholder="Scan QR code"  />
-								</form>
-								<a href="login"><input class="wow fadeInRight animated" data-wow-delay=".5s" type="submit" name="Sign In" value="Login Admin">
-								</a><a href="index.php"> Kembali ke Home</a>
-								
-								<script language="javascript">
-								function setFocus()
-								{
-								var field = document.testForm.nik;
-								field.focus();
-								field.value = field.value;
-								field.focus();
-								}
-								</script>
-							</div>
-						</div>
-						<div class="contact-right-top">
-							<div class="col-md-6 user-grid">
-								<div class="user-grid-info">
-									<h3 class="wow fadeInLeft animated" data-wow-delay=".5s">SUDAH PULANG</h3>
-									<p class="wow fadeInRight animated" data-wow-delay=".5s"><?php 
-										$s_pulang = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from absensi where tanggal='$skr' AND pulang !='0' order by pulang DESC");
-										$t_pulang = mysqli_num_rows($s_pulang); echo $t_pulang; ?>  <sup><?= number_format($t_pulang/$t_karyawan*100,0) ;?> %</sup></p>
-									<div class="progress">
-										<div class="progress-bar" role="progressbar" aria-valuenow="<?= number_format($t_pulang/$t_karyawan*100,0) ;?>" aria-valuemin="0" aria-valuemax="100" style="width: 60%;">
-										</div>
-									</div>
-								</div>
-							</div>
-							<div class="col-md-6 user-grid view-grid">
-								<div class="user-grid-info view-grid-info">
-									<h3 class="wow fadeInLeft animated" data-wow-delay=".5s">BELUM PULANG</h3>
-									<p class="wow fadeInRight animated" data-wow-delay=".5s"><?= $t_karyawan-$t_pulang;?></p>
-									<div class="progress">
-										<div class="progress-bar view-grid-info-bar" role="progressbar" aria-valuenow="<?= ($t_karyawan-$t_pulang)/$t_karyawan*100;?>" aria-valuemin="0" aria-valuemax="100" style="width: 60%;">
-										</div>
-									</div>
-								</div>
-							</div>
-							<div class="clearfix"> </div>
-						</div>
-					</div>
-					<div class="col-md-4 content-right">
-						<div class="clock-grids wow fadeInRight animated" data-wow-delay=".5s">
-							<div id="verticalTab" class="resp-vtabs" style="display: block; width: 100%; margin: 0px;"><!-- start vertical Tabs-->
-								
-								<div class="resp-tabs-container">
-									<h2 class="resp-accordion resp-tab-active" role="tab" aria-controls="tab_item-0"><span class="resp-arrow"></span><i class="icon_1"></i> </h2><h2 class="resp-accordion" role="tab" aria-controls="tab_item-1"><span class="resp-arrow"></span> </h2>
-									<div class="new_posts resp-tab-content resp-tab-content-active" aria-labelledby="tab_item-0" style="display:block">
-										<div class="posts-grids">
-											<h3> Siswa Terakhir Absen</h3>
-											<?php 
-											$s_absen1 = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from absensi where tanggal='$skr' AND pulang !='0' order by pulang DESC limit 5");
-											while ($d_absen=mysqli_fetch_array($s_absen1)){ ?>
-											<?php $peg=mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from karyawan where nik='$d_absen[nik]'"));?>
-											<div class="post-grid1">
-												<div class="post-pic">
-													 <img src="app/images/<?= $peg['foto'];?>" class="img-responsive" alt="">
-												</div>
-												<div class="post-pic-text">
-													 <b style="color:#005288"><?= $peg['nama'];?></b>
-													 <p><?= $peg['lokasi'];?> - <?= $peg['area'];?> - <?= $peg['sub_area'];?></p>
-													 <p><b>masuk : <?= $d_absen['masuk'];?></b></p>
-												</div>
-												<div class="clearfix"></div>
-										   </div>
-											<?php ;} ?>
-										</div>
-									</div>
-									          
-								</div>
-								
-								<div class="clearfix"></div>
-							</div>
-							<div class="clock-bottom">
-								<div class="clock">
-									<marquee scrollamount="5"><b style="color:white" >Siswa Terakhir Absen </b></marquee>
-									
-								</div>
-							</div>
-							
-						</div>
-						
-					</div>
+					
 				</div>
 				<!-- //content-top-grids -->
 				<!-- weather-grids -->
@@ -415,7 +146,7 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 				<!-- //footer -->
 				<div class="clearfix"> </div>
 				<div class="copyright" >
-					<p>© 2024 <?= $app['nama_perusahaan'];?>  <img src="" alt=""></p>
+					<p>© 2018 <?= $app['nama_perusahaan'];?> . All Rights Reserved <img src="images/botom.webp" alt="Image"></p>
 				</div>
 			</div>
 		</div>
@@ -689,26 +420,5 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 		});
 		</script>
 		<!-- //fabochart -->
-		
-		<!-- Notification handling -->
-		<script>
-			// Notification handling
-			function closeNotification() {
-				const notification = document.querySelector('.notification-overlay');
-				if (notification) {
-					notification.style.animation = 'fadeOut 0.3s ease-out';
-					setTimeout(() => {
-						notification.remove();
-						// Clear URL parameters
-						window.history.replaceState({}, document.title, window.location.pathname);
-					}, 300);
-				}
-			}
-
-			// Auto close notification after 5 seconds
-			if (document.querySelector('.notification-overlay')) {
-				setTimeout(closeNotification, 5000);
-			}
-		</script>
 </body>	
 </html>

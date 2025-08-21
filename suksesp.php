@@ -85,10 +85,7 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 <!--//end-animate-->
 
 </head>
-<body>
-<script language=javascript>
-setTimeout("location.href='pulang'", 2000);
-</script>	
+<body>	
 	<div>
 		<div class="container">
 			<div class="logo">

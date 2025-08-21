@@ -9,7 +9,7 @@ $untuk = isset($_GET['untuk']) ? $_GET['untuk'] : 'siswa'; // default siswa
 
 // Set data berdasarkan jenis user
 if($untuk == 'guru') {
-    $home_link = 'index.php';
+    $home_link = 'index_guru_siswa.php';
     $masuk_link = 'masuk_guru.php';
     $pulang_link = 'pulang_guru.php';
     $user_type = 'Guru';
@@ -367,6 +367,11 @@ if($untuk == 'guru') {
             </a>
             <?php endif; ?>
         </div>
+
+        <!-- Auto Redirect Countdown -->
+        <div class="countdown">
+            <p>Otomatis kembali ke halaman utama dalam <span id="countdown">10</span> detik</p>
+        </div>
     </div>
 
     <script>
@@ -380,8 +385,20 @@ if($untuk == 'guru') {
             document.getElementById('current-time').textContent = `${hours}:${minutes}:${seconds}`;
         }
 
-        // Start clock timer
+        // Countdown timer
+        let countdown = 10;
+        function updateCountdown() {
+            document.getElementById('countdown').textContent = countdown;
+            countdown--;
+            
+            if (countdown < 0) {
+                window.location.href = '<?= $home_link ?>';
+            }
+        }
+
+        // Start timers
         setInterval(updateClock, 1000);
+        setInterval(updateCountdown, 1000);
         updateClock();
 
         // Add entrance animation delay for better UX

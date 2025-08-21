@@ -1,9 +1,13 @@
 <?php
 include '../include/koneksi.php';
-// memulai session
+include '../sync_guru_photos.php';
 
+// memulai session
 session_start();
 error_reporting(0);
+
+// Auto sync foto guru
+syncGuruPhotos();
 /**
  * Jika Tidak login atau sudah login tapi bukan sebagai admin
  * maka akan dibawa kembali kehalaman login atau menuju halaman yang seharusnya.
@@ -507,7 +511,7 @@ $skr = date('Y-m-d');
         }
     </style>
 
-    <title><?= $d_aplikasi['nama_aplikasi']; ?> - Data Absensi</title>
+    <title><?= $d_aplikasi['nama_aplikasi']; ?> - Data Absensi Guru</title>
 </head>
 
 <body>
@@ -546,12 +550,12 @@ $skr = date('Y-m-d');
                     <span>Guru</span>
                 </a>
 
-                <a href="absensi_modern.php" class="sidebar-item active" onclick="toggleActive(this)">
+                <a href="absensi_modern.php" class="sidebar-item" onclick="toggleActive(this)">
                     <i class="fas fa-clipboard-list"></i>
                     <span>Absensi Siswa</span>
                 </a>
 
-                <a href="absensi_guru_modern.php" class="sidebar-item" onclick="toggleActive(this)">
+                <a href="absensi_guru_modern.php" class="sidebar-item active" onclick="toggleActive(this)">
                     <i class="fas fa-calendar-check"></i>
                     <span>Absensi Guru</span>
                 </a>
@@ -584,7 +588,7 @@ $skr = date('Y-m-d');
                         <button id="toggle-navbar" onclick="toggleNavbar()">
                             <i class="fas fa-bars" style="font-size: 20px; color: #121F3E;"></i>
                         </button>
-                        <h2 class="nav-title">Data Absensi</h2>
+                        <h2 class="nav-title">Data Absensi Guru</h2>
                     </div>
                     <button class="btn-notif d-block d-md-none">
                         <i class="fas fa-bell"></i>
@@ -611,8 +615,8 @@ $skr = date('Y-m-d');
                         <div class="modern-card">
                             <div class="d-flex justify-content-between align-items-center mb-4">
                                 <div>
-                                    <h3 class="content-title mb-0">Data Absensi</h3>
-                                    <p class="content-desc mb-0">Monitor dan kelola data absensi siswa per bulan</p>
+                                    <h3 class="content-title mb-0">Data Absensi Guru</h3>
+                                    <p class="content-desc mb-0">Monitor dan kelola data absensi guru per bulan</p>
                                 </div>
                                 <div class="d-flex gap-2">
                                     <button class="btn-modern success" onclick="exportData('excel')">
@@ -656,7 +660,7 @@ $skr = date('Y-m-d');
                                                 <span class="stat-value" id="totalMasuk">
                                                     <?php
                                                     $total_masuk = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], 
-                                                        "SELECT * FROM absensi WHERE DATE_FORMAT(tanggal, '%Y-%m') = '$selected_month' AND masuk IS NOT NULL AND ijin IS NULL AND status_tidak_masuk IS NULL"));
+                                                        "SELECT * FROM absensi_guru WHERE DATE_FORMAT(tanggal, '%Y-%m') = '$selected_month' AND masuk IS NOT NULL AND ijin IS NULL AND status_tidak_masuk IS NULL"));
                                                     echo $total_masuk;
                                                     ?>
                                                 </span>
@@ -666,7 +670,7 @@ $skr = date('Y-m-d');
                                                 <span class="stat-value" id="totalTidakMasuk">
                                                     <?php
                                                     $total_tidak_masuk_all = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], 
-                                                        "SELECT * FROM absensi WHERE DATE_FORMAT(tanggal, '%Y-%m') = '$selected_month' AND (ijin IS NOT NULL OR status_tidak_masuk IS NOT NULL)"));
+                                                        "SELECT * FROM absensi_guru WHERE DATE_FORMAT(tanggal, '%Y-%m') = '$selected_month' AND (ijin IS NOT NULL OR status_tidak_masuk IS NOT NULL)"));
                                                     echo $total_tidak_masuk_all;
                                                     ?>
                                                 </span>
@@ -675,10 +679,10 @@ $skr = date('Y-m-d');
                                                 <span class="stat-label">Persentase Kehadiran</span>
                                                 <span class="stat-value" id="persentaseKehadiran">
                                                     <?php
-                                                    $total_siswa = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM karyawan"));
+                                                    $total_guru = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM guru"));
                                                     $total_hari_kerja = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], 
-                                                        "SELECT DISTINCT tanggal FROM absensi WHERE DATE_FORMAT(tanggal, '%Y-%m') = '$selected_month'"));
-                                                    $total_expected = $total_siswa * $total_hari_kerja;
+                                                        "SELECT DISTINCT tanggal FROM absensi_guru WHERE DATE_FORMAT(tanggal, '%Y-%m') = '$selected_month'"));
+                                                    $total_expected = $total_guru * $total_hari_kerja;
                                                     $persentase = $total_expected > 0 ? round(($total_masuk / $total_expected) * 100, 1) : 0;
                                                     echo $persentase . '%';
                                                     ?>
@@ -715,8 +719,8 @@ $skr = date('Y-m-d');
                                         <tr>
                                             <th>No</th>
                                             <th>Foto</th>
-                                            <th>Nama Siswa</th>
-                                            <th>Kelas</th>
+                                            <th>Nama Guru</th>
+                                            <th>Mata Pelajaran</th>
                                             <th>Jam Masuk</th>
                                             <th>Jam Pulang</th>
                                             <th>Status</th>
@@ -730,30 +734,30 @@ $skr = date('Y-m-d');
                                         $selected_month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
                                         $selected_date = date('Y-m-d'); // Today's date for checking attendance
                                         
-                                        // Query untuk data absensi per bulan
+                                        // Query untuk data absensi guru per bulan
                                         $attendance = mysqli_query($GLOBALS["___mysqli_ston"], "
-                                            SELECT k.*, a.tanggal, a.masuk, a.pulang, a.ijin, a.status_tidak_masuk 
-                                            FROM karyawan k 
-                                            LEFT JOIN absensi a ON k.nik = a.nik AND DATE_FORMAT(a.tanggal, '%Y-%m') = '$selected_month'
-                                            ORDER BY k.nama ASC, a.tanggal DESC
+                                            SELECT g.*, a.tanggal, a.masuk, a.pulang, a.ijin, a.status_tidak_masuk 
+                                            FROM guru g 
+                                            LEFT JOIN absensi_guru a ON g.nip = a.nip AND DATE_FORMAT(a.tanggal, '%Y-%m') = '$selected_month'
+                                            ORDER BY g.nama ASC, a.tanggal DESC
                                         ");
                                         
-                                        $student_data = array();
+                                        $teacher_data = array();
                                         while ($data = mysqli_fetch_array($attendance)) {
-                                            if (!isset($student_data[$data['nik']])) {
-                                                $student_data[$data['nik']] = array(
+                                            if (!isset($teacher_data[$data['nip']])) {
+                                                $teacher_data[$data['nip']] = array(
                                                     'info' => $data,
                                                     'attendance' => array()
                                                 );
                                             }
                                             if ($data['tanggal']) {
-                                                $student_data[$data['nik']]['attendance'][] = $data;
+                                                $teacher_data[$data['nip']]['attendance'][] = $data;
                                             }
                                         }
                                         
-                                        foreach ($student_data as $nik => $student) {
-                                            $data = $student['info'];
-                                            $attendance_records = $student['attendance'];
+                                        foreach ($teacher_data as $nip => $teacher) {
+                                            $data = $teacher['info'];
+                                            $attendance_records = $teacher['attendance'];
                                             
                                             $total_hadir = 0;
                                             $total_ijin = 0;
@@ -776,9 +780,9 @@ $skr = date('Y-m-d');
                                                 }
                                             }
                                             
-                                            // Check if student has attendance today
+                                            // Check if teacher has attendance today
                                             $today_attendance = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], 
-                                                "SELECT * FROM absensi WHERE nik = '$nik' AND tanggal = '$selected_date'"));
+                                                "SELECT * FROM absensi_guru WHERE nip = '{$data['nip']}' AND tanggal = '$selected_date'"));
                                             
                                             // Determine overall status for the month
                                             if ($total_hadir > ($total_ijin + $total_alpha + $total_sakit)) {
@@ -802,17 +806,17 @@ $skr = date('Y-m-d');
                                         <tr data-status="<?= $status; ?>">
                                             <td><?= $no++; ?></td>
                                             <td>
-                                                <img src="images/<?= $data['foto'] ?: 'default-avatar.png'; ?>" 
+                                                <img src="../images/guru/<?= $data['foto'] ?: 'default-avatar.png'; ?>" 
                                                      alt="<?= $data['nama']; ?>" 
                                                      class="student-avatar"
-                                                     onerror="this.src='images/default-avatar.png'">
+                                                     onerror="this.src='../images/default-avatar.png'">
                                             </td>
                                             <td>
                                                 <strong><?= $data['nama']; ?></strong>
                                                 <br>
-                                                <small class="text-muted"><?= $data['nik']; ?></small>
+                                                <small class="text-muted"><?= $data['nip']; ?></small>
                                             </td>
-                                            <td><?= $data['job_title']; ?></td>
+                                            <td><?= $data['mata_pelajaran'] ?: 'Belum ditentukan'; ?></td>
                                             <td>
                                                 <?php if ($last_attendance && $last_attendance['masuk']) { ?>
                                                     <span class="time-badge"><?= date('H:i', strtotime($last_attendance['masuk'])); ?></span>
@@ -850,7 +854,7 @@ $skr = date('Y-m-d');
                                             </td>
                                             <td>
                                                 <?php if (!$today_attendance || (!$today_attendance['masuk'] && !$today_attendance['ijin'] && !$today_attendance['status_tidak_masuk'])) { ?>
-                                                    <button class="btn-modern warning" onclick="markAbsent('<?= $data['nik']; ?>', '<?= $data['nama']; ?>')">
+                                                    <button class="btn-modern warning" onclick="markAbsent('<?= $data['nip']; ?>', '<?= $data['nama']; ?>')">
                                                         <i class="fas fa-user-times"></i>
                                                         Tandai Tidak Masuk
                                                     </button>
@@ -859,7 +863,7 @@ $skr = date('Y-m-d');
                                                         <?= ucfirst($today_attendance['status_tidak_masuk']); ?>
                                                     </span>
                                                     <br>
-                                                    <button class="btn-modern primary" style="font-size: 10px; padding: 4px 8px; margin-top: 5px;" onclick="markAbsent('<?= $data['nik']; ?>', '<?= $data['nama']; ?>', '<?= $today_attendance['status_tidak_masuk']; ?>')">
+                                                    <button class="btn-modern primary" style="font-size: 10px; padding: 4px 8px; margin-top: 5px;" onclick="markAbsent('<?= $data['nip']; ?>', '<?= $data['nama']; ?>', '<?= $today_attendance['status_tidak_masuk']; ?>')">
                                                         <i class="fas fa-edit"></i>
                                                         Edit
                                                     </button>
@@ -886,13 +890,13 @@ $skr = date('Y-m-d');
                 <div class="modal-header" style="border-bottom: 1px solid #f0f0f0;">
                     <h5 class="modal-title" id="absentModalLabel">
                         <i class="fas fa-user-times me-2"></i>
-                        Tandai Siswa Tidak Masuk
+                        Tandai Guru Tidak Masuk
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <p>Siswa: <strong id="studentName"></strong></p>
+                        <p>Guru: <strong id="studentName"></strong></p>
                         <p class="text-muted">Tanggal: <?= date('d F Y'); ?></p>
                     </div>
                     
@@ -1012,12 +1016,12 @@ $skr = date('Y-m-d');
         }
 
         // Variables for absent modal
-        let currentStudentNik = '';
-        let currentStudentName = '';
+        let currentTeacherNip = '';
+        let currentTeacherName = '';
 
-        function markAbsent(nik, name, currentStatus = '') {
-            currentStudentNik = nik;
-            currentStudentName = name;
+        function markAbsent(nip, name, currentStatus = '') {
+            currentTeacherNip = nip;
+            currentTeacherName = name;
             
             document.getElementById('studentName').textContent = name;
             
@@ -1044,11 +1048,11 @@ $skr = date('Y-m-d');
             }
             
             const formData = new FormData();
-            formData.append('nik', currentStudentNik);
+            formData.append('nip', currentTeacherNip);
             formData.append('status', selectedStatus.value);
             formData.append('tanggal', '<?= date('Y-m-d'); ?>');
             
-            fetch('controller/mark_absent.php', {
+            fetch('controller/mark_absent_guru.php', {
                 method: 'POST',
                 body: formData
             })

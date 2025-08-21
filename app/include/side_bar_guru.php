@@ -2,7 +2,7 @@
             <!-- User Info -->
             <div class="user-info">
                 <div class="image">
-                    <img src="../images/logo smp.png" width="90" height="100" alt="User" />
+                    <img src="../images/logo smp.png"" width="90" height="100" alt="User" />
                 </div>
                 <div class="info-container">
                     <div class="name" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><?=$_SESSION['nama'];?></div>
@@ -20,7 +20,7 @@
             <div class="menu">
                 <ul class="list">
                     
-                    <li  class="active">
+                    <li>
                         <a href="home_modern.php">
                             <i class="material-icons">home</i>
                             <span>Dashboard</span>
@@ -32,21 +32,21 @@
                             <span>Data Siswa</span>
                         </a>
                     </li>
-                    <li>
+                    <li class="active">
                         <a href="guru">
                             <i class="material-icons">school</i>
                             <span>Data Guru</span>
                         </a>
                     </li>
-                    <li >
+                    <li>
                         <a href="absensi">
                             <i class="material-icons">access_alarms</i>
                             <span>Absensi Siswa</span>
                         </a>
                     </li>
-                    <li >
+                    <li>
                         <a href="absensi_guru">
-                            <i class="material-icons">assignment_ind</i>
+                            <i class="material-icons">access_time</i>
                             <span>Absensi Guru</span>
                         </a>
                     </li>
@@ -57,29 +57,37 @@
                         </a>
                         <ul class="ml-menu">
                             <li>
-                                <a href="ijin">Ijin</a>
+                                <a href="ijin">Ijin Siswa</a>
                             </li>
-                    
+                            <li>
+                                <a href="ijin_guru">Ijin Guru</a>
+                            </li>
                             
                         </ul>
                     </li>
-					<li>
+					<li >
                         <a href="javascript:void(0);" class="menu-toggle">
                             <i class="material-icons">assignment</i>
                             <span>Laporan</span>
                         </a>
                         <ul class="ml-menu">
                             <li>
-                                <a href="absensi_all">Absensi Siswa Keseluruhan</a>
+                                <a href="absensi_all">Absensi Siswa</a>
                             </li>
                             <li>
-                                <a href="absensi_time">Absensi Siswa Timesheet</a>
+                                <a href="absensi_guru_all">Absensi Guru</a>
+                            </li>
+                            <li>
+                                <a href="absensi_time">Timesheet Siswa</a>
+                            </li>
+                            <li>
+                                <a href="absensi_guru_time">Timesheet Guru</a>
                             </li>
                             <li>
                                 <a href="absensi_ijin">Siswa Ijin</a>
                             </li>
                             <li>
-                                <a href="absensi_guru">Laporan Absensi Guru</a>
+                                <a href="absensi_guru_ijin">Guru Ijin</a>
                             </li>
                         </ul>
                     </li>
@@ -100,6 +108,9 @@
 							<li>
                                 <a href="job_title">Status Siswa</a>
                             </li>
+                            <li>
+                                <a href="mata_pelajaran">Mata Pelajaran</a>
+                            </li>
                             
                         </ul>
                     </li>
@@ -117,7 +128,7 @@
             <!-- Footer -->
             <div class="legal">
                 <div class="copyright">
-                   © <?= $d_aplikasi['nama_perusahaan'];?> 
+                   © SMP Al-Azhar 
                 </div>
                 
             </div>

@@ -1,9 +1,9 @@
 <?php
 include 'include/koneksi.php';
 include 'include/app.php';
-$s_karyawan = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from karyawan");
-$karyawan = mysqli_fetch_array($s_karyawan);
-$t_karyawan = mysqli_num_rows($s_karyawan);
+$s_guru = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from guru");
+$guru = mysqli_fetch_array($s_guru);
+$t_guru = mysqli_num_rows($s_guru);
 $skr = date('Y-m-d');
 ?>
 <!DOCTYPE html>
@@ -11,8 +11,8 @@ $skr = date('Y-m-d');
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Absen Masuk - <?= $app['nama_aplikasi'];?></title>
-    <meta name="description" content="Halaman Absen Masuk - <?= $app['nama_perusahaan'];?>">
+    <title>Absen Masuk Guru - <?= $app['nama_aplikasi'];?></title>
+    <meta name="description" content="Halaman Absen Masuk Guru - <?= $app['nama_perusahaan'];?>">
     
     <!-- Modern Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -77,8 +77,14 @@ $skr = date('Y-m-d');
             gap: 12px;
         }
 
+        .attendance-subtitle {
+            color: #e74c3c;
+            font-weight: 500;
+            font-size: 16px;
+        }
+
         .qr-section {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
             padding: 30px;
             border-radius: 16px;
             margin: 20px 0;
@@ -104,8 +110,8 @@ $skr = date('Y-m-d');
         }
 
         .scan-input:focus {
-            border-color: #4facfe;
-            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
         }
 
         .navigation-buttons {
@@ -162,7 +168,7 @@ $skr = date('Y-m-d');
         .digital-time {
             font-size: 32px;
             font-weight: 700;
-            color: #667eea;
+            color: #e74c3c;
             margin-bottom: 8px;
         }
 
@@ -180,7 +186,7 @@ $skr = date('Y-m-d');
         }
 
         .stat-card {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
             padding: 20px;
             border-radius: 12px;
             color: white;
@@ -188,7 +194,7 @@ $skr = date('Y-m-d');
         }
 
         .stat-card.absent {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
         }
 
         .stat-number {
@@ -238,7 +244,7 @@ $skr = date('Y-m-d');
             height: 40px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid #667eea;
+            border: 2px solid #e74c3c;
         }
 
         .attendance-info {
@@ -259,7 +265,7 @@ $skr = date('Y-m-d');
 
         .attendance-time {
             font-size: 10px;
-            color: #667eea;
+            color: #e74c3c;
             font-weight: 500;
         }
 
@@ -326,6 +332,21 @@ $skr = date('Y-m-d');
             border-radius: 50%;
             border-top-color: white;
             animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Notification Styles */
@@ -455,67 +476,57 @@ $skr = date('Y-m-d');
             }
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
         }
     </style>
 </head>
 <body>
-    <div class="modern-attendance-container">
-        <!-- Success/Error Notification -->
-        <?php if(isset($_GET['status'])): ?>
-        <div class="notification-overlay" id="notificationOverlay">
-            <div class="notification-card <?= $_GET['status']; ?>">
-                <div class="notification-icon">
-                    <?php if($_GET['status'] == 'berhasil'): ?>
-                        <i class="fas fa-check-circle"></i>
-                    <?php elseif($_GET['status'] == 'gagal'): ?>
-                        <i class="fas fa-times-circle"></i>
-                    <?php else: ?>
-                        <i class="fas fa-info-circle"></i>
-                    <?php endif; ?>
-                </div>
-                <div class="notification-content">
-                    <h3 class="notification-title">
-                        <?php if($_GET['status'] == 'berhasil'): ?>
-                            Absensi Berhasil!
-                        <?php elseif($_GET['status'] == 'gagal'): ?>
-                            Absensi Gagal!
-                        <?php else: ?>
-                            Informasi
-                        <?php endif; ?>
-                    </h3>
-                    <?php if(isset($_GET['nama'])): ?>
-                        <p class="notification-user">
-                            <strong><?= base64_decode($_GET['nama']); ?></strong>
-                        </p>
-                    <?php endif; ?>
-                    <p class="notification-message">
-                        <?= base64_decode($_GET['pesan']); ?>
-                    </p>
-                    <div class="notification-time">
-                        <i class="fas fa-clock"></i>
-                        <?= date('H:i:s'); ?> - <?= date('d M Y'); ?>
-                    </div>
-                </div>
-                <button class="notification-close" onclick="closeNotification()">
-                    <i class="fas fa-times"></i>
-                </button>
+    <!-- Success/Error Notification -->
+    <?php if(isset($_GET['status'])): ?>
+    <div class="notification-overlay" id="notificationOverlay">
+        <div class="notification-card <?= $_GET['status']; ?>">
+            <div class="notification-icon">
+                <?php if($_GET['status'] == 'berhasil'): ?>
+                    <i class="fas fa-check-circle"></i>
+                <?php elseif($_GET['status'] == 'gagal'): ?>
+                    <i class="fas fa-times-circle"></i>
+                <?php else: ?>
+                    <i class="fas fa-info-circle"></i>
+                <?php endif; ?>
             </div>
+            <div class="notification-content">
+                <h3 class="notification-title">
+                    <?php if($_GET['status'] == 'berhasil'): ?>
+                        Absensi Guru Berhasil!
+                    <?php elseif($_GET['status'] == 'gagal'): ?>
+                        Absensi Guru Gagal!
+                    <?php else: ?>
+                        Informasi
+                    <?php endif; ?>
+                </h3>
+                <?php if(isset($_GET['nama'])): ?>
+                    <p class="notification-user">
+                        <strong><?= base64_decode($_GET['nama']); ?></strong>
+                    </p>
+                <?php endif; ?>
+                <p class="notification-message">
+                    <?= base64_decode($_GET['pesan']); ?>
+                </p>
+                <div class="notification-time">
+                    <i class="fas fa-clock"></i>
+                    <?= date('H:i:s'); ?> - <?= date('d M Y'); ?>
+                </div>
+            </div>
+            <button class="notification-close" onclick="closeNotification()">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
-        <?php endif; ?>
+    </div>
+    <?php endif; ?>
 
+    <div class="modern-attendance-container">
         <div class="attendance-grid">
             <!-- Left Side - Clock & Stats -->
             <div class="side-card">
@@ -541,28 +552,28 @@ $skr = date('Y-m-d');
                     <div class="stat-card">
                         <div class="stat-number">
                             <?php 
-                            $s_absen = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from absensi where tanggal='$skr' and ijin is NULL order by masuk DESC");
-                            $t_absen = mysqli_num_rows($s_absen); 
-                            echo $t_absen; 
+                            $s_absen_guru = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from absensi_guru where tanggal='$skr' and ijin is NULL order by masuk DESC");
+                            $t_absen_guru = mysqli_num_rows($s_absen_guru); 
+                            echo $t_absen_guru; 
                             ?>
-                            <span class="stat-percentage"><?= number_format($t_absen/$t_karyawan*100,0) ?>%</span>
+                            <span class="stat-percentage"><?= $t_guru > 0 ? number_format($t_absen_guru/$t_guru*100,0) : 0 ?>%</span>
                         </div>
-                        <div class="stat-label">Sudah Masuk</div>
+                        <div class="stat-label">Guru Sudah Masuk</div>
                         <div class="progress-container">
                             <div class="progress-bar-modern">
-                                <div class="progress-fill" style="width: <?= number_format($t_absen/$t_karyawan*100,0) ?>%"></div>
+                                <div class="progress-fill" style="width: <?= $t_guru > 0 ? number_format($t_absen_guru/$t_guru*100,0) : 0 ?>%"></div>
                             </div>
                         </div>
                     </div>
                     <div class="stat-card absent">
                         <div class="stat-number">
-                            <?= $t_karyawan-$t_absen; ?>
-                            <span class="stat-percentage"><?= number_format(($t_karyawan-$t_absen)/$t_karyawan*100,0) ?>%</span>
+                            <?= $t_guru-$t_absen_guru; ?>
+                            <span class="stat-percentage"><?= $t_guru > 0 ? number_format(($t_guru-$t_absen_guru)/$t_guru*100,0) : 0 ?>%</span>
                         </div>
-                        <div class="stat-label">Belum Masuk</div>
+                        <div class="stat-label">Guru Belum Masuk</div>
                         <div class="progress-container">
                             <div class="progress-bar-modern">
-                                <div class="progress-fill" style="width: <?= number_format(($t_karyawan-$t_absen)/$t_karyawan*100,0) ?>%"></div>
+                                <div class="progress-fill" style="width: <?= $t_guru > 0 ? number_format(($t_guru-$t_absen_guru)/$t_guru*100,0) : 0 ?>%"></div>
                             </div>
                         </div>
                     </div>
@@ -573,22 +584,23 @@ $skr = date('Y-m-d');
             <div class="main-attendance-card">
                 <div class="attendance-header">
                     <h1 class="attendance-title">
-                        <i class="fas fa-qrcode qr-icon"></i>
-                        Absen Masuk
+                        <i class="fas fa-chalkboard-teacher"></i>
+                        Absen Masuk Guru
                     </h1>
+                    <p class="attendance-subtitle">Khusus untuk Bapak/Ibu Guru</p>
                     <p style="color: #7f8c8d; margin: 0;">Scan QR Code untuk melakukan absensi</p>
                 </div>
 
                 <div class="qr-section">
                     <i class="fas fa-qrcode qr-icon"></i>
-                    <h3 style="margin: 0 0 15px 0;">Scan QR Code</h3>
-                    <form action="controllers/masuk" name="attendanceForm" method="POST" id="attendanceForm">
+                    <h3 style="margin: 0 0 15px 0;">Scan QR Code atau NIP</h3>
+                    <form action="controllers/masuk_guru" name="attendanceForm" method="POST" id="attendanceForm">
                         <input 
                             type="text" 
                             class="scan-input" 
-                            name="nik" 
-                            id="nikInput"
-                            placeholder="Scan QR code atau ketik NIK..."
+                            name="nip" 
+                            id="nipInput"
+                            placeholder="Scan QR code atau ketik NIP..."
                             autocomplete="off"
                             autofocus
                         />
@@ -615,21 +627,21 @@ $skr = date('Y-m-d');
             <div class="side-card">
                 <div class="recent-attendance">
                     <h3 class="recent-title">
-                        <i class="fas fa-users"></i> Absen Terakhir
+                        <i class="fas fa-chalkboard-teacher"></i> Absen Guru Terakhir
                     </h3>
                     <?php 
-                    $s_absen1 = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from absensi where tanggal='$skr' AND masuk!='NULL' order by masuk DESC limit 5");
-                    while ($d_absen = mysqli_fetch_array($s_absen1)) { 
-                        $peg = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from karyawan where nik='$d_absen[nik]'"));
+                    $s_absen_guru1 = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from absensi_guru where tanggal='$skr' AND masuk!='NULL' order by masuk DESC limit 5");
+                    while ($d_absen = mysqli_fetch_array($s_absen_guru1)) { 
+                        $guru = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from guru where nip='$d_absen[nip]'"));
                     ?>
                     <div class="attendance-item">
-                        <img src="app/images/<?= $peg['foto'] ?: 'default-avatar.png'; ?>" 
-                             alt="<?= $peg['nama']; ?>" 
+                        <img src="app/images/guru/<?= $guru['foto'] ?: 'default-avatar.png'; ?>" 
+                             alt="<?= $guru['nama']; ?>" 
                              class="attendance-avatar"
-                             onerror="this.src='images/default-avatar.png'">
+                             onerror="this.src='app/images/default-avatar-proper.png'">
                         <div class="attendance-info">
-                            <div class="attendance-name"><?= $peg['nama']; ?></div>
-                            <div class="attendance-details"><?= $peg['lokasi']; ?> - <?= $peg['area']; ?></div>
+                            <div class="attendance-name"><?= $guru['nama']; ?></div>
+                            <div class="attendance-details"><?= $guru['mata_pelajaran']; ?> - <?= $guru['lokasi']; ?></div>
                             <div class="attendance-time">
                                 <i class="fas fa-clock"></i> 
                                 <?= date('H:i', strtotime($d_absen['masuk'])); ?>
@@ -659,7 +671,7 @@ $skr = date('Y-m-d');
         setInterval(updateClock, 1000);
 
         // Auto-submit form when input changes (for QR scanner)
-        document.getElementById('nikInput').addEventListener('input', function() {
+        document.getElementById('nipInput').addEventListener('input', function() {
             const value = this.value.trim();
             if (value.length >= 5) { // Adjust minimum length as needed
                 // Add small delay to ensure complete scan
@@ -673,7 +685,7 @@ $skr = date('Y-m-d');
 
         // Focus management for QR scanner
         function setFocus() {
-            const field = document.getElementById('nikInput');
+            const field = document.getElementById('nipInput');
             field.focus();
             field.select();
         }
@@ -688,20 +700,20 @@ $skr = date('Y-m-d');
 
         // Prevent form submission on empty input
         document.getElementById('attendanceForm').addEventListener('submit', function(e) {
-            const nikValue = document.getElementById('nikInput').value.trim();
-            if (!nikValue) {
+            const nipValue = document.getElementById('nipInput').value.trim();
+            if (!nipValue) {
                 e.preventDefault();
-                alert('Silakan scan QR code atau masukkan NIK terlebih dahulu');
+                alert('Silakan scan QR code atau masukkan NIP terlebih dahulu');
                 setFocus();
             }
         });
 
         // Add scanning animation
-        document.getElementById('nikInput').addEventListener('focus', function() {
+        document.getElementById('nipInput').addEventListener('focus', function() {
             this.parentElement.style.transform = 'scale(1.02)';
         });
 
-        document.getElementById('nikInput').addEventListener('blur', function() {
+        document.getElementById('nipInput').addEventListener('blur', function() {
             this.parentElement.style.transform = 'scale(1)';
         });
 
@@ -737,16 +749,6 @@ $skr = date('Y-m-d');
         if (document.querySelector('.notification-overlay')) {
             setTimeout(closeNotification, 5000);
         }
-
-        // Add fadeOut animation for closing notifications
-        const notificationStyle = document.createElement('style');
-        notificationStyle.textContent = `
-            @keyframes fadeOut {
-                from { opacity: 1; }
-                to { opacity: 0; }
-            }
-        `;
-        document.head.appendChild(notificationStyle);
     </script>
 </body>
 </html>

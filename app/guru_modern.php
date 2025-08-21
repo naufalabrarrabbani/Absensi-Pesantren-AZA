@@ -1,9 +1,13 @@
 <?php
 include '../include/koneksi.php';
-// memulai session
+include '../sync_guru_photos.php';
 
+// memulai session
 session_start();
 error_reporting(0);
+
+// Auto sync foto guru
+syncGuruPhotos();
 /**
  * Jika Tidak login atau sudah login tapi bukan sebagai admin
  * maka akan dibawa kembali kehalaman login atau menuju halaman yang seharusnya.
@@ -13,9 +17,9 @@ if ( !isset($_SESSION['level'])) {
 	exit();
 }
 
-// Query untuk data siswa
-$s_karyawan = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from karyawan");
-$t_karyawan = mysqli_num_rows($s_karyawan);
+// Query untuk data guru
+$s_guru = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from guru");
+$t_guru = mysqli_num_rows($s_guru);
 
 $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from aplikasi"));
 ?>
@@ -513,7 +517,7 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
         }
     </style>
 
-    <title><?= $d_aplikasi['nama_aplikasi']; ?> - Data Siswa</title>
+    <title><?= $d_aplikasi['nama_aplikasi']; ?> - Data Guru</title>
 </head>
 
 <body>
@@ -542,14 +546,14 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                     <span>Overview</span>
                 </a>
 
-                <a href="karyawan_modern.php" class="sidebar-item active" onclick="toggleActive(this)">
-                    <i class="fas fa-users"></i>
-                    <span>Siswa</span>
-                </a>
-
-                <a href="guru_modern.php" class="sidebar-item" onclick="toggleActive(this)">
+                <a href="guru_modern.php" class="sidebar-item active" onclick="toggleActive(this)">
                     <i class="fas fa-chalkboard-teacher"></i>
                     <span>Guru</span>
+                </a>
+
+                <a href="karyawan_modern.php" class="sidebar-item" onclick="toggleActive(this)">
+                    <i class="fas fa-users"></i>
+                    <span>Siswa</span>
                 </a>
 
                 <a href="absensi_modern.php" class="sidebar-item" onclick="toggleActive(this)">
@@ -590,7 +594,7 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                         <button id="toggle-navbar" onclick="toggleNavbar()">
                             <i class="fas fa-bars" style="font-size: 20px; color: #121F3E;"></i>
                         </button>
-                        <h2 class="nav-title">Data Siswa</h2>
+                        <h2 class="nav-title">Data Guru</h2>
                     </div>
                     <button class="btn-notif d-block d-md-none">
                         <i class="fas fa-bell"></i>
@@ -599,7 +603,7 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
 
                 <div class="d-flex justify-content-between align-items-center nav-input-container">
                     <div class="nav-input-group">
-                        <input type="text" class="nav-input" placeholder="Search students..." id="searchInput" onkeyup="searchStudents()">
+                        <input type="text" class="nav-input" placeholder="Search teachers..." id="searchInput" onkeyup="searchStudents()">
                         <button class="btn-nav-input">
                             <i class="fas fa-search" style="color: #ABB3C4;"></i>
                         </button>
@@ -612,6 +616,62 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
             </div>
 
             <div class="content">
+                <?php
+                if (isset($_GET['pesan'])) {
+                    $pesan = $_GET['pesan'];
+                    if ($pesan == 'berhasil') {
+                        $debug_info = isset($_GET['debug']) ? '<br><small>Debug: ' . urldecode($_GET['debug']) . '</small>' : '';
+                        echo '<div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 12px; border: none; background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; margin-bottom: 20px;">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <strong>Berhasil!</strong> Data guru berhasil ditambahkan.' . $debug_info . '
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                              </div>';
+                    } elseif ($pesan == 'update_berhasil') {
+                        echo '<div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 12px; border: none; background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; margin-bottom: 20px;">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <strong>Berhasil!</strong> Data guru berhasil diperbarui.
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                              </div>';
+                    } elseif ($pesan == 'delete_berhasil') {
+                        echo '<div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 12px; border: none; background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; margin-bottom: 20px;">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <strong>Berhasil!</strong> Data guru berhasil dihapus.
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                              </div>';
+                    } elseif ($pesan == 'gagal') {
+                        echo '<div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius: 12px; border: none; background: linear-gradient(135deg, #F44336 0%, #e53935 100%); color: white; margin-bottom: 20px;">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Gagal!</strong> Data guru gagal ditambahkan.
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                              </div>';
+                    } elseif ($pesan == 'update_gagal') {
+                        echo '<div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius: 12px; border: none; background: linear-gradient(135deg, #F44336 0%, #e53935 100%); color: white; margin-bottom: 20px;">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Gagal!</strong> Data guru gagal diperbarui.
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                              </div>';
+                    } elseif ($pesan == 'delete_gagal') {
+                        echo '<div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius: 12px; border: none; background: linear-gradient(135deg, #F44336 0%, #e53935 100%); color: white; margin-bottom: 20px;">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Gagal!</strong> Data guru gagal dihapus.
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                              </div>';
+                    } elseif ($pesan == 'nip_exists') {
+                        echo '<div class="alert alert-warning alert-dismissible fade show" role="alert" style="border-radius: 12px; border: none; background: linear-gradient(135deg, #FF9800 0%, #f57c00 100%); color: white; margin-bottom: 20px;">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                <strong>Peringatan!</strong> NIP sudah terdaftar. Gunakan NIP yang berbeda.
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                              </div>';
+                    } elseif ($pesan == 'data_not_found') {
+                        echo '<div class="alert alert-warning alert-dismissible fade show" role="alert" style="border-radius: 12px; border: none; background: linear-gradient(135deg, #FF9800 0%, #f57c00 100%); color: white; margin-bottom: 20px;">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                <strong>Peringatan!</strong> Data guru tidak ditemukan.
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                              </div>';
+                    }
+                }
+                ?>
+                
                 <?php if (isset($_GET['success'])): ?>
                 <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 12px; border: none; background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white;">
                     <i class="fas fa-check-circle me-2"></i>
@@ -633,12 +693,12 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                         <div class="modern-card">
                             <div class="d-flex justify-content-between align-items-center mb-4">
                                 <div>
-                                    <h3 class="content-title mb-0">Daftar Siswa</h3>
-                                    <p class="content-desc mb-0">Kelola data siswa di sistem absensi</p>
+                                    <h3 class="content-title mb-0">Daftar Guru</h3>
+                                    <p class="content-desc mb-0">Kelola data guru di sistem absensi</p>
                                 </div>
-                                <a href="#" class="btn-modern primary" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+                                <a href="#" class="btn-modern primary" data-bs-toggle="modal" data-bs-target="#addTeacherModal">
                                     <i class="fas fa-plus"></i>
-                                    Tambah Siswa
+                                    Tambah Guru
                                 </a>
                             </div>
 
@@ -648,9 +708,9 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                                         <tr>
                                             <th>No</th>
                                             <th>Foto</th>
-                                            <th>NIK</th>
+                                            <th>NIP</th>
                                             <th>Nama</th>
-                                            <th>Kelas</th>
+                                            <th>Mata Pelajaran</th>
                                             <th>Status</th>
                                             <th>Aksi</th>
                                         </tr>
@@ -658,39 +718,46 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                                     <tbody>
                                         <?php
                                         $no = 1;
-                                        $students = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM karyawan ORDER BY nama ASC");
-                                        while ($student = mysqli_fetch_array($students)) {
-                                            $status = ($student['end_date'] > date('Y-m-d')) ? 'active' : 'inactive';
+                                        $teachers = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM guru ORDER BY nama ASC");
+                                        while ($teacher = mysqli_fetch_array($teachers)) {
                                         ?>
                                         <tr>
                                             <td><?= $no++; ?></td>
                                             <td>
-                                                <img src="images/<?= $student['foto'] ?: 'default-avatar.png'; ?>" 
-                                                     alt="<?= $student['nama']; ?>" 
+                                                <?php 
+                                                // Logic foto guru - sama seperti siswa
+                                                if ($teacher['foto'] && $teacher['foto'] != 'default-avatar.png' && !empty(trim($teacher['foto']))) {
+                                                    $foto_path = "images/guru/" . $teacher['foto'];
+                                                } else {
+                                                    $foto_path = "images/default-avatar-proper.png";
+                                                }
+                                                ?>
+                                                <img src="<?= $foto_path; ?>" 
+                                                     alt="<?= $teacher['nama']; ?>" 
                                                      class="student-avatar"
-                                                     onerror="this.src='images/default-avatar.png'">
+                                                     onerror="this.src='images/default-avatar-proper.png';">
                                             </td>
-                                            <td><?= $student['nik']; ?></td>
+                                            <td><?= $teacher['nip']; ?></td>
                                             <td>
-                                                <strong><?= $student['nama']; ?></strong>
+                                                <strong><?= $teacher['nama']; ?></strong>
                                                 <br>
-                                                <small class="text-muted"><?= $student['no_telp']; ?></small>
+                                                <small class="text-muted"><?= $teacher['no_telp']; ?></small>
                                             </td>
-                                            <td><?= $student['job_title']; ?></td>
+                                            <td><?= $teacher['mata_pelajaran'] ?: 'Belum ditentukan'; ?></td>
                                             <td>
-                                                <span class="status-badge <?= $status == 'active' ? 'status-active' : 'status-inactive'; ?>">
-                                                    <?= $status == 'active' ? 'Aktif' : 'Tidak Aktif'; ?>
+                                                <span class="status-badge status-active">
+                                                    Aktif
                                                 </span>
                                             </td>
                                             <td>
                                                 <div class="action-buttons">
-                                                    <a href="karyawan_detail.php?id=<?= $student['id']; ?>" class="btn-modern primary">
+                                                    <button class="btn-modern secondary" onclick="viewTeacher(<?= $teacher['id']; ?>)" title="Lihat Detail">
                                                         <i class="fas fa-eye"></i>
-                                                    </a>
-                                                    <a href="karyawan_edit_modern.php?id=<?= $student['nik']; ?>" class="btn-modern warning">
+                                                    </button>
+                                                    <button class="btn-modern warning" onclick="editTeacher(<?= $teacher['id']; ?>)" title="Edit">
                                                         <i class="fas fa-edit"></i>
-                                                    </a>
-                                                    <a href="karyawan_delete.php?id=<?= $student['id']; ?>" class="btn-modern danger" onclick="return confirm('Yakin ingin menghapus?')">
+                                                    </button>
+                                                    <a href="../controller/guru_delete.php?id=<?= $teacher['id']; ?>" class="btn-modern danger" onclick="return confirm('Yakin ingin menghapus guru <?= $teacher['nama']; ?>?')" title="Hapus">
                                                         <i class="fas fa-trash"></i>
                                                     </a>
                                                 </div>
@@ -708,28 +775,28 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
     </div>
 
     <!-- Add Student Modal -->
-    <div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModalLabel" aria-hidden="true">
+    <div class="modal fade" id="addTeacherModal" tabindex="-1" aria-labelledby="addTeacherModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content modal-modern">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addStudentModalLabel">
-                        <i class="fas fa-user-plus me-2"></i>
-                        Tambah Siswa Baru
+                    <h5 class="modal-title" id="addTeacherModalLabel">
+                        <i class="fas fa-chalkboard-teacher me-2"></i>
+                        Tambah Guru Baru
                     </h5>
                     <button type="button" class="btn-close-modern" data-bs-dismiss="modal" aria-label="Close">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
-                <form action="controller/karyawan_simpan.php" method="POST" enctype="multipart/form-data" id="addStudentForm">
+                <form action="../controller/guru_simpan.php" method="POST" enctype="multipart/form-data" id="addTeacherForm">
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group-modern">
-                                    <label for="nik" class="form-label-modern">
+                                    <label for="nip" class="form-label-modern">
                                         <i class="fas fa-id-card me-1"></i>
-                                        NISN
+                                        NIP
                                     </label>
-                                    <input type="text" class="form-modern" id="nik" name="nik" placeholder="Masukkan NISN" required>
+                                    <input type="text" class="form-modern" id="nip" name="nip" placeholder="Masukkan NIP" required>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -746,20 +813,27 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group-modern">
-                                    <label for="job_title" class="form-label-modern">
-                                        <i class="fas fa-graduation-cap me-1"></i>
-                                        Kelas
+                                    <label for="mata_pelajaran" class="form-label-modern">
+                                        <i class="fas fa-book me-1"></i>
+                                        Mata Pelajaran
                                     </label>
-                                    <select class="form-modern" id="job_title" name="job_title" required>
-                                        <option value="">-- Pilih Kelas --</option>
-                                        <?php
-                                        $sql_jt = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM jobtitle");
-                                        if(mysqli_num_rows($sql_jt) != 0){
-                                            while($d_jt = mysqli_fetch_assoc($sql_jt)){
-                                                echo '<option value="'.$d_jt['kode_jobtitle'].'">'.$d_jt['jobtitle'].'</option>';
-                                            }
-                                        }
-                                        ?>
+                                    <select class="form-modern" id="mata_pelajaran" name="mata_pelajaran" required>
+                                        <option value="">-- Pilih Mata Pelajaran --</option>
+                                        <option value="Matematika">Matematika</option>
+                                        <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+                                        <option value="Bahasa Inggris">Bahasa Inggris</option>
+                                        <option value="IPA">IPA</option>
+                                        <option value="IPS">IPS</option>
+                                        <option value="PKN">PKN</option>
+                                        <option value="Agama">Agama</option>
+                                        <option value="Seni Budaya">Seni Budaya</option>
+                                        <option value="Penjaskes">Penjaskes</option>
+                                        <option value="TIK">TIK</option>
+                                        <option value="Bahasa Arab">Bahasa Arab</option>
+                                        <option value="Akidah Akhlak">Akidah Akhlak</option>
+                                        <option value="Fiqih">Fiqih</option>
+                                        <option value="Quran Hadist">Quran Hadist</option>
+                                        <option value="SKI">SKI</option>
                                     </select>
                                 </div>
                             </div>
@@ -769,7 +843,7 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                                         <i class="fas fa-phone me-1"></i>
                                         No. Telepon
                                     </label>
-                                    <input type="text" class="form-modern" id="no_telp" name="no_telp" placeholder="Masukkan nomor telepon">
+                                    <input type="text" class="form-modern" id="no_telp" name="no_telp" placeholder="Masukkan nomor telepon" required>
                                 </div>
                             </div>
                         </div>
@@ -790,70 +864,11 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group-modern">
-                                    <label for="agama" class="form-label-modern">
-                                        <i class="fas fa-pray me-1"></i>
-                                        Agama
-                                    </label>
-                                    <select class="form-modern" id="agama" name="agama" required>
-                                        <option value="">-- Pilih Agama --</option>
-                                        <option value="Islam">Islam</option>
-                                        <option value="Kristen">Kristen</option>
-                                        <option value="Katolik">Katolik</option>
-                                        <option value="Hindu">Hindu</option>
-                                        <option value="Buddha">Buddha</option>
-                                        <option value="Konghucu">Konghucu</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group-modern">
                                     <label for="lokasi" class="form-label-modern">
                                         <i class="fas fa-map-marker-alt me-1"></i>
                                         Lokasi
                                     </label>
-                                    <select class="form-modern" id="lokasi" name="lokasi" required>
-                                        <?php
-                                        $sql_l = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM lokasi");
-                                        if(mysqli_num_rows($sql_l) != 0){
-                                            while($d_l = mysqli_fetch_assoc($sql_l)){
-                                                echo '<option value="'.$d_l['lokasi'].'">'.$d_l['lokasi'].'</option>';
-                                            }
-                                        }
-                                        ?>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group-modern">
-                                    <label for="nama_ayah" class="form-label-modern">
-                                        <i class="fas fa-male me-1"></i>
-                                        Nama Ayah
-                                    </label>
-                                    <input type="text" class="form-modern" id="nama_ayah" name="nama_ayah" placeholder="Masukkan nama ayah">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group-modern">
-                                    <label for="start_date" class="form-label-modern">
-                                        <i class="fas fa-calendar-alt me-1"></i>
-                                        Tanggal Mulai
-                                    </label>
-                                    <input type="date" class="form-modern" id="start_date" name="start_date" value="<?= date('Y-m-d'); ?>" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group-modern">
-                                    <label for="end_date" class="form-label-modern">
-                                        <i class="fas fa-calendar-check me-1"></i>
-                                        Tanggal Selesai
-                                    </label>
-                                    <input type="date" class="form-modern" id="end_date" name="end_date" value="<?= date('Y-m-d', strtotime('+1 year')); ?>" required>
+                                    <input type="text" class="form-modern" id="lokasi" name="lokasi" placeholder="Masukkan lokasi">
                                 </div>
                             </div>
                         </div>
@@ -861,7 +876,7 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                         <div class="form-group-modern">
                             <label for="file" class="form-label-modern">
                                 <i class="fas fa-camera me-1"></i>
-                                Foto Siswa
+                                Foto Guru
                             </label>
                             <div class="file-upload-area" onclick="document.getElementById('file').click()">
                                 <i class="fas fa-cloud-upload-alt" style="font-size: 32px; color: #ABB3C4; margin-bottom: 10px;"></i>
@@ -879,10 +894,186 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                         </button>
                         <button type="submit" class="btn-modern success">
                             <i class="fas fa-save me-1"></i>
-                            Simpan Siswa
+                            Simpan Guru
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Teacher Modal -->
+    <div class="modal fade" id="editTeacherModal" tabindex="-1" aria-labelledby="editTeacherModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content modern-modal">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title" id="editTeacherModalLabel">
+                        <i class="fas fa-user-edit me-2"></i>
+                        Edit Data Guru
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="../controller/guru_update.php" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" id="edit_id" name="id">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label for="edit_nama" class="form-label-modern">
+                                        <i class="fas fa-user me-1"></i>
+                                        Nama Lengkap
+                                    </label>
+                                    <input type="text" class="form-modern" id="edit_nama" name="nama" required>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label for="edit_nip" class="form-label-modern">
+                                        <i class="fas fa-id-card me-1"></i>
+                                        NIP
+                                    </label>
+                                    <input type="text" class="form-modern" id="edit_nip" name="nip" required>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label for="edit_mata_pelajaran" class="form-label-modern">
+                                        <i class="fas fa-book me-1"></i>
+                                        Mata Pelajaran
+                                    </label>
+                                    <select class="form-modern" id="edit_mata_pelajaran" name="mata_pelajaran" required>
+                                        <option value="">-- Pilih Mata Pelajaran --</option>
+                                        <option value="Matematika">Matematika</option>
+                                        <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+                                        <option value="Bahasa Inggris">Bahasa Inggris</option>
+                                        <option value="IPA">IPA</option>
+                                        <option value="IPS">IPS</option>
+                                        <option value="PKN">PKN</option>
+                                        <option value="Agama">Agama</option>
+                                        <option value="Seni Budaya">Seni Budaya</option>
+                                        <option value="Penjaskes">Penjaskes</option>
+                                        <option value="TIK">TIK</option>
+                                        <option value="Bahasa Arab">Bahasa Arab</option>
+                                        <option value="Akidah Akhlak">Akidah Akhlak</option>
+                                        <option value="Fiqih">Fiqih</option>
+                                        <option value="Quran Hadist">Quran Hadist</option>
+                                        <option value="SKI">SKI</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label for="edit_no_telp" class="form-label-modern">
+                                        <i class="fas fa-phone me-1"></i>
+                                        No. Telepon
+                                    </label>
+                                    <input type="text" class="form-modern" id="edit_no_telp" name="no_telp" required>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label for="edit_jenis_kelamin" class="form-label-modern">
+                                        <i class="fas fa-venus-mars me-1"></i>
+                                        Jenis Kelamin
+                                    </label>
+                                    <select class="form-modern" id="edit_jenis_kelamin" name="jenis_kelamin" required>
+                                        <option value="">-- Pilih Jenis Kelamin --</option>
+                                        <option value="Laki-laki">Laki-laki</option>
+                                        <option value="Perempuan">Perempuan</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label for="edit_lokasi" class="form-label-modern">
+                                        <i class="fas fa-map-marker-alt me-1"></i>
+                                        Lokasi
+                                    </label>
+                                    <input type="text" class="form-modern" id="edit_lokasi" name="lokasi">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group-modern">
+                            <label for="edit_foto" class="form-label-modern">
+                                <i class="fas fa-camera me-1"></i>
+                                Foto Guru (Kosongkan jika tidak diubah)
+                            </label>
+                            <input type="file" class="form-modern" id="edit_foto" name="foto" accept="image/*">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-modern" style="background: #6c757d; color: white;" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i>
+                            Batal
+                        </button>
+                        <button type="submit" class="btn-modern primary">
+                            <i class="fas fa-save me-1"></i>
+                            Update Guru
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Teacher Modal -->
+    <div class="modal fade" id="viewTeacherModal" tabindex="-1" aria-labelledby="viewTeacherModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content modern-modal">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title" id="viewTeacherModalLabel">
+                        <i class="fas fa-user me-2"></i>
+                        Detail Guru
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <img id="view_foto" src="" alt="Foto Guru" class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                        </div>
+                        <div class="col-md-8">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Nama:</strong></td>
+                                    <td id="view_nama"></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>NIP:</strong></td>
+                                    <td id="view_nip"></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Mata Pelajaran:</strong></td>
+                                    <td id="view_mata_pelajaran"></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Jenis Kelamin:</strong></td>
+                                    <td id="view_jenis_kelamin"></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>No. Telepon:</strong></td>
+                                    <td id="view_no_telp"></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Lokasi:</strong></td>
+                                    <td id="view_lokasi"></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn-modern secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                        Tutup
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -953,21 +1144,29 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
         });
 
         // Form validation
-        document.getElementById('addStudentForm').addEventListener('submit', function(e) {
-            const nik = document.getElementById('nik').value;
+        document.getElementById('addTeacherForm').addEventListener('submit', function(e) {
+            const nip = document.getElementById('nip').value;
             const nama = document.getElementById('nama').value;
-            const job_title = document.getElementById('job_title').value;
+            const mata_pelajaran = document.getElementById('mata_pelajaran').value;
+            const no_telp = document.getElementById('no_telp').value;
             
-            if (!nik || !nama || !job_title) {
+            if (!nip || !nama || !mata_pelajaran || !no_telp) {
                 e.preventDefault();
-                alert('Mohon lengkapi data NISN, Nama, dan Kelas');
+                alert('Mohon lengkapi data NIP, Nama, Mata Pelajaran, dan No. Telepon');
                 return false;
             }
             
-            // Validate NISN format (hanya angka)
-            if (!/^\d+$/.test(nik)) {
+            // Validate NIP format (hanya angka)
+            if (!/^\d+$/.test(nip)) {
                 e.preventDefault();
-                alert('NISN harus berupa angka');
+                alert('NIP harus berupa angka');
+                return false;
+            }
+
+            // Validate phone number
+            if (!/^[\d\-\+\(\)\s]+$/.test(no_telp)) {
+                e.preventDefault();
+                alert('Format nomor telepon tidak valid');
                 return false;
             }
         });
@@ -992,7 +1191,7 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                 const cells = row.querySelectorAll('td');
                 let found = false;
                 
-                // Search in NIK, Name, Class columns
+                // Search in NIP, Name, Mata Pelajaran columns
                 for (let i = 2; i <= 4; i++) {
                     if (cells[i] && cells[i].textContent.toLowerCase().includes(filter)) {
                         found = true;
@@ -1006,6 +1205,65 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                     row.style.display = 'none';
                 }
             });
+        }
+
+        // View teacher function
+        function viewTeacher(id) {
+            fetch(`../controller/guru_get.php?id=${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const teacher = data.data;
+                        document.getElementById('view_nama').textContent = teacher.nama;
+                        document.getElementById('view_nip').textContent = teacher.nip;
+                        document.getElementById('view_mata_pelajaran').textContent = teacher.mata_pelajaran || 'Belum ditentukan';
+                        document.getElementById('view_jenis_kelamin').textContent = teacher.jenis_kelamin || '-';
+                        document.getElementById('view_no_telp').textContent = teacher.no_telp || '-';
+                        document.getElementById('view_lokasi').textContent = teacher.lokasi || '-';
+                        
+                        let fotoSrc = 'images/default-avatar-proper.png';
+                        if (teacher.foto && teacher.foto !== 'default-avatar.png' && teacher.foto.trim() !== '') {
+                            fotoSrc = `images/guru/${teacher.foto}`;
+                        }
+                        document.getElementById('view_foto').src = fotoSrc;
+                        
+                        const modal = new bootstrap.Modal(document.getElementById('viewTeacherModal'));
+                        modal.show();
+                    } else {
+                        alert('Gagal mengambil data guru!');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan saat mengambil data guru!');
+                });
+        }
+
+        // Edit teacher function
+        function editTeacher(id) {
+            fetch(`../controller/guru_get.php?id=${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const teacher = data.data;
+                        document.getElementById('edit_id').value = teacher.id;
+                        document.getElementById('edit_nama').value = teacher.nama;
+                        document.getElementById('edit_nip').value = teacher.nip;
+                        document.getElementById('edit_mata_pelajaran').value = teacher.mata_pelajaran;
+                        document.getElementById('edit_no_telp').value = teacher.no_telp;
+                        document.getElementById('edit_jenis_kelamin').value = teacher.jenis_kelamin;
+                        document.getElementById('edit_lokasi').value = teacher.lokasi;
+                        
+                        const modal = new bootstrap.Modal(document.getElementById('editTeacherModal'));
+                        modal.show();
+                    } else {
+                        alert('Gagal mengambil data guru!');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan saat mengambil data guru!');
+                });
         }
 
         // Auto-hide alerts after 5 seconds
