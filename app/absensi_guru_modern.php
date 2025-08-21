@@ -565,6 +565,11 @@ $skr = date('Y-m-d');
                     <span>Area</span>
                 </a>
 
+                <a href="generate_qr.php" class="sidebar-item" onclick="toggleActive(this)">
+                    <i class="fas fa-qrcode"></i>
+                    <span>Generate QR</span>
+                </a>
+
                 <h5 class="sidebar-title">Others</h5>
 
                 <a href="setting_modern.php" class="sidebar-item" onclick="toggleActive(this)">
