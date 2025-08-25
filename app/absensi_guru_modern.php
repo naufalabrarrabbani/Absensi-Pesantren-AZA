@@ -13,7 +13,7 @@ syncGuruPhotos();
  * maka akan dibawa kembali kehalaman login atau menuju halaman yang seharusnya.
  */
 if ( !isset($_SESSION['level'])) {
-	header('location:../login');
+	header('location:../login.php');
 	exit();
 }
 

@@ -9,7 +9,7 @@ error_reporting(0);
  * maka akan dibawa kembali kehalaman login atau menuju halaman yang seharusnya.
  */
 if ( !isset($_SESSION['username'])) {
-	header('location:../login');
+	header('location:../login.php');
 	exit();
 }
 
@@ -568,7 +568,7 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                     <span>Settings</span>
                 </a>
 
-                <a href="../controllers/logout.php" class="sidebar-item" onclick="toggleActive(this)">
+                <a href="../controllers/logout.php" class="sidebar-item">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Logout</span>
                 </a>

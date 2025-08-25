@@ -20,7 +20,7 @@ if ($password == $data['password'])
 	
 }
 else {
-header('location: ../login?error='.base64_encode('Maaf Username dan Password Salah'));
+header('location: ../login.php?error='.base64_encode('Maaf Username dan Password Salah'));
         exit();
 }
 ?>
