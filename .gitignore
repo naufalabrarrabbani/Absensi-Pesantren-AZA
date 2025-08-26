@@ -15,6 +15,17 @@ koneksi.php
 .env
 .env.local
 .env.production
+.env.development
+.env.test
+
+# Database configuration files
+include/koneksi.php
+app/include/koneksi.php
+database.ini
+
+# But keep the example templates
+!include/koneksi.php.example
+!app/include/koneksi.php.example
 
 # Database
 *.sql.backup

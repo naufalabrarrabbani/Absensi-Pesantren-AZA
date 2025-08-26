@@ -1,0 +1,26 @@
+<?php
+/**
+ * Database Configuration Template
+ * 
+ * Copy this file to 'koneksi.php' and update with your database credentials
+ * DO NOT commit the actual koneksi.php file to version control
+ */
+
+// Database configuration
+$host = 'localhost';        // Database host
+$username = 'root';         // Database username  
+$password = '';             // Database password
+$database = 'db_absensi';   // Database name
+
+// Create connection
+$GLOBALS["___mysqli_ston"] = mysqli_connect($host, $username, $password, $database);
+
+// Check connection
+if (mysqli_connect_errno()) {
+    die("Connection failed: " . mysqli_connect_error());
+}
+
+// Set charset to UTF-8
+mysqli_set_charset($GLOBALS["___mysqli_ston"], "utf8");
+
+?>
