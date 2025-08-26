@@ -311,7 +311,7 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 							</div>
 									
 							<div class="login-info">
-								<form action="controllers/pulang.php" name="testForm"  method="POST">
+								<form action="controllers/pulang" name="testForm"  method="POST">
 									<input type="text" class="user" onLoad="this.focus();" onChange="document.testForm.submit()" name="nik" placeholder="Scan QR code"  />
 								</form>
 								<a href="login"><input class="wow fadeInRight animated" data-wow-delay=".5s" type="submit" name="Sign In" value="Login Admin">

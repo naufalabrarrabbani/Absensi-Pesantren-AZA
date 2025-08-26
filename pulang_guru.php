@@ -583,7 +583,7 @@ $skr = date('Y-m-d');
                 <div class="qr-section">
                     <i class="fas fa-qrcode qr-icon"></i>
                     <h3 style="margin: 0 0 15px 0;">Scan QR Code atau NIP</h3>
-                    <form action="controllers/pulang_guru.php" name="attendanceForm" method="POST" id="attendanceForm">
+                    <form action="controllers/pulang_guru" name="attendanceForm" method="POST" id="attendanceForm">
                         <input 
                             type="text" 
                             class="scan-input" 
