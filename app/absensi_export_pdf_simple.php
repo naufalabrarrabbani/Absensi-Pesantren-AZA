@@ -40,8 +40,6 @@ $grand_total_hadir = 0;
 $grand_total_ijin = 0;
 $grand_total_sakit = 0;
 $grand_total_alpha = 0;
-$total_hari_kerja = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], 
-    "SELECT DISTINCT tanggal FROM absensi WHERE DATE_FORMAT(tanggal, '%Y-%m') = '$month'"));
 
 // Start output buffering for clean PDF generation
 ob_start();
@@ -252,7 +250,9 @@ header('Expires: 0');
                     }
                 }
                 
-                $persentase = $total_hari_kerja > 0 ? round(($total_hadir / $total_hari_kerja) * 100, 1) : 0;
+                // Calculate percentage based on total attendance records, not working days
+                $total_all_records = $total_hadir + $total_ijin + $total_sakit + $total_alpha;
+                $persentase = $total_all_records > 0 ? round(($total_hadir / $total_all_records) * 100, 1) : 0;
                 
                 $grand_total_hadir += $total_hadir;
                 $grand_total_ijin += $total_ijin;
@@ -277,7 +277,12 @@ header('Expires: 0');
                 <td><strong><?= $grand_total_ijin; ?></strong></td>
                 <td><strong><?= $grand_total_sakit; ?></strong></td>
                 <td><strong><?= $grand_total_alpha; ?></strong></td>
-                <td><strong><?= count($student_data) > 0 ? round(($grand_total_hadir / (count($student_data) * $total_hari_kerja)) * 100, 1) : 0; ?>%</strong></td>
+                <td><strong>
+                    <?php 
+                    $grand_total_all = $grand_total_hadir + $grand_total_ijin + $grand_total_sakit + $grand_total_alpha;
+                    echo $grand_total_all > 0 ? round(($grand_total_hadir / $grand_total_all) * 100, 1) : 0; 
+                    ?>%
+                </strong></td>
             </tr>
         </tbody>
     </table>
@@ -288,10 +293,6 @@ header('Expires: 0');
             <tr>
                 <td><strong>Total Siswa:</strong></td>
                 <td><?= count($student_data); ?> orang</td>
-            </tr>
-            <tr>
-                <td><strong>Total Hari Kerja:</strong></td>
-                <td><?= $total_hari_kerja; ?> hari</td>
             </tr>
             <tr>
                 <td><strong>Total Kehadiran:</strong></td>

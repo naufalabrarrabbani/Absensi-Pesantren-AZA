@@ -14,18 +14,18 @@ if ($cek == 1) {
     $ada = mysqli_query($GLOBALS["___mysqli_ston"], $cekdata) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
     
     if(mysqli_num_rows($ada) > 0) { 
-        header('location:../masuk?status=sudah&pesan='.base64_encode('Anda sudah absen masuk hari ini').'&nama='.base64_encode($data_siswa['nama']));
+        header('location:../masuk.php?status=sudah&pesan='.base64_encode('Anda sudah absen masuk hari ini').'&nama='.base64_encode($data_siswa['nama']));
     } else {
         $sql = "INSERT INTO absensi (nik, tanggal, masuk) VALUES ('$nik','$tanggal','$masuk')";
         $proses = mysqli_query($GLOBALS["___mysqli_ston"], $sql);
         
         if ($proses) {
-            header('location:../masuk?status=berhasil&pesan='.base64_encode('Absen masuk berhasil!').'&nama='.base64_encode($data_siswa['nama']));
+            header('location:../masuk.php?status=berhasil&pesan='.base64_encode('Absen masuk berhasil!').'&nama='.base64_encode($data_siswa['nama']));
         } else { 
-            header('location:../masuk?status=gagal&pesan='.base64_encode('Gagal melakukan absen masuk!'));
+            header('location:../masuk.php?status=gagal&pesan='.base64_encode('Gagal melakukan absen masuk!'));
         }
     }
 } else {
-    header('location:../masuk?status=gagal&pesan='.base64_encode('NIK tidak ditemukan!'));
+    header('location:../masuk.php?status=gagal&pesan='.base64_encode('NIK tidak ditemukan!'));
 }
 ?>

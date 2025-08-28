@@ -340,7 +340,7 @@ $skr = date('Y-m-d');
             align-items: center;
             justify-content: center;
             z-index: 1000;
-            animation: fadeIn 0.3s ease-out;
+            animation: fadeIn 0.2s ease-out;
         }
 
         .notification-card {
@@ -351,7 +351,7 @@ $skr = date('Y-m-d');
             width: 90%;
             position: relative;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            animation: slideIn 0.5s ease-out;
+            animation: slideIn 0.3s ease-out;
             text-align: center;
         }
 
@@ -724,18 +724,18 @@ $skr = date('Y-m-d');
         function closeNotification() {
             const notification = document.querySelector('.notification-overlay');
             if (notification) {
-                notification.style.animation = 'fadeOut 0.3s ease-out';
+                notification.style.animation = 'fadeOut 0.2s ease-out';
                 setTimeout(() => {
                     notification.remove();
                     // Clear URL parameters
                     window.history.replaceState({}, document.title, window.location.pathname);
-                }, 300);
+                }, 200);
             }
         }
 
-        // Auto close notification after 5 seconds
+        // Auto close notification after 0.5 second
         if (document.querySelector('.notification-overlay')) {
-            setTimeout(closeNotification, 5000);
+            setTimeout(closeNotification, 500);
         }
 
         // Add fadeOut animation for closing notifications

@@ -10,13 +10,35 @@ if (!isset($_SESSION['level'])) {
 }
 
 $month = $_GET['month'] ?? date('Y-m');
+$kelas = $_GET['kelas'] ?? '';
+$download = $_GET['download'] ?? '0';
+
+// If download is requested, set proper headers
+if ($download == '1') {
+    $filename = 'Laporan_Absensi_' . date('F_Y', strtotime($month . '-01'));
+    if ($kelas) {
+        $kelas_name = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT nama_kelas FROM kelas WHERE kode_kelas = '$kelas'"));
+        $filename .= '_' . ($kelas_name ? $kelas_name['nama_kelas'] : $kelas);
+    }
+    $filename .= '.html';
+    
+    header('Content-Type: application/octet-stream');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Content-Transfer-Encoding: binary');
+    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+    header('Pragma: public');
+    header('Expires: 0');
+}
+
 $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from aplikasi"));
 
-// Get attendance data for the month
+// Get attendance data for the month with class filter
+$class_filter = $kelas ? " AND k.job_title = '$kelas'" : "";
 $attendance_query = "
     SELECT k.*, a.tanggal, a.masuk, a.pulang, a.ijin, a.status_tidak_masuk 
     FROM karyawan k 
     LEFT JOIN absensi a ON k.nik = a.nik AND DATE_FORMAT(a.tanggal, '%Y-%m') = '$month'
+    WHERE 1=1 $class_filter
     ORDER BY k.nama ASC, a.tanggal DESC
 ";
 
@@ -40,8 +62,6 @@ $grand_total_hadir = 0;
 $grand_total_ijin = 0;
 $grand_total_sakit = 0;
 $grand_total_alpha = 0;
-$total_hari_kerja = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], 
-    "SELECT DISTINCT tanggal FROM absensi WHERE DATE_FORMAT(tanggal, '%Y-%m') = '$month'"));
 
 // Generate HTML content
 ob_start();
@@ -205,6 +225,12 @@ ob_start();
             <h1><?= $d_aplikasi['nama_aplikasi']; ?></h1>
             <h2>Laporan Absensi Siswa</h2>
             <h2>Periode: <?= date('F Y', strtotime($month . '-01')); ?></h2>
+            <?php if ($kelas): ?>
+                <?php
+                $kelas_name = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT nama_kelas FROM kelas WHERE kode_kelas = '$kelas'"));
+                ?>
+                <h3>Kelas: <?= $kelas_name ? $kelas_name['nama_kelas'] : $kelas; ?></h3>
+            <?php endif; ?>
         </div>
         
         <table>
@@ -250,7 +276,9 @@ ob_start();
                         }
                     }
                     
-                    $persentase = $total_hari_kerja > 0 ? round(($total_hadir / $total_hari_kerja) * 100, 1) : 0;
+                    // Calculate percentage based on total attendance records, not working days
+                    $total_all_records = $total_hadir + $total_ijin + $total_sakit + $total_alpha;
+                    $persentase = $total_all_records > 0 ? round(($total_hadir / $total_all_records) * 100, 1) : 0;
                     
                     $grand_total_hadir += $total_hadir;
                     $grand_total_ijin += $total_ijin;
@@ -275,7 +303,12 @@ ob_start();
                     <td><strong><?= $grand_total_ijin; ?></strong></td>
                     <td><strong><?= $grand_total_sakit; ?></strong></td>
                     <td><strong><?= $grand_total_alpha; ?></strong></td>
-                    <td><strong><?= count($student_data) > 0 ? round(($grand_total_hadir / (count($student_data) * $total_hari_kerja)) * 100, 1) : 0; ?>%</strong></td>
+                    <td><strong>
+                        <?php 
+                        $grand_total_all = $grand_total_hadir + $grand_total_ijin + $grand_total_sakit + $grand_total_alpha;
+                        echo $grand_total_all > 0 ? round(($grand_total_hadir / $grand_total_all) * 100, 1) : 0; 
+                        ?>%
+                    </strong></td>
                 </tr>
             </tbody>
         </table>
@@ -286,10 +319,6 @@ ob_start();
                 <tr>
                     <td><strong>Total Siswa:</strong></td>
                     <td><?= count($student_data); ?> orang</td>
-                </tr>
-                <tr>
-                    <td><strong>Total Hari Kerja:</strong></td>
-                    <td><?= $total_hari_kerja; ?> hari</td>
                 </tr>
                 <tr>
                     <td><strong>Total Kehadiran:</strong></td>
@@ -317,31 +346,31 @@ ob_start();
 
     <script>
         function downloadAsPDF() {
-            // Create form and submit to force download
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = 'absensi_export_pdf_force.php';
-            
-            const monthInput = document.createElement('input');
-            monthInput.type = 'hidden';
-            monthInput.name = 'month';
-            monthInput.value = '<?= $month; ?>';
-            
-            form.appendChild(monthInput);
-            document.body.appendChild(form);
-            form.submit();
-            document.body.removeChild(form);
+            // For direct download, redirect to self with download parameter
+            const currentUrl = new URL(window.location);
+            currentUrl.searchParams.set('download', '1');
+            window.location.href = currentUrl.toString();
         }
         
-        // Auto prompt for download if parameter is set
-        <?php if (isset($_GET['download']) && $_GET['download'] == '1'): ?>
-        window.onload = function() {
-            setTimeout(function() {
-                if (confirm('Download PDF file?')) {
-                    window.print();
-                }
-            }, 500);
-        };
+        // Only show print option if not downloading
+        <?php if ($download != '1'): ?>
+        // Add download button functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create download button if it doesn't exist
+            const toolsDiv = document.querySelector('.tools');
+            if (toolsDiv) {
+                const downloadBtn = document.createElement('button');
+                downloadBtn.innerHTML = '📥 Download HTML';
+                downloadBtn.className = 'btn btn-primary';
+                downloadBtn.onclick = downloadAsPDF;
+                toolsDiv.insertBefore(downloadBtn, toolsDiv.firstChild);
+            }
+        });
+        <?php endif; ?>
+        
+        // Auto download if parameter is set
+        <?php if ($download == '1'): ?>
+        // File will be downloaded automatically due to headers
         <?php endif; ?>
     </script>
 </body>

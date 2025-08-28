@@ -561,6 +561,13 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                     <span>Generate QR</span>
                 </a>
 
+                <h5 class="sidebar-title">Master Data</h5>
+
+                <a href="kelas_modern.php" class="sidebar-item" onclick="toggleActive(this)">
+                    <i class="fas fa-school"></i>
+                    <span>Kelas</span>
+                </a>
+
                 <h5 class="sidebar-title">Others</h5>
 
                 <a href="setting_modern.php" class="sidebar-item" onclick="toggleActive(this)">

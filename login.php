@@ -415,7 +415,6 @@ $skr = date('Y-m-d');
     </script>
 </body>
 </html>
-        });
     </script>
 </body>
 </html>

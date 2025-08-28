@@ -137,7 +137,17 @@
 											?></td>
                                             <td><?= $d_karyawan['nik'];?></td>
                                             <td><?= $d_karyawan['nama'];?></td>
-                                            <td><?= $d_karyawan['job_title'];?></td>
+                                            <td>
+                                                <?php
+                                                // Ambil nama kelas dari tabel kelas berdasarkan kode_kelas
+                                                $kelas_info = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT nama_kelas, kode_kelas FROM kelas WHERE kode_kelas = '{$d_karyawan['job_title']}'"));
+                                                if ($kelas_info) {
+                                                    echo $kelas_info['nama_kelas'] . ' (' . $kelas_info['kode_kelas'] . ')';
+                                                } else {
+                                                    echo $d_karyawan['job_title']; // fallback jika tidak ditemukan
+                                                }
+                                                ?>
+                                            </td>
                                             <td><?= $d_karyawan['lokasi'];?></td>
 											<td><?= $d_karyawan['area'];?></td>
                                             <td><?= $d_karyawan['sub_area'];?></td>

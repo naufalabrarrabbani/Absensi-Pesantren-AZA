@@ -7,84 +7,333 @@ $t_karyawan = mysqli_num_rows($s_karyawan);
 $skr = date('Y-m-d');
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <title><?= $app['nama_aplikasi'];?> - <?= $app['nama_perusahaan'];?> </title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="keywords" content="Statistics UI Kit Responsive web template, Bootstrap Web Templates, Flat Web Templates, Android Compatible web template, 
-Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, SonyEricsson, Motorola web design" />
-<script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
-<!-- bootstrap-css -->
-<link href="css/bootstrap.css" rel="stylesheet" type="text/css" media="all" />
-<!--// bootstrap-css -->
-<!-- css -->
-<link rel="stylesheet" href="css/style.css" type="text/css" media="all" />
-<!--// css -->
-<!-- font-awesome icons -->
-<link href="css/font-awesome.css" rel="stylesheet"> 
-<!-- //font-awesome icons -->
-<!-- font -->
-<link href='//fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,600,600italic,700,700italic,800,800italic' rel='stylesheet' type='text/css'>
-<!-- //font -->
-<script src="js/jquery-1.11.3.min.js"></script>
-<script src="js/bootstrap.js"></script>
-<!-- circle -->
-<script src="js/circliful.js"></script>
- <script>
-							$( document ).ready(function() { // 6,32 5,38 2,34
-								$("#test-circle").circliful({
-									animation: 1,
-									animationStep: 5,
-									foregroundBorderWidth: 15,
-									backgroundBorderWidth: 15,
-									percent: 71,
-									textSize: 28,
-									text: 'New Users',
-									textStyle: 'font-size: 12px;',
-									textColor: '#666'
-								});
-							});
-
-						</script>
-<!-- //circle -->
-<!--chart js-->
-<script src="js/Chart.js"></script>
-<!--//chart js-->
-<script src="js/easyResponsiveTabs.js" type="text/javascript"></script>
-<script type="text/javascript">
-	$(document).ready(function () {
-		$('#horizontalTab').easyResponsiveTabs({
-			type: 'default', //Types: default, vertical, accordion           
-			width: 'auto', //auto or any width like 600px
-			fit: true   // 100% fit in a container
-		});
-	});
-</script>
-<!--Calender -->
-  <link rel="stylesheet" href="css/clndr.css" type="text/css" />
-  <script src="js/underscore-min.js"></script>
-  <script src= "js/moment-2.2.1.js"></script>
-  <script src="js/clndr.js"></script>
-  <script src="js/site.js"></script>
-<!--End Calender-->
-<!-- chart-grid-left -->
-<link rel="stylesheet" href="css/master.css">
-<script src="js/d3.min.js"></script>
-<script src="js/xcharts.min.js"></script>
-<script src="js/rainbow.min.js"></script>
-<!-- //chart-grid-left -->
-<!-- fabochart -->
-<link href="css/fabochart.css" rel="stylesheet" type="text/css">
-<!-- //fabochart -->
-<!--animate-->
-<link href="css/animate.css" rel="stylesheet" type="text/css" media="all">
-<script src="js/wow.min.js"></script>
-	<script>
-		 new WOW().init();
-	</script>
-<!--//end-animate-->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absen Pulang Siswa - <?= $app['nama_aplikasi'];?></title>
+    <meta name="description" content="Halaman Absen Pulang Siswa - <?= $app['nama_perusahaan'];?>">
+    
+    <!-- Modern Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Modern CSS -->
+    <link href="css/modern-style.css" rel="stylesheet">
+    <link href="css/modern-form.css" rel="stylesheet">
+    
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="images/icon/logogl.jpg">
+    
     <style>
+        .modern-attendance-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .attendance-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px 1fr;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            align-items: start;
+        }
+
+        .side-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .main-attendance-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .attendance-header {
+            margin-bottom: 30px;
+        }
+
+        .attendance-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .attendance-subtitle {
+            color: #667eea;
+            font-weight: 500;
+            font-size: 16px;
+        }
+
+        .qr-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 16px;
+            margin: 20px 0;
+            color: white;
+        }
+
+        .qr-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .scan-input {
+            width: 100%;
+            padding: 18px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 18px;
+            text-align: center;
+            background: white;
+            outline: none;
+            transition: all 0.3s ease;
+            margin: 15px 0;
+        }
+
+        .scan-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .navigation-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 500;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-home {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-admin {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+            color: white;
+        }
+
+        /* Clock Widget */
+        .clock-widget {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .clock-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .digital-time {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .digital-date {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 12px;
+            color: white;
+            text-align: center;
+        }
+
+        .stat-card.not-home {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .stat-percentage {
+            font-size: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 6px;
+            border-radius: 8px;
+            margin-left: 8px;
+        }
+
+        /* Recent Attendance */
+        .recent-attendance {
+            margin-top: 20px;
+        }
+
+        .recent-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .attendance-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .attendance-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #667eea;
+        }
+
+        .attendance-info {
+            flex: 1;
+        }
+
+        .attendance-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 2px;
+        }
+
+        .attendance-details {
+            font-size: 11px;
+            color: #7f8c8d;
+        }
+
+        .attendance-time {
+            font-size: 10px;
+            color: #667eea;
+            font-weight: 500;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin: 10px 0;
+        }
+
+        .progress-bar-modern {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .attendance-grid {
+                grid-template-columns: 1fr;
+                max-width: 500px;
+            }
+            
+            .side-card {
+                order: 2;
+            }
+            
+            .main-attendance-card {
+                order: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .modern-attendance-container {
+                padding: 10px;
+            }
+            
+            .main-attendance-card {
+                padding: 30px 20px;
+            }
+            
+            .attendance-title {
+                font-size: 24px;
+            }
+            
+            .navigation-buttons {
+                flex-direction: column;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         /* Notification Styles */
         .notification-overlay {
             position: fixed;
@@ -217,20 +466,19 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
             to { opacity: 0; }
         }
     </style>
-
 </head>
-<body onload="setFocus()">
+<body>
     <!-- Success/Error Notification -->
     <?php if(isset($_GET['status'])): ?>
     <div class="notification-overlay" id="notificationOverlay">
         <div class="notification-card <?= $_GET['status']; ?>">
             <div class="notification-icon">
                 <?php if($_GET['status'] == 'berhasil'): ?>
-                    <i class="fa fa-check-circle"></i>
+                    <i class="fas fa-check-circle"></i>
                 <?php elseif($_GET['status'] == 'gagal'): ?>
-                    <i class="fa fa-times-circle"></i>
+                    <i class="fas fa-times-circle"></i>
                 <?php else: ?>
-                    <i class="fa fa-info-circle"></i>
+                    <i class="fas fa-info-circle"></i>
                 <?php endif; ?>
             </div>
             <div class="notification-content">
@@ -252,463 +500,246 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
                     <?= base64_decode($_GET['pesan']); ?>
                 </p>
                 <div class="notification-time">
-                    <i class="fa fa-clock-o"></i>
+                    <i class="fas fa-clock"></i>
                     <?= date('H:i:s'); ?> - <?= date('d M Y'); ?>
                 </div>
             </div>
             <button class="notification-close" onclick="closeNotification()">
-                <i class="fa fa-times"></i>
+                <i class="fas fa-times"></i>
             </button>
         </div>
     </div>
     <?php endif; ?>
 
-	<div >
-		<div class="container">
-			<div class="logo">
-				<h1 class="wow fadeInDown animated" data-wow-delay=".5s"><?= $app['nama_aplikasi'];?></h1>
-			</div>
-			<!-- header -->
-			
-			<!-- //header -->
-			<div class="content-grids">
-				<!-- content-top-grids -->
-				<div class="content-top-grids">
-					<div class="col-md-4 content-left">
-						<div class="clock-grids wow fadeInUp animated" data-wow-delay=".5s">
-							<div class="clock-heading">
-								<h3> WAKTU SAAT INI</h3>
-							</div>
-							<div class="clock-left">
-								<div id="myclock"></div>
-							</div>
-							<div class="clock-bottom">
-								<div class="clock">
-									<div id="Date"></div>
-									<ul>
-										<li id="hours"> </li>
-										<li id="point">:</li>
-										<li id="min"> </li>
-										<li id="point">:</li>
-										<li id="sec"> </li>
-									</ul>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-4 contact-right">
-						<div class="contact-right-top">
-							<div class="contact-right-middle-heading wow fadeInUp animated" data-wow-delay=".5s">
-								<h3><img src="images/LOGO SMP.PNG" width="50%" alt="Image"></h3>
-							</div>
-							
-						</div>
-						
-						<div class="contact-right-middle">
-							<div class="contact-right-middle-heading wow fadeInUp animated" data-wow-delay=".5s">
-								<h3><img src="images/QR.CODE.png" width="20%" alt="Image">
-								  ABSEN PULANG </h3>
-							</div>
-									
-							<div class="login-info">
-								<form action="controllers/pulang" name="testForm"  method="POST">
-									<input type="text" class="user" onLoad="this.focus();" onChange="document.testForm.submit()" name="nik" placeholder="Scan QR code"  />
-								</form>
-								<a href="login"><input class="wow fadeInRight animated" data-wow-delay=".5s" type="submit" name="Sign In" value="Login Admin">
-								</a><a href="index.php"> Kembali ke Home</a>
-								
-								<script language="javascript">
-								function setFocus()
-								{
-								var field = document.testForm.nik;
-								field.focus();
-								field.value = field.value;
-								field.focus();
-								}
-								</script>
-							</div>
-						</div>
-						<div class="contact-right-top">
-							<div class="col-md-6 user-grid">
-								<div class="user-grid-info">
-									<h3 class="wow fadeInLeft animated" data-wow-delay=".5s">SUDAH PULANG</h3>
-									<p class="wow fadeInRight animated" data-wow-delay=".5s"><?php 
-										$s_pulang = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from absensi where tanggal='$skr' AND pulang !='0' order by pulang DESC");
-										$t_pulang = mysqli_num_rows($s_pulang); echo $t_pulang; ?>  <sup><?= number_format($t_pulang/$t_karyawan*100,0) ;?> %</sup></p>
-									<div class="progress">
-										<div class="progress-bar" role="progressbar" aria-valuenow="<?= number_format($t_pulang/$t_karyawan*100,0) ;?>" aria-valuemin="0" aria-valuemax="100" style="width: 60%;">
-										</div>
-									</div>
-								</div>
-							</div>
-							<div class="col-md-6 user-grid view-grid">
-								<div class="user-grid-info view-grid-info">
-									<h3 class="wow fadeInLeft animated" data-wow-delay=".5s">BELUM PULANG</h3>
-									<p class="wow fadeInRight animated" data-wow-delay=".5s"><?= $t_karyawan-$t_pulang;?></p>
-									<div class="progress">
-										<div class="progress-bar view-grid-info-bar" role="progressbar" aria-valuenow="<?= ($t_karyawan-$t_pulang)/$t_karyawan*100;?>" aria-valuemin="0" aria-valuemax="100" style="width: 60%;">
-										</div>
-									</div>
-								</div>
-							</div>
-							<div class="clearfix"> </div>
-						</div>
-					</div>
-					<div class="col-md-4 content-right">
-						<div class="clock-grids wow fadeInRight animated" data-wow-delay=".5s">
-							<div id="verticalTab" class="resp-vtabs" style="display: block; width: 100%; margin: 0px;"><!-- start vertical Tabs-->
-								
-								<div class="resp-tabs-container">
-									<h2 class="resp-accordion resp-tab-active" role="tab" aria-controls="tab_item-0"><span class="resp-arrow"></span><i class="icon_1"></i> </h2><h2 class="resp-accordion" role="tab" aria-controls="tab_item-1"><span class="resp-arrow"></span> </h2>
-									<div class="new_posts resp-tab-content resp-tab-content-active" aria-labelledby="tab_item-0" style="display:block">
-										<div class="posts-grids">
-											<h3> Siswa Terakhir Absen</h3>
-											<?php 
-											$s_absen1 = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from absensi where tanggal='$skr' AND pulang !='0' order by pulang DESC limit 5");
-											while ($d_absen=mysqli_fetch_array($s_absen1)){ ?>
-											<?php $peg=mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from karyawan where nik='$d_absen[nik]'"));?>
-											<div class="post-grid1">
-												<div class="post-pic">
-													 <img src="app/images/<?= $peg['foto'];?>" class="img-responsive" alt="">
-												</div>
-												<div class="post-pic-text">
-													 <b style="color:#005288"><?= $peg['nama'];?></b>
-													 <p><?= $peg['lokasi'];?> - <?= $peg['area'];?> - <?= $peg['sub_area'];?></p>
-													 <p><b>masuk : <?= $d_absen['masuk'];?></b></p>
-												</div>
-												<div class="clearfix"></div>
-										   </div>
-											<?php ;} ?>
-										</div>
-									</div>
-									          
-								</div>
-								
-								<div class="clearfix"></div>
-							</div>
-							<div class="clock-bottom">
-								<div class="clock">
-									<marquee scrollamount="5"><b style="color:white" >Siswa Terakhir Absen </b></marquee>
-									
-								</div>
-							</div>
-							
-						</div>
-						
-					</div>
-				</div>
-				<!-- //content-top-grids -->
-				<!-- weather-grids -->
-				
-				<!-- //weather-grids -->
-				<!-- graph-tabs -->
-				
-				<!-- //graph-tabs -->
-				<!-- contact-grids -->
-				
-				<!-- //contact-grids -->
-				<!-- chart-grids -->
-				
-				<!-- //chart-grids -->
-				<!-- footer -->
-				
-				<!-- //footer -->
-				<div class="clearfix"> </div>
-				<div class="copyright" >
-					<p>© 2024 <?= $app['nama_perusahaan'];?>  <img src="" alt=""></p>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- skills-bar -->
-	<script src="js/bars.js"></script>
-	<!-- //skills-bar -->
-	<!-- clock -->
-	<script language="javascript" type="text/javascript" src="js/jquery.thooClock.js"></script>  
-	<script language="javascript">
-		var intVal, myclock;
+    <div class="modern-attendance-container">
+        <div class="attendance-grid">
+            <!-- Left Side - Clock & Stats -->
+            <div class="side-card">
+                <div class="clock-widget">
+                    <h3 class="clock-title">
+                        <i class="fas fa-clock"></i> Waktu Saat Ini
+                    </h3>
+                    <div class="digital-time" id="current-time">00:00:00</div>
+                    <div class="digital-date" id="current-date">
+                        <?php 
+                        $tanggal = date('d M Y');
+                        $day = date('D', strtotime($tanggal));
+                        $dayList = array(
+                            'Sun' => 'Minggu', 'Mon' => 'Senin', 'Tue' => 'Selasa',
+                            'Wed' => 'Rabu', 'Thu' => 'Kamis', 'Fri' => 'Jumat', 'Sat' => 'Sabtu'
+                        );
+                        echo $dayList[$day] . ", " . $tanggal;
+                        ?>
+                    </div>
+                </div>
 
-		$(window).resize(function(){
-			window.location.reload()
-		});
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">
+                            <?php 
+                            $s_pulang = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from absensi where tanggal='$skr' AND pulang !='0' order by pulang DESC");
+                            $t_pulang = mysqli_num_rows($s_pulang); 
+                            echo $t_pulang; 
+                            ?>
+                            <span class="stat-percentage"><?= $t_karyawan > 0 ? number_format($t_pulang/$t_karyawan*100,0) : 0 ?>%</span>
+                        </div>
+                        <div class="stat-label">Siswa Sudah Pulang</div>
+                        <div class="progress-container">
+                            <div class="progress-bar-modern">
+                                <div class="progress-fill" style="width: <?= $t_karyawan > 0 ? number_format($t_pulang/$t_karyawan*100,0) : 0 ?>%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card not-home">
+                        <div class="stat-number">
+                            <?php 
+                            $s_masuk = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from absensi where tanggal='$skr' and masuk is not NULL and pulang is NULL");
+                            $t_belum_pulang = mysqli_num_rows($s_masuk);
+                            echo $t_belum_pulang; 
+                            ?>
+                            <span class="stat-percentage"><?= $t_karyawan > 0 ? number_format($t_belum_pulang/$t_karyawan*100,0) : 0 ?>%</span>
+                        </div>
+                        <div class="stat-label">Siswa Belum Pulang</div>
+                        <div class="progress-container">
+                            <div class="progress-bar-modern">
+                                <div class="progress-fill" style="width: <?= $t_karyawan > 0 ? number_format($t_belum_pulang/$t_karyawan*100,0) : 0 ?>%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-		$(document).ready(function(){
+            <!-- Main - Attendance Form -->
+            <div class="main-attendance-card">
+                <div class="attendance-header">
+                    <h1 class="attendance-title">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Absen Pulang Siswa
+                    </h1>
+                    <p class="attendance-subtitle">Khusus untuk Siswa-Siswi</p>
+                    <p style="color: #7f8c8d; margin: 0;">Scan QR Code untuk melakukan absensi pulang</p>
+                </div>
 
-			var audioElement = new Audio("");
+                <div class="qr-section">
+                    <i class="fas fa-qrcode qr-icon"></i>
+                    <h3 style="margin: 0 0 15px 0;">Scan QR Code atau NIK</h3>
+                    <form action="controllers/pulang.php" name="attendanceForm" method="POST" id="attendanceForm">
+                        <input 
+                            type="text" 
+                            class="scan-input" 
+                            name="nik" 
+                            id="nikInput"
+                            placeholder="Scan QR code atau ketik NIK..."
+                            autocomplete="off"
+                            autofocus
+                        />
+                    </form>
+                    <p style="margin: 0; font-size: 14px; opacity: 0.9;">
+                        <i class="fas fa-info-circle"></i> 
+                        Form akan otomatis submit setelah scan
+                    </p>
+                </div>
 
-			//clock plugin constructor
-			$('#myclock').thooClock({
-				size:$(document).height()/1.4,
-				onAlarm:function(){
-					//all that happens onAlarm
-					$('#alarm1').show();
-					alarmBackground(0);
-					//audio element just for alarm sound
-					document.body.appendChild(audioElement);
-					var canPlayType = audioElement.canPlayType("audio/ogg");
-					if(canPlayType.match(/maybe|probably/i)) {
-						audioElement.src = 'alarm.ogg';
-					} else {
-						audioElement.src = 'alarm.mp3';
-					}
-					// erst abspielen wenn genug vom mp3 geladen wurde
-					audioElement.addEventListener('canplay', function() {
-						audioElement.loop = true;
-						audioElement.play();
-					}, false);
-				},
-				showNumerals:true,
-				brandText:'KSO APS-ISS',
-				brandText2:'Indonesia',
-				onEverySecond:function(){
-					//callback that should be fired every second
-				},
-				//alarmTime:'15:10',
-				offAlarm:function(){
-					$('#alarm1').hide();
-					audioElement.pause();
-					clearTimeout(intVal);
-					$('body').css('background-color','#FCFCFC');
-				}
-			});
+                <div class="navigation-buttons">
+                    <a href="index.php" class="nav-btn btn-home">
+                        <i class="fas fa-home"></i>
+                        Kembali ke Home
+                    </a>
+                    <a href="login.php" class="nav-btn btn-admin">
+                        <i class="fas fa-user-shield"></i>
+                        Login Admin
+                    </a>
+                </div>
+            </div>
 
-		});
+            <!-- Right Side - Recent Attendance -->
+            <div class="side-card">
+                <div class="recent-attendance">
+                    <h3 class="recent-title">
+                        <i class="fas fa-sign-out-alt"></i> Pulang Siswa Terakhir
+                    </h3>
+                    <?php 
+                    $s_absen1 = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from absensi where tanggal='$skr' AND pulang !='0' order by pulang DESC limit 5");
+                    while ($d_absen = mysqli_fetch_array($s_absen1)) { 
+                        $peg = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from karyawan where nik='$d_absen[nik]'"));
+                    ?>
+                    <div class="attendance-item">
+                        <img src="app/images/<?= $peg['foto'] ?: 'default-avatar.png'; ?>" 
+                             alt="<?= $peg['nama']; ?>" 
+                             class="attendance-avatar"
+                             onerror="this.src='images/default-avatar.png'">
+                        <div class="attendance-info">
+                            <div class="attendance-name"><?= $peg['nama']; ?></div>
+                            <div class="attendance-details"><?= $peg['lokasi']; ?> - <?= $peg['area']; ?> - <?= $peg['sub_area']; ?></div>
+                            <div class="attendance-time">
+                                <i class="fas fa-clock"></i> 
+                                <?= date('H:i', strtotime($d_absen['pulang'])); ?>
+                            </div>
+                        </div>
+                    </div>
+                    <?php } ?>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Scripts -->
+    <script>
+        // Clock function
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            document.getElementById('current-time').textContent = `${hours}:${minutes}:${seconds}`;
+        }
 
+        // Update clock every second
+        updateClock();
+        setInterval(updateClock, 1000);
 
-		$('#turnOffAlarm').click(function(){
-			$.fn.thooClock.clearAlarm();
-		});
+        // Auto-submit form when input changes (for QR scanner)
+        document.getElementById('nikInput').addEventListener('input', function() {
+            const value = this.value.trim();
+            if (value.length >= 5) { // Adjust minimum length as needed
+                // Add small delay to ensure complete scan
+                setTimeout(() => {
+                    if (this.value.trim() === value) {
+                        document.getElementById('attendanceForm').submit();
+                    }
+                }, 500);
+            }
+        });
 
+        // Focus management for QR scanner
+        function setFocus() {
+            const field = document.getElementById('nikInput');
+            field.focus();
+            field.select();
+        }
 
-		$('#set').click(function(){
-			var inp = $('#altime').val();
-			$.fn.thooClock.setAlarm(inp);
-		});
+        // Auto-focus when page loads and when clicked elsewhere
+        window.onload = setFocus;
+        document.addEventListener('click', function(e) {
+            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'A' && e.target.tagName !== 'BUTTON') {
+                setFocus();
+            }
+        });
 
-		
-		function alarmBackground(y){
-				var color;
-				if(y===1){
-					color = '#CC0000';
-					y=0;
-				}
-				else{
-					color = '#FCFCFC';
-					y+=1;
-				}
-				$('body').css('background-color',color);
-				intVal = setTimeout(function(){alarmBackground(y);},100);
-		}
-	</script>
+        // Prevent form submission on empty input
+        document.getElementById('attendanceForm').addEventListener('submit', function(e) {
+            const nikValue = document.getElementById('nikInput').value.trim();
+            if (!nikValue) {
+                e.preventDefault();
+                alert('Silakan scan QR code atau masukkan NIK terlebih dahulu');
+                setFocus();
+            }
+        });
 
-	<!-- //clock -->
-	<!-- clock-bottom -->
-	<script type="text/javascript">
-	$(document).ready(function() {
-	// Create two variable with the names of the months and days in an array
-	var monthNames = [ "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "Nopember", "Desember" ]; 
-	var dayNames= ["Minggu","Senin","Selasa","Rabu","Kamis","Jum'at","Sabtu"]
+        // Add scanning animation
+        document.getElementById('nikInput').addEventListener('focus', function() {
+            this.parentElement.style.transform = 'scale(1.02)';
+        });
 
-	// Create a newDate() object
-	var newDate = new Date();
-	// Extract the current date from Date object
-	newDate.setDate(newDate.getDate());
-	// Output the day, date, month and year    
-	$('#Date').html(dayNames[newDate.getDay()] + " " + newDate.getDate() + ' ' + monthNames[newDate.getMonth()] + ' ' + newDate.getFullYear());
+        document.getElementById('nikInput').addEventListener('blur', function() {
+            this.parentElement.style.transform = 'scale(1)';
+        });
 
-	setInterval( function() {
-		// Create a newDate() object and extract the seconds of the current time on the visitor's
-		var seconds = new Date().getSeconds();
-		// Add a leading zero to seconds value
-		$("#sec").html(( seconds < 10 ? "0" : "" ) + seconds);
-		},1000);
-		
-	setInterval( function() {
-		// Create a newDate() object and extract the minutes of the current time on the visitor's
-		var minutes = new Date().getMinutes();
-		// Add a leading zero to the minutes value
-		$("#min").html(( minutes < 10 ? "0" : "" ) + minutes);
-		},1000);
-		
-	setInterval( function() {
-		// Create a newDate() object and extract the hours of the current time on the visitor's
-		var hours = new Date().getHours();
-		// Add a leading zero to the hours value
-		$("#hours").html(( hours < 10 ? "0" : "" ) + hours);
-		}, 1000);
-		
-	}); 
-	</script>
-	<!-- clock-bottom -->
-	<!--skycons-icons-->
-	<script src="js/skycons.js"></script>
-		<!--//skycons-icons-->
-		<script>
-				 var icons = new Skycons({"color": "#FFFFFF"}),
-					  list  = [
-						"clear-day"
-					  ],
-					  i;
-
-				  for(i = list.length; i--; )
-					icons.set(list[i], list[i]);
-
-				  icons.play();
-			</script>
-			<script>
-				 var icons = new Skycons({"color": "#f5f5f5"}),
-					  list  = [
-						"clear-night", "partly-cloudy-day",
-						"partly-cloudy-night", "cloudy", "rain", "sleet", "snow", "wind",
-						"fog"
-					  ],
-					  i;
-
-				  for(i = list.length; i--; )
-					icons.set(list[i], list[i]);
-
-				  icons.play();
-			</script>
-		
-		<!-- graph-tabs -->
-		<script src="js/jquery.graphly.min.js"></script>
-		<link rel="stylesheet" media="screen" href="css/bootstrap-responsive.min.css" />
-		<script>
-            $(function() {
-                 $('#negative-positive-graph-button').click(function() {
-                    $('li.active').removeClass('active');
-                    $('#negative-positive-graph-button').parent().addClass('active');
-                    $('.example:visible').not('#negative-positive-container').fadeOut(300, function() {
-                        $('#negative-positive-container').fadeIn(300);
-                    });
-                });
-                $('#line-graph-button').click(function() {
-                    $('li.active').removeClass('active');
-                    $('#line-graph-button').parent().addClass('active');
-                    $('.example:visible').not('#line-graph-container').fadeOut(300, function() {
-                        $('#line-graph-container').fadeIn(300);
-                    });
-                });
+        // Smooth animations on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.side-card, .main-attendance-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
                 
-                $('#custom-colours-button').click(function() {
-                    $('li.active').removeClass('active');
-                    $('#custom-colours-button').parent().addClass('active');
-                    $('.example:visible').not('#custom-colours-container').fadeOut(300, function() {
-                        $('#custom-colours-container').fadeIn(300);
-                    });
-                });
-                
-                $('#grouped-graph-button').click(function() {
-                    $('li.active').removeClass('active');
-                    $('#grouped-graph-button').parent().addClass('active');
-                    $('.example:visible').not('#grouped-graph-container').fadeOut(300, function() {
-                        $('#grouped-graph-container').fadeIn(300);
-                    });
-                });
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease-out';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 200);
             });
-        </script>
-		<script src="js/line_graph.js"></script>
-		<script src="js/custom_colours.js"></script>
-		<script src="js/grouped_graph.js"></script>
-		<script src="js/negative_positive_graph.js"></script>
-		<!-- //graph-tabs -->
-		<!-- chart-grid-left -->
-		<script>
-			(function () {
-			var data = [{"xScale":"ordinal","comp":[],"main":[{"className":".main.l1","data":[{"y":15,"x":"2012-11-19T00:00:00"},{"y":11,"x":"2012-11-20T00:00:00"},{"y":8,"x":"2012-11-21T00:00:00"},{"y":10,"x":"2012-11-22T00:00:00"},{"y":1,"x":"2012-11-23T00:00:00"},{"y":6,"x":"2012-11-24T00:00:00"},{"y":8,"x":"2012-11-25T00:00:00"}]},{"className":".main.l2","data":[{"y":29,"x":"2012-11-19T00:00:00"},{"y":33,"x":"2012-11-20T00:00:00"},{"y":13,"x":"2012-11-21T00:00:00"},{"y":16,"x":"2012-11-22T00:00:00"},{"y":7,"x":"2012-11-23T00:00:00"},{"y":18,"x":"2012-11-24T00:00:00"},{"y":8,"x":"2012-11-25T00:00:00"}]}],"type":"line-dotted","yScale":"linear"},{"xScale":"ordinal","comp":[],"main":[{"className":".main.l1","data":[{"y":12,"x":"2012-11-19T00:00:00"},{"y":18,"x":"2012-11-20T00:00:00"},{"y":8,"x":"2012-11-21T00:00:00"},{"y":7,"x":"2012-11-22T00:00:00"},{"y":6,"x":"2012-11-23T00:00:00"},{"y":12,"x":"2012-11-24T00:00:00"},{"y":8,"x":"2012-11-25T00:00:00"}]},{"className":".main.l2","data":[{"y":29,"x":"2012-11-19T00:00:00"},{"y":33,"x":"2012-11-20T00:00:00"},{"y":13,"x":"2012-11-21T00:00:00"},{"y":16,"x":"2012-11-22T00:00:00"},{"y":7,"x":"2012-11-23T00:00:00"},{"y":18,"x":"2012-11-24T00:00:00"},{"y":8,"x":"2012-11-25T00:00:00"}]}],"type":"cumulative","yScale":"linear"},{"xScale":"ordinal","comp":[],"main":[{"className":".main.l1","data":[{"y":12,"x":"2012-11-19T00:00:00"},{"y":18,"x":"2012-11-20T00:00:00"},{"y":8,"x":"2012-11-21T00:00:00"},{"y":7,"x":"2012-11-22T00:00:00"},{"y":6,"x":"2012-11-23T00:00:00"},{"y":12,"x":"2012-11-24T00:00:00"},{"y":8,"x":"2012-11-25T00:00:00"}]},{"className":".main.l2","data":[{"y":29,"x":"2012-11-19T00:00:00"},{"y":33,"x":"2012-11-20T00:00:00"},{"y":13,"x":"2012-11-21T00:00:00"},{"y":16,"x":"2012-11-22T00:00:00"},{"y":7,"x":"2012-11-23T00:00:00"},{"y":18,"x":"2012-11-24T00:00:00"},{"y":8,"x":"2012-11-25T00:00:00"}]}],"type":"bar","yScale":"linear"}];
-			var order = [0, 1, 0, 2],
-			  i = 0,
-			  xFormat = d3.time.format('%A'),
-			  chart = new xChart('line-dotted', data[order[i]], '#chart', {
-				axisPaddingTop: 5,
-				dataFormatX: function (x) {
-				  return new Date(x);
-				},
-				tickFormatX: function (x) {
-				  return xFormat(x);
-				},
-				timing: 1250
-			  }),
-			  rotateTimer,
-			  toggles = d3.selectAll('.multi button'),
-			  t = 3500;
+        });
 
-			function updateChart(i) {
-			  var d = data[i];
-			  chart.setData(d);
-			  toggles.classed('toggled', function () {
-				return (d3.select(this).attr('data-type') === d.type);
-			  });
-			  return d;
-			}
+        // Notification handling
+        function closeNotification() {
+            const notification = document.querySelector('.notification-overlay');
+            if (notification) {
+                notification.style.animation = 'fadeOut 0.3s ease-out';
+                setTimeout(() => {
+                    notification.remove();
+                    // Clear URL parameters
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }, 300);
+            }
+        }
 
-			toggles.on('click', function (d, i) {
-			  clearTimeout(rotateTimer);
-			  updateChart(i);
-			});
-
-			function rotateChart() {
-			  i += 1;
-			  i = (i >= order.length) ? 0 : i;
-			  var d = updateChart(order[i]);
-			  rotateTimer = setTimeout(rotateChart, t);
-			}
-			rotateTimer = setTimeout(rotateChart, t);
-			}());
-		</script>
-		<!-- //chart-grid-left -->
-		<!-- fabochart -->
-		<script src="js/fabochart.js"></script>
-		<script>
-		$(document).ready(function () {
-			data = {
-			  '2010' : 300, 
-			  '2011' : 200,
-			  '2012' : 100,
-			  '2013' : 500,
-			  '2014' : 400,
-			  '2015' : 200
-			};
-
-			$("#chart1").faBoChart({
-			  time: 500,
-			  animate: true,
-			  instantAnimate: true,
-			  straight: false,
-			  data: data,
-			  labelTextColor : "#C0392B",
-			});
-			$("#chart2").faBoChart({
-			  time: 2500,
-			  animate: true,
-			  data: data,
-			  straight: true,
-			  labelTextColor : "#C0392B",
-			});
-		});
-		</script>
-		<!-- //fabochart -->
-		
-		<!-- Notification handling -->
-		<script>
-			// Notification handling
-			function closeNotification() {
-				const notification = document.querySelector('.notification-overlay');
-				if (notification) {
-					notification.style.animation = 'fadeOut 0.3s ease-out';
-					setTimeout(() => {
-						notification.remove();
-						// Clear URL parameters
-						window.history.replaceState({}, document.title, window.location.pathname);
-					}, 300);
-				}
-			}
-
-			// Auto close notification after 5 seconds
-			if (document.querySelector('.notification-overlay')) {
-				setTimeout(closeNotification, 5000);
-			}
-		</script>
+        // Auto close notification after 1 second (changed from 5 seconds)
+        if (document.querySelector('.notification-overlay')) {
+            setTimeout(closeNotification, 1000);
+        }
+    </script>
+</body>
+</html>
 </body>	
 </html>

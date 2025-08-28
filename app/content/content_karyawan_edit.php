@@ -64,12 +64,12 @@
 															<option value="">-- Pilih Kelas --</option>
 															<?php
 															$jt = $detail['job_title'];
-															$sql_jt = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM jobtitle");
-															while($d_jt = mysqli_fetch_assoc($sql_jt)){
-															if($jt == $d_jt['kode_jobtitle']){
-															echo '<option value="'.$d_jt['kode_jobtitle'].'" selected>'.$d_jt['jobtitle'].'</option>';
+															$sql_kelas = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM kelas WHERE status='aktif' ORDER BY tingkat ASC, kode_kelas ASC");
+															while($d_kelas = mysqli_fetch_assoc($sql_kelas)){
+															if($jt == $d_kelas['kode_kelas']){
+															echo '<option value="'.$d_kelas['kode_kelas'].'" selected>'.$d_kelas['nama_kelas'].' ('.$d_kelas['kode_kelas'].')</option>';
 																	} else{
-															echo '<option value="'.$d_jt['kode_jobtitle'].'" >'.$d_jt['jobtitle'].'</option>';			
+															echo '<option value="'.$d_kelas['kode_kelas'].'" >'.$d_kelas['nama_kelas'].' ('.$d_kelas['kode_kelas'].')</option>';			
 																	}
 																}
 															?>

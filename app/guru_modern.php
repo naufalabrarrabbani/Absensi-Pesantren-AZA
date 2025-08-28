@@ -576,6 +576,13 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                     <span>Generate QR</span>
                 </a>
 
+                <h5 class="sidebar-title">Master Data</h5>
+
+                <a href="kelas_modern.php" class="sidebar-item" onclick="toggleActive(this)">
+                    <i class="fas fa-school"></i>
+                    <span>Kelas</span>
+                </a>
+
                 <h5 class="sidebar-title">Others</h5>
 
                 <a href="setting_modern.php" class="sidebar-item" onclick="toggleActive(this)">
@@ -824,21 +831,13 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                                     </label>
                                     <select class="form-modern" id="mata_pelajaran" name="mata_pelajaran" required>
                                         <option value="">-- Pilih Mata Pelajaran --</option>
-                                        <option value="Matematika">Matematika</option>
-                                        <option value="Bahasa Indonesia">Bahasa Indonesia</option>
-                                        <option value="Bahasa Inggris">Bahasa Inggris</option>
-                                        <option value="IPA">IPA</option>
-                                        <option value="IPS">IPS</option>
-                                        <option value="PKN">PKN</option>
-                                        <option value="Agama">Agama</option>
-                                        <option value="Seni Budaya">Seni Budaya</option>
-                                        <option value="Penjaskes">Penjaskes</option>
-                                        <option value="TIK">TIK</option>
-                                        <option value="Bahasa Arab">Bahasa Arab</option>
-                                        <option value="Akidah Akhlak">Akidah Akhlak</option>
-                                        <option value="Fiqih">Fiqih</option>
-                                        <option value="Quran Hadist">Quran Hadist</option>
-                                        <option value="SKI">SKI</option>
+                                        <?php
+                                        $query_mapel = "SELECT * FROM mata_pelajaran ORDER BY nama_mapel ASC";
+                                        $result_mapel = mysqli_query($GLOBALS["___mysqli_ston"], $query_mapel);
+                                        while ($mapel = mysqli_fetch_array($result_mapel)) {
+                                            echo "<option value='" . htmlspecialchars($mapel['nama_mapel']) . "'>" . htmlspecialchars($mapel['nama_mapel']) . " (" . htmlspecialchars($mapel['kode_mapel']) . ")</option>";
+                                        }
+                                        ?>
                                     </select>
                                 </div>
                             </div>
@@ -950,21 +949,13 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                                     </label>
                                     <select class="form-modern" id="edit_mata_pelajaran" name="mata_pelajaran" required>
                                         <option value="">-- Pilih Mata Pelajaran --</option>
-                                        <option value="Matematika">Matematika</option>
-                                        <option value="Bahasa Indonesia">Bahasa Indonesia</option>
-                                        <option value="Bahasa Inggris">Bahasa Inggris</option>
-                                        <option value="IPA">IPA</option>
-                                        <option value="IPS">IPS</option>
-                                        <option value="PKN">PKN</option>
-                                        <option value="Agama">Agama</option>
-                                        <option value="Seni Budaya">Seni Budaya</option>
-                                        <option value="Penjaskes">Penjaskes</option>
-                                        <option value="TIK">TIK</option>
-                                        <option value="Bahasa Arab">Bahasa Arab</option>
-                                        <option value="Akidah Akhlak">Akidah Akhlak</option>
-                                        <option value="Fiqih">Fiqih</option>
-                                        <option value="Quran Hadist">Quran Hadist</option>
-                                        <option value="SKI">SKI</option>
+                                        <?php
+                                        $query_mapel_edit = "SELECT * FROM mata_pelajaran ORDER BY nama_mapel ASC";
+                                        $result_mapel_edit = mysqli_query($GLOBALS["___mysqli_ston"], $query_mapel_edit);
+                                        while ($mapel_edit = mysqli_fetch_array($result_mapel_edit)) {
+                                            echo "<option value='" . htmlspecialchars($mapel_edit['nama_mapel']) . "'>" . htmlspecialchars($mapel_edit['nama_mapel']) . " (" . htmlspecialchars($mapel_edit['kode_mapel']) . ")</option>";
+                                        }
+                                        ?>
                                     </select>
                                 </div>
                             </div>

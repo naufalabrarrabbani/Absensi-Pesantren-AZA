@@ -93,7 +93,17 @@
 											</td>
                                             <td><?= $d_karyawan['nik'];?></td>
                                             <td><?= $d_karyawan['nama'];?></td>
-                                            <td><?= $d_karyawan['job_title'];?></td>
+                                            <td>
+                                                <?php
+                                                // Ambil nama kelas dari tabel kelas berdasarkan kode_kelas
+                                                $kelas_info = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT nama_kelas, kode_kelas FROM kelas WHERE kode_kelas = '{$d_karyawan['job_title']}'"));
+                                                if ($kelas_info) {
+                                                    echo $kelas_info['nama_kelas'] . ' (' . $kelas_info['kode_kelas'] . ')';
+                                                } else {
+                                                    echo $d_karyawan['job_title']; // fallback jika tidak ditemukan
+                                                }
+                                                ?>
+                                            </td>
                                             <td><?= $d_karyawan['lokasi'];?></td>
 									
                                             <!--<td><?= $d_karyawan['start_date'];?></td>
@@ -151,10 +161,10 @@
 															<select name="job_title" class="form-control show-tick" required>
 															<option value="">-- Pilih Kelas --</option>
 															<?php
-															$sql_jt = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM jobtitle");
-															if(mysqli_num_rows($sql_jt) != 0){
-															while($d_jt = mysqli_fetch_assoc($sql_jt)){
-															echo '<option value="'.$d_jt['kode_jobtitle'].'">'.$d_jt['jobtitle'].'</option>';
+															$sql_kelas = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM kelas WHERE status='aktif' ORDER BY tingkat ASC, kode_kelas ASC");
+															if(mysqli_num_rows($sql_kelas) != 0){
+															while($d_kelas = mysqli_fetch_assoc($sql_kelas)){
+															echo '<option value="'.$d_kelas['kode_kelas'].'">'.$d_kelas['nama_kelas'].' ('.$d_kelas['kode_kelas'].')</option>';
 																	}
 																}
 															?>

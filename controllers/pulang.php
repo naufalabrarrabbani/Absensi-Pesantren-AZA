@@ -18,13 +18,13 @@ if ($cek == 1) {
         
         // Cek apakah sudah absen masuk
         if($data_absen['masuk'] == null) {
-            header('location:../pulang?status=gagal&pesan='.base64_encode('Anda belum melakukan absen masuk hari ini!').'&nama='.base64_encode($data_siswa['nama']));
+            header('location:../pulang.php?status=gagal&pesan='.base64_encode('Anda belum melakukan absen masuk hari ini!').'&nama='.base64_encode($data_siswa['nama']));
             exit();
         }
         
         // Cek apakah sudah absen pulang
         if($data_absen['pulang'] != null && $data_absen['pulang'] != '0') {
-            header('location:../pulang?status=sudah&pesan='.base64_encode('Anda sudah melakukan absen pulang hari ini pada pukul '.date('H:i', strtotime($data_absen['pulang']))).'&nama='.base64_encode($data_siswa['nama']));
+            header('location:../pulang.php?status=sudah&pesan='.base64_encode('Anda sudah melakukan absen pulang hari ini pada pukul '.date('H:i', strtotime($data_absen['pulang']))).'&nama='.base64_encode($data_siswa['nama']));
             exit();
         }
 
@@ -32,14 +32,14 @@ if ($cek == 1) {
         $proses = mysqli_query($GLOBALS["___mysqli_ston"], $sql);
         
         if ($proses) {
-            header('location:../pulang?status=berhasil&pesan='.base64_encode('Absen pulang berhasil!').'&nama='.base64_encode($data_siswa['nama']));
+            header('location:../pulang.php?status=berhasil&pesan='.base64_encode('Absen pulang berhasil!').'&nama='.base64_encode($data_siswa['nama']));
         } else { 
-            header('location:../pulang?status=gagal&pesan='.base64_encode('Gagal melakukan absen pulang!'));
+            header('location:../pulang.php?status=gagal&pesan='.base64_encode('Gagal melakukan absen pulang!'));
         }
     } else {
-        header('location:../pulang?status=gagal&pesan='.base64_encode('Anda belum melakukan absen masuk hari ini!').'&nama='.base64_encode($data_siswa['nama']));
+        header('location:../pulang.php?status=gagal&pesan='.base64_encode('Anda belum melakukan absen masuk hari ini!').'&nama='.base64_encode($data_siswa['nama']));
     }
 } else {
-    header('location:../pulang?status=gagal&pesan='.base64_encode('NIK tidak ditemukan!'));
+    header('location:../pulang.php?status=gagal&pesan='.base64_encode('NIK tidak ditemukan!'));
 }
 ?>

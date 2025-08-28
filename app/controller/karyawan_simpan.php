@@ -4,10 +4,7 @@ include '../include/koneksi.php';
 $nik = $_POST['nik'];
 $nama = $_POST['nama'];
 $job_title = $_POST['job_title'];
-$no_telp = $_POST['no_telp'] ?? '';
-$nama_ayah = $_POST['nama_ayah'] ?? '';
 $jenis_kelamin = $_POST['jenis_kelamin'] ?? '';
-$agama = $_POST['agama'] ?? '';
 $lokasi = $_POST['lokasi'];
 $start_date = $_POST['start_date'] ?? date('Y-m-d');
 $end_date = $_POST['end_date'] ?? date('Y-m-d', strtotime('+1 year'));
@@ -40,8 +37,8 @@ $s_pelanggan = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from karyawan 
 $cek = mysqli_num_rows($s_pelanggan);
 
 if ($cek == 0) {
-    $s_p = "INSERT into karyawan (nik, nama, job_title, no_telp, nama_ayah, jenis_kelamin, agama, lokasi, start_date, end_date, foto) 
-            VALUES('$nik', '$nama', '$job_title', '$no_telp', '$nama_ayah', '$jenis_kelamin', '$agama', '$lokasi', '$start_date', '$end_date', '$photo')";
+    $s_p = "INSERT into karyawan (nik, nama, job_title, jenis_kelamin, lokasi, start_date, end_date, foto) 
+            VALUES('$nik', '$nama', '$job_title', '$jenis_kelamin', '$lokasi', '$start_date', '$end_date', '$photo')";
     
     $proses = mysqli_query($GLOBALS["___mysqli_ston"], $s_p);
     

@@ -10,19 +10,30 @@ if (!isset($_SESSION['level'])) {
 }
 
 $month = $_GET['month'] ?? date('Y-m');
+$kelas = $_GET['kelas'] ?? '';
 
 // Get application data
 $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from aplikasi"));
 
+// Create filename with class filter if applied
+$filename = 'Laporan_Absensi_' . date('F_Y', strtotime($month . '-01'));
+if ($kelas) {
+    $kelas_name = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT nama_kelas FROM kelas WHERE kode_kelas = '$kelas'"));
+    $filename .= '_' . ($kelas_name ? $kelas_name['nama_kelas'] : $kelas);
+}
+$filename .= '.xls';
+
 // Create Excel file using simple HTML table
 header('Content-Type: application/vnd.ms-excel');
-header('Content-Disposition: attachment; filename="Laporan_Absensi_' . date('F_Y', strtotime($month . '-01')) . '.xls"');
+header('Content-Disposition: attachment; filename="' . $filename . '"');
 
-// Get attendance data for the month
+// Get attendance data for the month with class filter
+$class_filter = $kelas ? " AND k.job_title = '$kelas'" : "";
 $attendance_query = "
     SELECT k.*, a.tanggal, a.masuk, a.pulang, a.ijin, a.status_tidak_masuk 
     FROM karyawan k 
     LEFT JOIN absensi a ON k.nik = a.nik AND DATE_FORMAT(a.tanggal, '%Y-%m') = '$month'
+    WHERE 1=1 $class_filter
     ORDER BY k.nama ASC, a.tanggal DESC
 ";
 
@@ -43,8 +54,6 @@ while ($data = mysqli_fetch_array($attendance_result)) {
 
 // Get statistics
 $total_siswa = count($student_data);
-$total_hari_kerja = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], 
-    "SELECT DISTINCT tanggal FROM absensi WHERE DATE_FORMAT(tanggal, '%Y-%m') = '$month'"));
 
 ?>
 <!DOCTYPE html>
@@ -66,6 +75,12 @@ $total_hari_kerja = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"],
                 <?= $d_aplikasi['nama_aplikasi']; ?><br>
                 LAPORAN ABSENSI SISWA<br>
                 Periode: <?= date('F Y', strtotime($month . '-01')); ?>
+                <?php if ($kelas): ?>
+                    <?php
+                    $kelas_name = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT nama_kelas FROM kelas WHERE kode_kelas = '$kelas'"));
+                    ?>
+                    <br>Kelas: <?= $kelas_name ? $kelas_name['nama_kelas'] : $kelas; ?>
+                <?php endif; ?>
             </td>
         </tr>
         <tr><td colspan="9"></td></tr>
@@ -113,8 +128,9 @@ $total_hari_kerja = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"],
                 }
             }
             
-            $total_kehadiran = $total_hadir + $total_ijin + $total_sakit;
-            $persentase = $total_hari_kerja > 0 ? round(($total_kehadiran / $total_hari_kerja) * 100, 1) : 0;
+            // Calculate percentage based on total attendance records, not working days
+            $total_all_records = $total_hadir + $total_ijin + $total_sakit + $total_alpha;
+            $persentase = $total_all_records > 0 ? round(($total_hadir / $total_all_records) * 100, 1) : 0;
             
             $grand_total_hadir += $total_hadir;
             $grand_total_ijin += $total_ijin;
@@ -141,16 +157,20 @@ $total_hari_kerja = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"],
             <td><?= $grand_total_ijin; ?></td>
             <td><?= $grand_total_sakit; ?></td>
             <td><?= $grand_total_alpha; ?></td>
-            <td><?= $total_siswa > 0 ? round((($grand_total_hadir + $grand_total_ijin + $grand_total_sakit) / ($total_siswa * $total_hari_kerja)) * 100, 1) : 0; ?>%</td>
+            <td>
+                <?php 
+                $grand_total_all = $grand_total_hadir + $grand_total_ijin + $grand_total_sakit + $grand_total_alpha;
+                echo $grand_total_all > 0 ? round(($grand_total_hadir / $grand_total_all) * 100, 1) : 0; 
+                ?>%
+            </td>
         </tr>
         
         <tr><td colspan="9"></td></tr>
         <tr>
             <td colspan="2"><strong>Total Siswa:</strong></td>
             <td><?= $total_siswa; ?> orang</td>
-            <td colspan="2"><strong>Total Hari Kerja:</strong></td>
-            <td><?= $total_hari_kerja; ?> hari</td>
             <td colspan="3"><strong>Tanggal Cetak:</strong> <?= date('d/m/Y H:i'); ?></td>
+            <td colspan="3"></td>
         </tr>
     </table>
 </body>

@@ -572,6 +572,13 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                     <span>Generate QR</span>
                 </a>
 
+                <h5 class="sidebar-title">Master Data</h5>
+
+                <a href="kelas_modern.php" class="sidebar-item" onclick="toggleActive(this)">
+                    <i class="fas fa-school"></i>
+                    <span>Kelas</span>
+                </a>
+
                 <h5 class="sidebar-title">Others</h5>
 
                 <a href="setting_modern.php" class="sidebar-item" onclick="toggleActive(this)">
@@ -633,19 +640,36 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                 </div>
                 <?php endif; ?>
 
-                <div class="row">
-                    <div class="col-12">
-                        <div class="modern-card">
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <div>
-                                    <h3 class="content-title mb-0">Daftar Siswa</h3>
-                                    <p class="content-desc mb-0">Kelola data siswa di sistem absensi</p>
-                                </div>
-                                <a href="#" class="btn-modern primary" data-bs-toggle="modal" data-bs-target="#addStudentModal">
-                                    <i class="fas fa-plus"></i>
-                                    Tambah Siswa
-                                </a>
-                            </div>
+                <!-- Navigation Tabs -->
+                <ul class="nav nav-pills mb-4" id="mainTabs" role="tablist" style="background: rgba(255,255,255,0.1); padding: 8px; border-radius: 50px; display: inline-flex;">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="siswa-tab" data-bs-toggle="pill" data-bs-target="#siswa" type="button" role="tab" style="border-radius: 25px; padding: 12px 24px; margin: 0 4px; font-weight: 500; border: none; transition: all 0.3s ease;">
+                            <i class="fas fa-users me-2"></i>Daftar Siswa
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="mata-pelajaran-tab" data-bs-toggle="pill" data-bs-target="#mata-pelajaran" type="button" role="tab" style="border-radius: 25px; padding: 12px 24px; margin: 0 4px; font-weight: 500; border: none; transition: all 0.3s ease;">
+                            <i class="fas fa-book-open me-2"></i>Master Data Mata Pelajaran
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="mainTabContent">
+                    <!-- Tab Daftar Siswa -->
+                    <div class="tab-pane fade show active" id="siswa" role="tabpanel">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="modern-card">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <div>
+                                            <h3 class="content-title mb-0">Daftar Siswa</h3>
+                                            <p class="content-desc mb-0">Kelola data siswa di sistem absensi</p>
+                                        </div>
+                                        <a href="#" class="btn-modern primary" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+                                            <i class="fas fa-plus"></i>
+                                            Tambah Siswa
+                                        </a>
+                                    </div>
 
                             <div class="table-responsive">
                                 <table class="modern-table">
@@ -681,7 +705,17 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                                                 <br>
                                                 <small class="text-muted"><?= $student['no_telp']; ?></small>
                                             </td>
-                                            <td><?= $student['job_title']; ?></td>
+                                            <td>
+                                                <?php
+                                                // Ambil nama kelas dari tabel kelas berdasarkan kode_kelas
+                                                $kelas_info = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT nama_kelas, kode_kelas FROM kelas WHERE kode_kelas = '{$student['job_title']}'"));
+                                                if ($kelas_info) {
+                                                    echo $kelas_info['nama_kelas'] . ' (' . $kelas_info['kode_kelas'] . ')';
+                                                } else {
+                                                    echo $student['job_title']; // fallback jika tidak ditemukan
+                                                }
+                                                ?>
+                                            </td>
                                             <td>
                                                 <span class="status-badge <?= $status == 'active' ? 'status-active' : 'status-inactive'; ?>">
                                                     <?= $status == 'active' ? 'Aktif' : 'Tidak Aktif'; ?>
@@ -689,9 +723,9 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                                             </td>
                                             <td>
                                                 <div class="action-buttons">
-                                                    <a href="karyawan_detail.php?id=<?= $student['id']; ?>" class="btn-modern primary">
+                                                    <button onclick="showStudentDetail('<?= $student['id']; ?>')" class="btn-modern primary">
                                                         <i class="fas fa-eye"></i>
-                                                    </a>
+                                                    </button>
                                                     <a href="karyawan_edit_modern.php?id=<?= $student['nik']; ?>" class="btn-modern warning">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
@@ -708,6 +742,109 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                         </div>
                     </div>
                 </div>
+            </div>
+            <!-- End Tab Daftar Siswa -->
+
+            <!-- Tab Master Data Mata Pelajaran -->
+            <div class="tab-pane fade" id="mata-pelajaran" role="tabpanel">
+                <!-- Add Form Card -->
+                <div class="modern-card mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h3 class="content-title mb-0">Tambah Mata Pelajaran</h3>
+                            <p class="content-desc mb-0">Kelola master data mata pelajaran</p>
+                        </div>
+                    </div>
+                    <form action="controller/mata_pelajaran_simpan.php" method="POST" id="addMapelForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="kode_mapel" class="form-label">
+                                        <i class="fas fa-code me-1"></i>
+                                        Kode Mata Pelajaran
+                                    </label>
+                                    <input type="text" class="form-control" id="kode_mapel" name="kode_mapel" 
+                                           placeholder="Contoh: MTK, IPA, IPS" maxlength="10" required 
+                                           style="border-radius: 10px; padding: 12px;">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="nama_mapel" class="form-label">
+                                        <i class="fas fa-book me-1"></i>
+                                        Nama Mata Pelajaran
+                                    </label>
+                                    <input type="text" class="form-control" id="nama_mapel" name="nama_mapel" 
+                                           placeholder="Contoh: Matematika, Ilmu Pengetahuan Alam" maxlength="100" required
+                                           style="border-radius: 10px; padding: 12px;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <button type="reset" class="btn-modern secondary me-2">
+                                <i class="fas fa-undo me-1"></i>Reset
+                            </button>
+                            <button type="submit" class="btn-modern primary">
+                                <i class="fas fa-save me-1"></i>Simpan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Data Table Card -->
+                <div class="modern-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h3 class="content-title mb-0">Daftar Mata Pelajaran</h3>
+                            <p class="content-desc mb-0">Semua mata pelajaran yang tersedia</p>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="modern-table" id="mapelTable">
+                            <thead>
+                                <tr>
+                                    <th width="5%">#</th>
+                                    <th width="20%">Kode</th>
+                                    <th width="55%">Nama Mata Pelajaran</th>
+                                    <th width="20%">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $no = 1;
+                                $query = "SELECT * FROM mata_pelajaran ORDER BY kode_mapel ASC";
+                                $result = mysqli_query($GLOBALS["___mysqli_ston"], $query);
+                                
+                                if (mysqli_num_rows($result) > 0) {
+                                    while ($row = mysqli_fetch_array($result)) {
+                                        echo "<tr>";
+                                        echo "<td>" . $no++ . "</td>";
+                                        echo "<td><span class='status-badge status-active'>" . htmlspecialchars($row['kode_mapel']) . "</span></td>";
+                                        echo "<td>" . htmlspecialchars($row['nama_mapel']) . "</td>";
+                                        echo "<td>";
+                                        echo "<div class='action-buttons'>";
+                                        echo "<button class='btn-modern warning' onclick='editMapel(" . $row['id'] . ", \"" . htmlspecialchars($row['kode_mapel']) . "\", \"" . htmlspecialchars($row['nama_mapel']) . "\")'>";
+                                        echo "<i class='fas fa-edit'></i>";
+                                        echo "</button>";
+                                        echo "<button class='btn-modern danger' onclick='deleteMapel(" . $row['id'] . ", \"" . htmlspecialchars($row['nama_mapel']) . "\")'>";
+                                        echo "<i class='fas fa-trash'></i>";
+                                        echo "</button>";
+                                        echo "</div>";
+                                        echo "</td>";
+                                        echo "</tr>";
+                                    }
+                                } else {
+                                    echo "<tr><td colspan='4' class='text-center'>Belum ada data mata pelajaran</td></tr>";
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- End Tab Master Data Mata Pelajaran -->
+        </div>
+        <!-- End Tab Content -->
             </div>
         </div>
     </div>
@@ -758,28 +895,16 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                                     <select class="form-modern" id="job_title" name="job_title" required>
                                         <option value="">-- Pilih Kelas --</option>
                                         <?php
-                                        $sql_jt = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM jobtitle");
-                                        if(mysqli_num_rows($sql_jt) != 0){
-                                            while($d_jt = mysqli_fetch_assoc($sql_jt)){
-                                                echo '<option value="'.$d_jt['kode_jobtitle'].'">'.$d_jt['jobtitle'].'</option>';
+                                        $sql_kelas = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM kelas WHERE status='aktif' ORDER BY tingkat ASC, kode_kelas ASC");
+                                        if(mysqli_num_rows($sql_kelas) != 0){
+                                            while($d_kelas = mysqli_fetch_assoc($sql_kelas)){
+                                                echo '<option value="'.$d_kelas['kode_kelas'].'">'.$d_kelas['nama_kelas'].' ('.$d_kelas['kode_kelas'].')</option>';
                                             }
                                         }
                                         ?>
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group-modern">
-                                    <label for="no_telp" class="form-label-modern">
-                                        <i class="fas fa-phone me-1"></i>
-                                        No. Telepon
-                                    </label>
-                                    <input type="text" class="form-modern" id="no_telp" name="no_telp" placeholder="Masukkan nomor telepon">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group-modern">
                                     <label for="jenis_kelamin" class="form-label-modern">
@@ -791,53 +916,6 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                                         <option value="Laki-laki">Laki-laki</option>
                                         <option value="Perempuan">Perempuan</option>
                                     </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group-modern">
-                                    <label for="agama" class="form-label-modern">
-                                        <i class="fas fa-pray me-1"></i>
-                                        Agama
-                                    </label>
-                                    <select class="form-modern" id="agama" name="agama" required>
-                                        <option value="">-- Pilih Agama --</option>
-                                        <option value="Islam">Islam</option>
-                                        <option value="Kristen">Kristen</option>
-                                        <option value="Katolik">Katolik</option>
-                                        <option value="Hindu">Hindu</option>
-                                        <option value="Buddha">Buddha</option>
-                                        <option value="Konghucu">Konghucu</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group-modern">
-                                    <label for="lokasi" class="form-label-modern">
-                                        <i class="fas fa-map-marker-alt me-1"></i>
-                                        Lokasi
-                                    </label>
-                                    <select class="form-modern" id="lokasi" name="lokasi" required>
-                                        <?php
-                                        $sql_l = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM lokasi");
-                                        if(mysqli_num_rows($sql_l) != 0){
-                                            while($d_l = mysqli_fetch_assoc($sql_l)){
-                                                echo '<option value="'.$d_l['lokasi'].'">'.$d_l['lokasi'].'</option>';
-                                            }
-                                        }
-                                        ?>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group-modern">
-                                    <label for="nama_ayah" class="form-label-modern">
-                                        <i class="fas fa-male me-1"></i>
-                                        Nama Ayah
-                                    </label>
-                                    <input type="text" class="form-modern" id="nama_ayah" name="nama_ayah" placeholder="Masukkan nama ayah">
                                 </div>
                             </div>
                         </div>
@@ -1023,7 +1101,236 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                 }
             });
         }, 5000);
+
+        // Student Detail Modal Function
+        function showStudentDetail(studentId) {
+            // Fetch student data via AJAX
+            fetch(`controller/get_student_detail.php?id=${studentId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const student = data.student;
+                        
+                        // Populate modal with student data
+                        document.getElementById('studentDetailModal').innerHTML = `
+                            <div class="modal-dialog modal-lg modal-dialog-centered">
+                                <div class="modal-content" style="border-radius: 20px; border: none;">
+                                    <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 20px 20px 0 0;">
+                                        <h5 class="modal-title" style="font-weight: 600;">
+                                            <i class="fas fa-user-graduate me-2"></i>Detail Siswa
+                                        </h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body" style="padding: 30px;">
+                                        <div class="row">
+                                            <div class="col-md-4 text-center mb-4">
+                                                <img src="images/${student.foto || 'default-avatar.png'}" 
+                                                     alt="${student.nama}" 
+                                                     style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid #667eea; box-shadow: 0 10px 30px rgba(0,0,0,0.1);"
+                                                     onerror="this.src='images/default-avatar.png'">
+                                                <h4 style="margin-top: 20px; color: #2c3e50; font-weight: 600;">${student.nama}</h4>
+                                                <p style="color: #7f8c8d; margin: 0;">${student.nik}</p>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <div class="row g-3">
+                                                    <div class="col-sm-6">
+                                                        <div class="detail-item">
+                                                            <label style="font-weight: 600; color: #2c3e50; font-size: 14px;">NISN</label>
+                                                            <p style="margin: 5px 0 0 0; color: #34495e; font-size: 16px;">${student.nik}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="detail-item">
+                                                            <label style="font-weight: 600; color: #2c3e50; font-size: 14px;">Kelas</label>
+                                                            <p style="margin: 5px 0 0 0; color: #34495e; font-size: 16px;">${student.lokasi}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="detail-item">
+                                                            <label style="font-weight: 600; color: #2c3e50; font-size: 14px;">Alamat</label>
+                                                            <p style="margin: 5px 0 0 0; color: #34495e; font-size: 16px;">${student.alamat || '-'}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="detail-item">
+                                                            <label style="font-weight: 600; color: #2c3e50; font-size: 14px;">Area</label>
+                                                            <p style="margin: 5px 0 0 0; color: #34495e; font-size: 16px;">${student.area || '-'}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="detail-item">
+                                                            <label style="font-weight: 600; color: #2c3e50; font-size: 14px;">Email</label>
+                                                            <p style="margin: 5px 0 0 0; color: #34495e; font-size: 16px;">${student.email || '-'}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="detail-item">
+                                                            <label style="font-weight: 600; color: #2c3e50; font-size: 14px;">Telepon</label>
+                                                            <p style="margin: 5px 0 0 0; color: #34495e; font-size: 16px;">${student.telepon || '-'}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <div class="detail-item">
+                                                            <label style="font-weight: 600; color: #2c3e50; font-size: 14px;">QR Code</label>
+                                                            <div style="margin-top: 10px;">
+                                                                <img src="../generate_qr_code.php?nik=${student.nik}" 
+                                                                     alt="QR Code" 
+                                                                     style="width: 120px; height: 120px; border-radius: 10px; border: 2px solid #e9ecef;">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer" style="border-top: 1px solid #e9ecef; padding: 20px 30px;">
+                                        <a href="karyawan_edit_modern.php?id=${student.nik}" class="btn btn-primary" style="border-radius: 10px; padding: 10px 20px;">
+                                            <i class="fas fa-edit me-2"></i>Edit Data
+                                        </a>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 10px; padding: 10px 20px;">
+                                            <i class="fas fa-times me-2"></i>Tutup
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        
+                        // Show modal
+                        const modal = new bootstrap.Modal(document.getElementById('studentDetailModal'));
+                        modal.show();
+                    } else {
+                        alert('Gagal memuat data siswa');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan saat memuat data siswa');
+                });
+        }
+
+        // Mata Pelajaran JavaScript Functions
+        function editMapel(id, kode, nama) {
+            document.getElementById('edit_id').value = id;
+            document.getElementById('edit_kode_mapel').value = kode;
+            document.getElementById('edit_nama_mapel').value = nama;
+            
+            const editModal = new bootstrap.Modal(document.getElementById('editMapelModal'));
+            editModal.show();
+        }
+
+        function deleteMapel(id, nama) {
+            document.getElementById('delete_nama').textContent = nama;
+            document.getElementById('delete_link').href = 'controller/mata_pelajaran_delete.php?id=' + id;
+            
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteMapelModal'));
+            deleteModal.show();
+        }
+
+        // Tab active styles
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('#mainTabs .nav-link');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active styles from all buttons
+                    tabButtons.forEach(btn => {
+                        btn.style.background = 'transparent';
+                        btn.style.color = '#6c757d';
+                    });
+                    
+                    // Add active styles to clicked button
+                    this.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                    this.style.color = 'white';
+                    this.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
+                });
+            });
+
+            // Set initial active tab style
+            const activeTab = document.querySelector('#mainTabs .nav-link.active');
+            if (activeTab) {
+                activeTab.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                activeTab.style.color = 'white';
+                activeTab.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
+            }
+        });
     </script>
+
+    <!-- Student Detail Modal -->
+    <div class="modal fade" id="studentDetailModal" tabindex="-1" aria-hidden="true">
+        <!-- Modal content will be populated by JavaScript -->
+    </div>
+
+    <!-- Edit Mata Pelajaran Modal -->
+    <div class="modal fade" id="editMapelModal" tabindex="-1" aria-labelledby="editMapelModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content modal-modern">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editMapelModalLabel">
+                        <i class="fas fa-edit me-2"></i>Edit Mata Pelajaran
+                    </h5>
+                    <button type="button" class="btn-close-modern" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form action="controller/mata_pelajaran_update.php" method="POST" id="editMapelForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="edit_id" name="id">
+                        <div class="mb-3">
+                            <label for="edit_kode_mapel" class="form-label">
+                                <i class="fas fa-code me-1"></i>Kode Mata Pelajaran
+                            </label>
+                            <input type="text" class="form-control" id="edit_kode_mapel" name="kode_mapel" maxlength="10" required style="border-radius: 10px; padding: 12px;">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_nama_mapel" class="form-label">
+                                <i class="fas fa-book me-1"></i>Nama Mata Pelajaran
+                            </label>
+                            <input type="text" class="form-control" id="edit_nama_mapel" name="nama_mapel" maxlength="100" required style="border-radius: 10px; padding: 12px;">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-modern secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i>Batal
+                        </button>
+                        <button type="submit" class="btn-modern primary">
+                            <i class="fas fa-save me-1"></i>Update
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Mata Pelajaran Modal -->
+    <div class="modal fade" id="deleteMapelModal" tabindex="-1" aria-labelledby="deleteMapelModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content modal-modern">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteMapelModalLabel">
+                        <i class="fas fa-trash me-2"></i>Konfirmasi Hapus
+                    </h5>
+                    <button type="button" class="btn-close-modern" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Apakah Anda yakin ingin menghapus mata pelajaran <strong id="delete_nama"></strong>?</p>
+                    <p class="text-danger">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        Tindakan ini tidak dapat dibatalkan.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-modern secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Batal
+                    </button>
+                    <a href="#" id="delete_link" class="btn-modern danger">
+                        <i class="fas fa-trash me-1"></i>Hapus
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

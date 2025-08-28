@@ -15,6 +15,10 @@ if ( !isset($_SESSION['level'])) {
 
 $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from aplikasi"));
 $skr = date('Y-m-d');
+
+// Get selected filters
+$selected_month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
+$selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
 ?>
 <!doctype html>
 <html lang="en">
@@ -505,6 +509,12 @@ $skr = date('Y-m-d');
                 margin-top: 15px;
             }
         }
+
+        .btn-group-actions {
+            display: flex;
+            gap: 4px;
+            margin-top: 8px;
+        }
     </style>
 
     <title><?= $d_aplikasi['nama_aplikasi']; ?> - Data Absensi</title>
@@ -566,6 +576,13 @@ $skr = date('Y-m-d');
                     <span>Generate QR</span>
                 </a>
 
+                <h5 class="sidebar-title">Master Data</h5>
+
+                <a href="kelas_modern.php" class="sidebar-item" onclick="toggleActive(this)">
+                    <i class="fas fa-school"></i>
+                    <span>Kelas</span>
+                </a>
+
                 <h5 class="sidebar-title">Others</h5>
 
                 <a href="setting_modern.php" class="sidebar-item" onclick="toggleActive(this)">
@@ -617,7 +634,18 @@ $skr = date('Y-m-d');
                             <div class="d-flex justify-content-between align-items-center mb-4">
                                 <div>
                                     <h3 class="content-title mb-0">Data Absensi</h3>
-                                    <p class="content-desc mb-0">Monitor dan kelola data absensi siswa per bulan</p>
+                                    <p class="content-desc mb-0">
+                                        Monitor dan kelola data absensi siswa per bulan
+                                        <?php if ($selected_class): ?>
+                                            <?php
+                                            $kelas_name = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT nama_kelas FROM kelas WHERE kode_kelas = '$selected_class'"));
+                                            ?>
+                                            <br><small style="color: #4640DE; font-weight: 600;">
+                                                <i class="fas fa-filter me-1"></i>
+                                                Filter: <?= $kelas_name ? $kelas_name['nama_kelas'] : $selected_class; ?>
+                                            </small>
+                                        <?php endif; ?>
+                                    </p>
                                 </div>
                                 <div class="d-flex gap-2">
                                     <button class="btn-modern success" onclick="exportData('excel')">
@@ -638,11 +666,8 @@ $skr = date('Y-m-d');
                             <!-- Period Selector -->
                             <div class="period-selector">
                                 <div class="row align-items-center">
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <label class="form-label">Pilih Periode:</label>
-                                        <?php
-                                        $selected_month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
-                                        ?>
                                         <select class="form-modern" id="monthYear" onchange="loadPeriodData()">
                                             <?php
                                             for ($i = 0; $i < 12; $i++) {
@@ -654,14 +679,32 @@ $skr = date('Y-m-d');
                                             ?>
                                         </select>
                                     </div>
-                                    <div class="col-md-8">
+                                    <div class="col-md-3">
+                                        <label class="form-label">Filter Kelas:</label>
+                                        <select class="form-modern" id="kelasFilter" onchange="loadPeriodData()">
+                                            <option value="">-- Semua Kelas --</option>
+                                            <?php
+                                            $query_kelas = "SELECT DISTINCT k.kode_kelas, k.nama_kelas FROM kelas k 
+                                                           INNER JOIN karyawan kar ON kar.job_title = k.kode_kelas 
+                                                           ORDER BY k.nama_kelas ASC";
+                                            $result_kelas = mysqli_query($GLOBALS["___mysqli_ston"], $query_kelas);
+                                            while ($kelas = mysqli_fetch_array($result_kelas)) {
+                                                $selected = ($kelas['kode_kelas'] == $selected_class) ? 'selected' : '';
+                                                echo "<option value='" . htmlspecialchars($kelas['kode_kelas']) . "' $selected>" . htmlspecialchars($kelas['nama_kelas']) . " (" . htmlspecialchars($kelas['kode_kelas']) . ")</option>";
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
                                         <div class="period-stats">
                                             <div class="stat-item">
                                                 <span class="stat-label">Total Masuk</span>
                                                 <span class="stat-value" id="totalMasuk">
                                                     <?php
+                                                    $class_filter = $selected_class ? " AND k.job_title = '$selected_class'" : "";
                                                     $total_masuk = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], 
-                                                        "SELECT * FROM absensi WHERE DATE_FORMAT(tanggal, '%Y-%m') = '$selected_month' AND masuk IS NOT NULL AND ijin IS NULL AND status_tidak_masuk IS NULL"));
+                                                        "SELECT * FROM absensi a INNER JOIN karyawan k ON a.nik = k.nik 
+                                                         WHERE DATE_FORMAT(a.tanggal, '%Y-%m') = '$selected_month' AND a.masuk IS NOT NULL AND a.ijin IS NULL AND a.status_tidak_masuk IS NULL $class_filter"));
                                                     echo $total_masuk;
                                                     ?>
                                                 </span>
@@ -671,7 +714,8 @@ $skr = date('Y-m-d');
                                                 <span class="stat-value" id="totalTidakMasuk">
                                                     <?php
                                                     $total_tidak_masuk_all = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], 
-                                                        "SELECT * FROM absensi WHERE DATE_FORMAT(tanggal, '%Y-%m') = '$selected_month' AND (ijin IS NOT NULL OR status_tidak_masuk IS NOT NULL)"));
+                                                        "SELECT * FROM absensi a INNER JOIN karyawan k ON a.nik = k.nik 
+                                                         WHERE DATE_FORMAT(a.tanggal, '%Y-%m') = '$selected_month' AND (a.ijin IS NOT NULL OR a.status_tidak_masuk IS NOT NULL) $class_filter"));
                                                     echo $total_tidak_masuk_all;
                                                     ?>
                                                 </span>
@@ -680,11 +724,12 @@ $skr = date('Y-m-d');
                                                 <span class="stat-label">Persentase Kehadiran</span>
                                                 <span class="stat-value" id="persentaseKehadiran">
                                                     <?php
-                                                    $total_siswa = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM karyawan"));
-                                                    $total_hari_kerja = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], 
-                                                        "SELECT DISTINCT tanggal FROM absensi WHERE DATE_FORMAT(tanggal, '%Y-%m') = '$selected_month'"));
-                                                    $total_expected = $total_siswa * $total_hari_kerja;
-                                                    $persentase = $total_expected > 0 ? round(($total_masuk / $total_expected) * 100, 1) : 0;
+                                                    $total_siswa_filter = $selected_class ? " WHERE job_title = '$selected_class'" : "";
+                                                    $total_siswa = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM karyawan $total_siswa_filter"));
+                                                    
+                                                    // Simplified calculation without working days
+                                                    $total_all_attendance = $total_masuk + $total_tidak_masuk_all;
+                                                    $persentase = $total_all_attendance > 0 ? round(($total_masuk / $total_all_attendance) * 100, 1) : 0;
                                                     echo $persentase . '%';
                                                     ?>
                                                 </span>
@@ -732,14 +777,17 @@ $skr = date('Y-m-d');
                                     <tbody>
                                         <?php
                                         $no = 1;
-                                        $selected_month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
                                         $selected_date = date('Y-m-d'); // Today's date for checking attendance
                                         
-                                        // Query untuk data absensi per bulan
+                                        // Add class filter to query
+                                        $class_filter = $selected_class ? " AND k.job_title = '$selected_class'" : "";
+                                        
+                                        // Query untuk data absensi per bulan dengan filter kelas
                                         $attendance = mysqli_query($GLOBALS["___mysqli_ston"], "
                                             SELECT k.*, a.tanggal, a.masuk, a.pulang, a.ijin, a.status_tidak_masuk 
                                             FROM karyawan k 
                                             LEFT JOIN absensi a ON k.nik = a.nik AND DATE_FORMAT(a.tanggal, '%Y-%m') = '$selected_month'
+                                            WHERE 1=1 $class_filter
                                             ORDER BY k.nama ASC, a.tanggal DESC
                                         ");
                                         
@@ -817,7 +865,17 @@ $skr = date('Y-m-d');
                                                 <br>
                                                 <small class="text-muted"><?= $data['nik']; ?></small>
                                             </td>
-                                            <td><?= $data['job_title']; ?></td>
+                                            <td>
+                                                <?php
+                                                // Ambil nama kelas dari tabel kelas berdasarkan kode_kelas
+                                                $kelas_info = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT nama_kelas, kode_kelas FROM kelas WHERE kode_kelas = '{$data['job_title']}'"));
+                                                if ($kelas_info) {
+                                                    echo $kelas_info['nama_kelas'] . ' (' . $kelas_info['kode_kelas'] . ')';
+                                                } else {
+                                                    echo $data['job_title']; // fallback jika tidak ditemukan
+                                                }
+                                                ?>
+                                            </td>
                                             <td>
                                                 <?php if ($last_attendance && $last_attendance['masuk']) { ?>
                                                     <span class="time-badge"><?= date('H:i', strtotime($last_attendance['masuk'])); ?></span>
@@ -863,11 +921,16 @@ $skr = date('Y-m-d');
                                                     <span class="status-badge status-permission">
                                                         <?= ucfirst($today_attendance['status_tidak_masuk']); ?>
                                                     </span>
-                                                    <br>
-                                                    <button class="btn-modern primary" style="font-size: 10px; padding: 4px 8px; margin-top: 5px;" onclick="markAbsent('<?= $data['nik']; ?>', '<?= $data['nama']; ?>', '<?= $today_attendance['status_tidak_masuk']; ?>')">
-                                                        <i class="fas fa-edit"></i>
-                                                        Edit
-                                                    </button>
+                                                    <div class="btn-group-actions">
+                                                        <button class="btn-modern primary" style="font-size: 10px; padding: 4px 8px;" onclick="markAbsent('<?= $data['nik']; ?>', '<?= $data['nama']; ?>', '<?= $today_attendance['status_tidak_masuk']; ?>')">
+                                                            <i class="fas fa-edit"></i>
+                                                            Edit
+                                                        </button>
+                                                        <button class="btn-modern danger" style="font-size: 10px; padding: 4px 8px;" onclick="cancelAbsent('<?= $data['nik']; ?>', '<?= $data['nama']; ?>')">
+                                                            <i class="fas fa-times"></i>
+                                                            Batal
+                                                        </button>
+                                                    </div>
                                                 <?php } else { ?>
                                                     <span class="text-muted">-</span>
                                                 <?php } ?>
@@ -987,32 +1050,59 @@ $skr = date('Y-m-d');
 
         function loadPeriodData() {
             const selectedMonth = document.getElementById('monthYear').value;
-            window.location.href = `?month=${selectedMonth}`;
+            const selectedClass = document.getElementById('kelasFilter').value;
+            
+            let url = `?month=${selectedMonth}`;
+            if (selectedClass) {
+                url += `&kelas=${selectedClass}`;
+            }
+            
+            window.location.href = url;
         }
 
         function exportData(format) {
             const selectedMonth = document.getElementById('monthYear').value;
+            const selectedClass = document.getElementById('kelasFilter').value;
             
+            let url = '';
             if (format === 'excel') {
-                window.open(`absensi_export.php?format=excel&month=${selectedMonth}`, '_blank');
+                url = `absensi_export.php?format=excel&month=${selectedMonth}`;
+                if (selectedClass) {
+                    url += `&kelas=${selectedClass}`;
+                }
+                window.open(url, '_blank');
             } else if (format === 'pdf') {
                 // Direct PDF export with better approach
-                window.open(`absensi_export_pdf_direct.php?month=${selectedMonth}&download=1`, '_blank');
+                url = `absensi_export_pdf_direct.php?month=${selectedMonth}&download=1`;
+                if (selectedClass) {
+                    url += `&kelas=${selectedClass}`;
+                }
+                window.open(url, '_blank');
             }
         }
 
         function testPDFExport() {
             const selectedMonth = document.getElementById('monthYear').value;
+            const selectedClass = document.getElementById('kelasFilter').value;
             
             // Show options to user
             const choice = confirm('Pilih PDF Export:\nOK = Direct PDF View\nCancel = Force Download');
             
+            let url = '';
             if (choice) {
                 // Direct PDF view
-                window.open(`absensi_export_pdf_direct.php?month=${selectedMonth}`, '_blank');
+                url = `absensi_export_pdf_direct.php?month=${selectedMonth}`;
+                if (selectedClass) {
+                    url += `&kelas=${selectedClass}`;
+                }
+                window.open(url, '_blank');
             } else {
                 // Force download
-                window.open(`absensi_export_pdf_force.php?month=${selectedMonth}`, '_blank');
+                url = `absensi_export_pdf_force.php?month=${selectedMonth}`;
+                if (selectedClass) {
+                    url += `&kelas=${selectedClass}`;
+                }
+                window.open(url, '_blank');
             }
         }
 
@@ -1038,6 +1128,33 @@ $skr = date('Y-m-d');
             
             const modal = new bootstrap.Modal(document.getElementById('absentModal'));
             modal.show();
+        }
+
+        function cancelAbsent(nik, name) {
+            if (confirm(`Yakin ingin membatalkan status tidak masuk untuk siswa ${name}?\n\nStatus akan dihapus dan siswa dapat ditandai hadir kembali.`)) {
+                const formData = new FormData();
+                formData.append('nik', nik);
+                formData.append('action', 'cancel');
+                formData.append('tanggal', '<?= date('Y-m-d'); ?>');
+                
+                fetch('controller/cancel_absent.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Status tidak masuk berhasil dibatalkan');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan saat membatalkan status');
+                });
+            }
         }
 
         function saveAbsentStatus() {

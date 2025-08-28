@@ -500,6 +500,13 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                     <span>Generate QR</span>
                 </a>
 
+                <h5 class="sidebar-title">Master Data</h5>
+
+                <a href="kelas_modern.php" class="sidebar-item" onclick="toggleActive(this)">
+                    <i class="fas fa-school"></i>
+                    <span>Kelas</span>
+                </a>
+
                 <h5 class="sidebar-title">Others</h5>
 
                 <a href="setting_modern.php" class="sidebar-item" onclick="toggleActive(this)">
@@ -619,30 +626,18 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                                                 <option value="">-- Pilih Kelas --</option>
                                                 <?php
                                                 $jt = $detail['job_title'];
-                                                $sql_jt = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM jobtitle");
-                                                while($d_jt = mysqli_fetch_assoc($sql_jt)){
-                                                    if($jt == $d_jt['kode_jobtitle']){
-                                                        echo '<option value="'.$d_jt['kode_jobtitle'].'" selected>'.$d_jt['jobtitle'].'</option>';
+                                                $sql_kelas = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM kelas WHERE status='aktif' ORDER BY tingkat ASC, kode_kelas ASC");
+                                                while($d_kelas = mysqli_fetch_assoc($sql_kelas)){
+                                                    if($jt == $d_kelas['kode_kelas']){
+                                                        echo '<option value="'.$d_kelas['kode_kelas'].'" selected>'.$d_kelas['nama_kelas'].' ('.$d_kelas['kode_kelas'].')</option>';
                                                     } else{
-                                                        echo '<option value="'.$d_jt['kode_jobtitle'].'">'.$d_jt['jobtitle'].'</option>';			
+                                                        echo '<option value="'.$d_kelas['kode_kelas'].'">'.$d_kelas['nama_kelas'].' ('.$d_kelas['kode_kelas'].')</option>';			
                                                     }
                                                 }
                                                 ?>
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label for="no_telp" class="form-label-modern">
-                                                <i class="fas fa-phone me-1"></i>
-                                                No. Telepon
-                                            </label>
-                                            <input type="text" class="form-modern" id="no_telp" name="no_telp" value="<?= $detail['no_telp']; ?>" placeholder="Masukkan nomor telepon">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group-modern">
                                             <label for="jenis_kelamin" class="form-label-modern">
@@ -654,56 +649,6 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                                                 <option value="Laki-laki" <?= ($detail['jenis_kelamin'] == 'Laki-laki') ? 'selected' : ''; ?>>Laki-laki</option>
                                                 <option value="Perempuan" <?= ($detail['jenis_kelamin'] == 'Perempuan') ? 'selected' : ''; ?>>Perempuan</option>
                                             </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label for="agama" class="form-label-modern">
-                                                <i class="fas fa-pray me-1"></i>
-                                                Agama
-                                            </label>
-                                            <select class="form-modern" id="agama" name="agama" required>
-                                                <option value="">-- Pilih Agama --</option>
-                                                <option value="Islam" <?= ($detail['agama'] == 'Islam') ? 'selected' : ''; ?>>Islam</option>
-                                                <option value="Kristen" <?= ($detail['agama'] == 'Kristen') ? 'selected' : ''; ?>>Kristen</option>
-                                                <option value="Katolik" <?= ($detail['agama'] == 'Katolik') ? 'selected' : ''; ?>>Katolik</option>
-                                                <option value="Hindu" <?= ($detail['agama'] == 'Hindu') ? 'selected' : ''; ?>>Hindu</option>
-                                                <option value="Buddha" <?= ($detail['agama'] == 'Buddha') ? 'selected' : ''; ?>>Buddha</option>
-                                                <option value="Konghucu" <?= ($detail['agama'] == 'Konghucu') ? 'selected' : ''; ?>>Konghucu</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label for="lokasi" class="form-label-modern">
-                                                <i class="fas fa-map-marker-alt me-1"></i>
-                                                Lokasi
-                                            </label>
-                                            <select class="form-modern" id="lokasi" name="lokasi" required>
-                                                <?php
-                                                $lok = $detail['lokasi'];
-                                                $sql_l = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM lokasi");
-                                                while($d_l = mysqli_fetch_assoc($sql_l)){
-                                                    if($lok == $d_l['lokasi']){
-                                                        echo '<option value="'.$d_l['lokasi'].'" selected>'.$d_l['lokasi'].'</option>';
-                                                    } else {
-                                                        echo '<option value="'.$d_l['lokasi'].'">'.$d_l['lokasi'].'</option>';			
-                                                    }
-                                                }
-                                                ?>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label for="nama_ayah" class="form-label-modern">
-                                                <i class="fas fa-male me-1"></i>
-                                                Nama Ayah
-                                            </label>
-                                            <input type="text" class="form-modern" id="nama_ayah" name="nama_ayah" value="<?= $detail['nama_ayah']; ?>" placeholder="Masukkan nama ayah">
                                         </div>
                                     </div>
                                 </div>
