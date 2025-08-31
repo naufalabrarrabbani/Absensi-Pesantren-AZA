@@ -582,14 +582,14 @@ $skr = date('Y-m-d');
 
                 <div class="qr-section">
                     <i class="fas fa-qrcode qr-icon"></i>
-                    <h3 style="margin: 0 0 15px 0;">Scan QR Code atau NIK</h3>
+                    <h3 style="margin: 0 0 15px 0;">Scan QR Code atau NISN</h3>
                     <form action="controllers/pulang.php" name="attendanceForm" method="POST" id="attendanceForm">
                         <input 
                             type="text" 
                             class="scan-input" 
                             name="nik" 
                             id="nikInput"
-                            placeholder="Scan QR code atau ketik NIK..."
+                            placeholder="Scan QR code atau ketik NISN..."
                             autocomplete="off"
                             autofocus
                         />

@@ -86,7 +86,7 @@ $total_siswa = count($student_data);
         <tr><td colspan="9"></td></tr>
         <tr>
             <th>No</th>
-            <th>NIK</th>
+            <th>NISN</th>
             <th>Nama Siswa</th>
             <th>Kelas</th>
             <th>Total Hadir</th>

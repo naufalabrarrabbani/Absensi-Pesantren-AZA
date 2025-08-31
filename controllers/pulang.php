@@ -40,6 +40,6 @@ if ($cek == 1) {
         header('location:../pulang.php?status=gagal&pesan='.base64_encode('Anda belum melakukan absen masuk hari ini!').'&nama='.base64_encode($data_siswa['nama']));
     }
 } else {
-    header('location:../pulang.php?status=gagal&pesan='.base64_encode('NIK tidak ditemukan!'));
+    header('location:../pulang.php?status=gagal&pesan='.base64_encode('NISN tidak ditemukan!'));
 }
 ?>

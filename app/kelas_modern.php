@@ -53,12 +53,12 @@ if ($_POST) {
                 
                 $query = "UPDATE kelas SET kode_kelas=?, nama_kelas=?, tingkat=?, jurusan=?, wali_kelas=?, kapasitas=?, status=? WHERE id=?";
                 $stmt = mysqli_prepare($GLOBALS["___mysqli_ston"], $query);
-                mysqli_stmt_bind_param($stmt, "sssssiui", $kode_kelas, $nama_kelas, $tingkat, $jurusan, $wali_kelas, $kapasitas, $status, $id);
+                mysqli_stmt_bind_param($stmt, "sssssisi", $kode_kelas, $nama_kelas, $tingkat, $jurusan, $wali_kelas, $kapasitas, $status, $id);
                 
                 if (mysqli_stmt_execute($stmt)) {
                     $success_message = "Kelas berhasil diupdate!";
                 } else {
-                    $error_message = "Gagal mengupdate kelas!";
+                    $error_message = "Gagal mengupdate kelas! Error: " . mysqli_error($GLOBALS["___mysqli_ston"]);
                 }
                 break;
         }

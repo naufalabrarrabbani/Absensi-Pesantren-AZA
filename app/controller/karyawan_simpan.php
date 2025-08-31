@@ -1,11 +1,10 @@
 <?php
-include '../include/koneksi.php';
+include '../../include/koneksi.php';
 
 $nik = $_POST['nik'];
 $nama = $_POST['nama'];
 $job_title = $_POST['job_title'];
 $jenis_kelamin = $_POST['jenis_kelamin'] ?? '';
-$lokasi = $_POST['lokasi'];
 $start_date = $_POST['start_date'] ?? date('Y-m-d');
 $end_date = $_POST['end_date'] ?? date('Y-m-d', strtotime('+1 year'));
 
@@ -18,11 +17,11 @@ if (isset($_FILES['file']) && $_FILES['file']['error'] == 0) {
     if (in_array($file_type, $allowed_types)) {
         $file_extension = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
         $photo = "student_" . $nik . "_" . date("YmdHis") . "." . $file_extension;
-        $target = "../images/$photo";
+        $target = "../../images/$photo";
         
         // Create images directory if it doesn't exist
-        if (!file_exists('../images')) {
-            mkdir('../images', 0755, true);
+        if (!file_exists('../../images')) {
+            mkdir('../../images', 0755, true);
         }
         
         move_uploaded_file($_FILES['file']['tmp_name'], $target);
@@ -32,13 +31,13 @@ if (isset($_FILES['file']) && $_FILES['file']['error'] == 0) {
     }
 }
 
-// Check if NIK already exists
+// Check if NISN already exists
 $s_pelanggan = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from karyawan where nik='$nik'");
 $cek = mysqli_num_rows($s_pelanggan);
 
 if ($cek == 0) {
-    $s_p = "INSERT into karyawan (nik, nama, job_title, jenis_kelamin, lokasi, start_date, end_date, foto) 
-            VALUES('$nik', '$nama', '$job_title', '$jenis_kelamin', '$lokasi', '$start_date', '$end_date', '$photo')";
+    $s_p = "INSERT into karyawan (nik, nama, job_title, jenis_kelamin, start_date, end_date, foto) 
+            VALUES('$nik', '$nama', '$job_title', '$jenis_kelamin', '$start_date', '$end_date', '$photo')";
     
     $proses = mysqli_query($GLOBALS["___mysqli_ston"], $s_p);
     

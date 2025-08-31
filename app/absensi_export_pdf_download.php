@@ -125,7 +125,7 @@ ob_start();
         <thead>
             <tr>
                 <th>No</th>
-                <th>NIK</th>
+                <th>NISN</th>
                 <th>Nama Siswa</th>
                 <th>Kelas</th>
                 <th>Total Hadir</th>

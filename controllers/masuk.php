@@ -26,6 +26,6 @@ if ($cek == 1) {
         }
     }
 } else {
-    header('location:../masuk.php?status=gagal&pesan='.base64_encode('NIK tidak ditemukan!'));
+    header('location:../masuk.php?status=gagal&pesan='.base64_encode('NISN tidak ditemukan!'));
 }
 ?>

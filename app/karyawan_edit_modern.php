@@ -485,9 +485,26 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                     <span>Siswa</span>
                 </a>
 
+                <a href="guru_modern.php" class="sidebar-item" onclick="toggleActive(this)">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <span>Guru</span>
+                </a>
+
                 <a href="absensi_modern.php" class="sidebar-item" onclick="toggleActive(this)">
                     <i class="fas fa-clipboard-list"></i>
-                    <span>Absensi</span>
+                    <span>Absensi Siswa</span>
+                </a>
+
+                <a href="absensi_guru_modern.php" class="sidebar-item" onclick="toggleActive(this)">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Absensi Guru</span>
+                </a>
+
+                <h5 class="sidebar-title">Master Data</h5>
+
+                <a href="kelas_modern.php" class="sidebar-item" onclick="toggleActive(this)">
+                    <i class="fas fa-school"></i>
+                    <span>Kelas</span>
                 </a>
 
                 <a href="area_modern.php" class="sidebar-item" onclick="toggleActive(this)">
@@ -498,13 +515,6 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                 <a href="generate_qr.php" class="sidebar-item" onclick="toggleActive(this)">
                     <i class="fas fa-qrcode"></i>
                     <span>Generate QR</span>
-                </a>
-
-                <h5 class="sidebar-title">Master Data</h5>
-
-                <a href="kelas_modern.php" class="sidebar-item" onclick="toggleActive(this)">
-                    <i class="fas fa-school"></i>
-                    <span>Kelas</span>
                 </a>
 
                 <h5 class="sidebar-title">Others</h5>
@@ -627,12 +637,15 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                                                 <?php
                                                 $jt = $detail['job_title'];
                                                 $sql_kelas = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM kelas WHERE status='aktif' ORDER BY tingkat ASC, kode_kelas ASC");
-                                                while($d_kelas = mysqli_fetch_assoc($sql_kelas)){
-                                                    if($jt == $d_kelas['kode_kelas']){
-                                                        echo '<option value="'.$d_kelas['kode_kelas'].'" selected>'.$d_kelas['nama_kelas'].' ('.$d_kelas['kode_kelas'].')</option>';
-                                                    } else{
-                                                        echo '<option value="'.$d_kelas['kode_kelas'].'">'.$d_kelas['nama_kelas'].' ('.$d_kelas['kode_kelas'].')</option>';			
+                                                
+                                                if($sql_kelas && mysqli_num_rows($sql_kelas) > 0){
+                                                    while($d_kelas = mysqli_fetch_assoc($sql_kelas)){
+                                                        $selected = ($jt == $d_kelas['kode_kelas']) ? 'selected' : '';
+                                                        echo '<option value="'.$d_kelas['kode_kelas'].'" '.$selected.'>'.$d_kelas['nama_kelas'].' ('.$d_kelas['kode_kelas'].')</option>';
                                                     }
+                                                } else {
+                                                    echo '<option value="">-- Belum ada kelas aktif tersedia --</option>';
+                                                    echo '<option value="">-- Silakan tambahkan kelas di Master Data > Kelas --</option>';
                                                 }
                                                 ?>
                                             </select>

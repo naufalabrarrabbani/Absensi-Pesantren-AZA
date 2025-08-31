@@ -125,7 +125,7 @@ while ($data = mysqli_fetch_array($attendance_result)) {
         <thead>
             <tr>
                 <th>No</th>
-                <th>NIK</th>
+                <th>NISN</th>
                 <th>Nama Siswa</th>
                 <th>Kelas</th>
                 <th>Total Hadir</th>

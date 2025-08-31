@@ -508,6 +508,53 @@ $skr = date('Y-m-d');
                 gap: 15px;
                 margin-top: 15px;
             }
+            
+            .period-selector .row {
+                flex-direction: column;
+            }
+            
+            .period-selector .col-md-2,
+            .period-selector .col-md-3 {
+                margin-bottom: 15px;
+            }
+        }
+
+        .dropdown-menu {
+            border-radius: 12px !important;
+            border: none !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
+            padding: 8px 0 !important;
+        }
+
+        .dropdown-item {
+            padding: 8px 16px !important;
+            transition: all 0.3s ease !important;
+            border-radius: 8px !important;
+            margin: 2px 8px !important;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f8f9fa !important;
+            transform: translateX(4px) !important;
+        }
+
+        .dropdown-header {
+            color: #4640DE !important;
+            font-weight: 600 !important;
+            padding: 8px 16px 4px 16px !important;
+            margin-bottom: 4px !important;
+        }
+
+        .dropdown-divider {
+            margin: 8px 0 !important;
+            opacity: 0.3 !important;
+        }
+
+        .badge {
+            font-size: 0.75em;
+            padding: 4px 8px;
+            border-radius: 12px;
+            margin-left: 4px;
         }
     </style>
 
@@ -628,7 +675,21 @@ $skr = date('Y-m-d');
                             <div class="d-flex justify-content-between align-items-center mb-4">
                                 <div>
                                     <h3 class="content-title mb-0">Data Absensi Guru</h3>
-                                    <p class="content-desc mb-0">Monitor dan kelola data absensi guru per bulan</p>
+                                    <p class="content-desc mb-0">
+                                        Monitor dan kelola data absensi guru 
+                                        <?php 
+                                        $mapel_filter_display = isset($_GET['mata_pelajaran']) ? urldecode($_GET['mata_pelajaran']) : '';
+                                        if ($mapel_filter_display): ?>
+                                            <span class="badge bg-primary">📚 <?= htmlspecialchars($mapel_filter_display); ?></span>
+                                        <?php endif; ?>
+                                        <?php if (isset($_GET['date'])): ?>
+                                            - <span class="badge bg-info">📅 <?= date('d F Y', strtotime($_GET['date'])); ?></span>
+                                        <?php else: 
+                                            $selected_month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
+                                        ?>
+                                            - <span class="badge bg-success">📊 <?= date('F Y', strtotime($selected_month . '-01')); ?></span>
+                                        <?php endif; ?>
+                                    </p>
                                 </div>
                                 <div class="d-flex gap-2">
                                     <button class="btn-modern success" onclick="exportData('excel')">
@@ -639,18 +700,46 @@ $skr = date('Y-m-d');
                                         <i class="fas fa-file-pdf"></i>
                                         Export PDF
                                     </button>
-                                    <button class="btn-modern warning" onclick="testPDFExport()" style="background: linear-gradient(135deg, #ffc107, #e0a800); border: none; color: white;">
-                                        <i class="fas fa-vial"></i>
-                                        Test PDF
-                                    </button>
+                                    <div class="dropdown">
+                                        <button class="btn-modern warning dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background: linear-gradient(135deg, #ffc107, #e0a800); border: none; color: white;">
+                                            <i class="fas fa-download"></i>
+                                            Download Options
+                                        </button>
+                                        <ul class="dropdown-menu" style="border-radius: 12px; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                                            <li><h6 class="dropdown-header"><i class="fas fa-calendar-month me-1"></i>Laporan Bulanan</h6></li>
+                                            <li><a class="dropdown-item" href="#" onclick="exportMonthlyData('excel')"><i class="fas fa-file-excel me-2 text-success"></i>Excel Bulanan</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="exportMonthlyData('pdf')"><i class="fas fa-file-pdf me-2 text-danger"></i>PDF Bulanan</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><h6 class="dropdown-header"><i class="fas fa-calendar-day me-1"></i>Laporan Harian</h6></li>
+                                            <li><a class="dropdown-item" href="#" onclick="exportDailyData('excel')"><i class="fas fa-file-excel me-2 text-success"></i>Excel Harian</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="exportDailyData('pdf')"><i class="fas fa-file-pdf me-2 text-danger"></i>PDF Harian</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><h6 class="dropdown-header"><i class="fas fa-vial me-1"></i>Test Export</h6></li>
+                                            <li><a class="dropdown-item" href="#" onclick="testPDFExport()"><i class="fas fa-test-tube me-2 text-warning"></i>Test PDF Export</a></li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
 
                             <!-- Period Selector -->
                             <div class="period-selector">
                                 <div class="row align-items-center">
-                                    <div class="col-md-4">
-                                        <label class="form-label">Pilih Periode:</label>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Filter Periode:</label>
+                                        <select class="form-modern" id="filterType" onchange="toggleFilterOptions()">
+                                            <option value="daily" <?= isset($_GET['date']) ? 'selected' : ''; ?>>Harian</option>
+                                            <option value="monthly" <?= isset($_GET['month']) && !isset($_GET['date']) ? 'selected' : ''; ?>>Bulanan</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2" id="dateFilter" style="<?= isset($_GET['date']) ? '' : 'display: none;'; ?>">
+                                        <label class="form-label">Pilih Tanggal:</label>
+                                        <?php
+                                        $selected_date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
+                                        ?>
+                                        <input type="date" class="form-modern" id="filterDate" value="<?= $selected_date; ?>" onchange="loadPeriodData()">
+                                    </div>
+                                    <div class="col-md-2" id="monthFilter" style="<?= isset($_GET['date']) ? 'display: none;' : ''; ?>">
+                                        <label class="form-label">Pilih Bulan:</label>
                                         <?php
                                         $selected_month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
                                         ?>
@@ -665,37 +754,110 @@ $skr = date('Y-m-d');
                                             ?>
                                         </select>
                                     </div>
-                                    <div class="col-md-8">
+                                    <div class="col-md-3">
+                                        <label class="form-label">
+                                            <i class="fas fa-book me-1"></i>
+                                            Filter Mata Pelajaran:
+                                        </label>
+                                        <?php
+                                        $selected_mapel = isset($_GET['mata_pelajaran']) ? $_GET['mata_pelajaran'] : '';
+                                        ?>
+                                        <select class="form-modern" id="mapelFilter" onchange="loadPeriodData()">
+                                            <option value="">🎯 Semua Mata Pelajaran</option>
+                                            <?php
+                                            $mapel_query = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT DISTINCT mata_pelajaran FROM guru WHERE mata_pelajaran IS NOT NULL AND mata_pelajaran != '' ORDER BY mata_pelajaran ASC");
+                                            while ($mapel = mysqli_fetch_array($mapel_query)) {
+                                                $selected = ($mapel['mata_pelajaran'] == $selected_mapel) ? 'selected' : '';
+                                                echo "<option value='{$mapel['mata_pelajaran']}' $selected>📚 {$mapel['mata_pelajaran']}</option>";
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
                                         <div class="period-stats">
                                             <div class="stat-item">
-                                                <span class="stat-label">Total Masuk</span>
-                                                <span class="stat-value" id="totalMasuk">
+                                                <span class="stat-label">Guru Hadir</span>
+                                                <span class="stat-value text-success" id="totalMasuk">
                                                     <?php
-                                                    $total_masuk = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], 
-                                                        "SELECT * FROM absensi_guru WHERE DATE_FORMAT(tanggal, '%Y-%m') = '$selected_month' AND masuk IS NOT NULL AND ijin IS NULL AND status_tidak_masuk IS NULL"));
+                                                    $mapel_filter_stat = isset($_GET['mata_pelajaran']) ? urldecode($_GET['mata_pelajaran']) : '';
+                                                    
+                                                    // Build mata pelajaran condition with proper escaping
+                                                    $mapel_condition_stat = "";
+                                                    if ($mapel_filter_stat && $mapel_filter_stat != '') {
+                                                        $mapel_filter_escaped_stat = mysqli_real_escape_string($GLOBALS["___mysqli_ston"], $mapel_filter_stat);
+                                                        $mapel_condition_stat = " AND g.mata_pelajaran = '$mapel_filter_escaped_stat'";
+                                                    }
+                                                    
+                                                    if (isset($_GET['date'])) {
+                                                        // Daily filter
+                                                        $filter_date = $_GET['date'];
+                                                        $total_masuk = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], 
+                                                            "SELECT DISTINCT a.nip FROM absensi_guru a 
+                                                             JOIN guru g ON a.nip = g.nip 
+                                                             WHERE a.tanggal = '$filter_date' 
+                                                             AND a.masuk IS NOT NULL 
+                                                             AND a.ijin IS NULL 
+                                                             AND a.status_tidak_masuk IS NULL 
+                                                             $mapel_condition_stat"));
+                                                    } else {
+                                                        // Monthly filter
+                                                        $filter_month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
+                                                        $total_masuk = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], 
+                                                            "SELECT a.* FROM absensi_guru a 
+                                                             JOIN guru g ON a.nip = g.nip 
+                                                             WHERE DATE_FORMAT(a.tanggal, '%Y-%m') = '$filter_month' 
+                                                             AND a.masuk IS NOT NULL 
+                                                             AND a.ijin IS NULL 
+                                                             AND a.status_tidak_masuk IS NULL 
+                                                             $mapel_condition_stat"));
+                                                    }
                                                     echo $total_masuk;
                                                     ?>
                                                 </span>
                                             </div>
                                             <div class="stat-item">
-                                                <span class="stat-label">Total Sakit/Izin/Alpha</span>
-                                                <span class="stat-value" id="totalTidakMasuk">
+                                                <span class="stat-label">Tidak Hadir</span>
+                                                <span class="stat-value text-danger" id="totalTidakMasuk">
                                                     <?php
-                                                    $total_tidak_masuk_all = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], 
-                                                        "SELECT * FROM absensi_guru WHERE DATE_FORMAT(tanggal, '%Y-%m') = '$selected_month' AND (ijin IS NOT NULL OR status_tidak_masuk IS NOT NULL)"));
+                                                    if (isset($_GET['date'])) {
+                                                        // Daily filter
+                                                        $total_tidak_masuk_all = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], 
+                                                            "SELECT DISTINCT a.nip FROM absensi_guru a 
+                                                             JOIN guru g ON a.nip = g.nip 
+                                                             WHERE a.tanggal = '$filter_date' 
+                                                             AND (a.ijin IS NOT NULL OR a.status_tidak_masuk IS NOT NULL) 
+                                                             $mapel_condition"));
+                                                    } else {
+                                                        // Monthly filter
+                                                        $total_tidak_masuk_all = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], 
+                                                            "SELECT a.* FROM absensi_guru a 
+                                                             JOIN guru g ON a.nip = g.nip 
+                                                             WHERE DATE_FORMAT(a.tanggal, '%Y-%m') = '$filter_month' 
+                                                             AND (a.ijin IS NOT NULL OR a.status_tidak_masuk IS NOT NULL) 
+                                                             $mapel_condition"));
+                                                    }
                                                     echo $total_tidak_masuk_all;
                                                     ?>
                                                 </span>
                                             </div>
                                             <div class="stat-item">
-                                                <span class="stat-label">Persentase Kehadiran</span>
-                                                <span class="stat-value" id="persentaseKehadiran">
+                                                <span class="stat-label">Persentase</span>
+                                                <span class="stat-value text-primary" id="persentaseKehadiran">
                                                     <?php
-                                                    $total_guru = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM guru"));
-                                                    $total_hari_kerja = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], 
-                                                        "SELECT DISTINCT tanggal FROM absensi_guru WHERE DATE_FORMAT(tanggal, '%Y-%m') = '$selected_month'"));
-                                                    $total_expected = $total_guru * $total_hari_kerja;
-                                                    $persentase = $total_expected > 0 ? round(($total_masuk / $total_expected) * 100, 1) : 0;
+                                                    $total_guru = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM guru WHERE 1=1 $mapel_condition"));
+                                                    if (isset($_GET['date'])) {
+                                                        // Daily calculation
+                                                        $persentase = $total_guru > 0 ? round(($total_masuk / $total_guru) * 100, 1) : 0;
+                                                    } else {
+                                                        // Monthly calculation
+                                                        $total_hari_kerja = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], 
+                                                            "SELECT DISTINCT a.tanggal FROM absensi_guru a 
+                                                             JOIN guru g ON a.nip = g.nip 
+                                                             WHERE DATE_FORMAT(a.tanggal, '%Y-%m') = '$filter_month' 
+                                                             $mapel_condition"));
+                                                        $total_expected = $total_guru * $total_hari_kerja;
+                                                        $persentase = $total_expected > 0 ? round(($total_masuk / $total_expected) * 100, 1) : 0;
+                                                    }
                                                     echo $persentase . '%';
                                                     ?>
                                                 </span>
@@ -743,148 +905,316 @@ $skr = date('Y-m-d');
                                     <tbody>
                                         <?php
                                         $no = 1;
-                                        $selected_month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
-                                        $selected_date = date('Y-m-d'); // Today's date for checking attendance
+                                        $is_daily_filter = isset($_GET['date']);
+                                        $mapel_filter = isset($_GET['mata_pelajaran']) ? $_GET['mata_pelajaran'] : '';
                                         
-                                        // Query untuk data absensi guru per bulan
-                                        $attendance = mysqli_query($GLOBALS["___mysqli_ston"], "
-                                            SELECT g.*, a.tanggal, a.masuk, a.pulang, a.ijin, a.status_tidak_masuk 
-                                            FROM guru g 
-                                            LEFT JOIN absensi_guru a ON g.nip = a.nip AND DATE_FORMAT(a.tanggal, '%Y-%m') = '$selected_month'
-                                            ORDER BY g.nama ASC, a.tanggal DESC
-                                        ");
+                                        // Debug: Show received filter
+                                        echo "<!-- DEBUG Received mapel_filter: '" . htmlspecialchars($mapel_filter) . "' -->";
+                                        echo "<!-- DEBUG URL decoded: '" . urldecode($mapel_filter) . "' -->";
                                         
-                                        $teacher_data = array();
-                                        while ($data = mysqli_fetch_array($attendance)) {
-                                            if (!isset($teacher_data[$data['nip']])) {
-                                                $teacher_data[$data['nip']] = array(
-                                                    'info' => $data,
-                                                    'attendance' => array()
-                                                );
-                                            }
-                                            if ($data['tanggal']) {
-                                                $teacher_data[$data['nip']]['attendance'][] = $data;
-                                            }
+                                        // Decode URL encoding if needed
+                                        $mapel_filter = urldecode($mapel_filter);
+                                        
+                                        // Build mata pelajaran condition
+                                        $mapel_condition = "";
+                                        if ($mapel_filter && $mapel_filter != '') {
+                                            $mapel_filter_escaped = mysqli_real_escape_string($GLOBALS["___mysqli_ston"], $mapel_filter);
+                                            $mapel_condition = " AND g.mata_pelajaran = '$mapel_filter_escaped'";
                                         }
                                         
-                                        foreach ($teacher_data as $nip => $teacher) {
-                                            $data = $teacher['info'];
-                                            $attendance_records = $teacher['attendance'];
+                                        echo "<!-- DEBUG Final mapel_condition: '$mapel_condition' -->";
+                                        
+                                        if ($is_daily_filter) {
+                                            // Daily filter
+                                            $selected_date = $_GET['date'];
+                                            $current_date = date('Y-m-d');
                                             
-                                            $total_hadir = 0;
-                                            $total_ijin = 0;
-                                            $total_alpha = 0;
-                                            $total_sakit = 0;
-                                            $last_attendance = null;
+                                            // Query untuk data absensi guru per hari
+                                            $query = "
+                                                SELECT g.*, a.tanggal, a.masuk, a.pulang, a.ijin, a.status_tidak_masuk 
+                                                FROM guru g 
+                                                LEFT JOIN absensi_guru a ON g.nip = a.nip AND a.tanggal = '$selected_date'
+                                                WHERE 1=1 $mapel_condition
+                                                ORDER BY g.nama ASC
+                                            ";
                                             
-                                            foreach ($attendance_records as $record) {
-                                                if ($record['ijin']) {
-                                                    $total_ijin++;
-                                                } elseif ($record['masuk']) {
-                                                    $total_hadir++;
-                                                } elseif ($record['status_tidak_masuk']) {
-                                                    if ($record['status_tidak_masuk'] == 'alpha') $total_alpha++;
-                                                    elseif ($record['status_tidak_masuk'] == 'sakit') $total_sakit++;
-                                                    elseif ($record['status_tidak_masuk'] == 'izin') $total_ijin++;
-                                                }
-                                                if (!$last_attendance || $record['tanggal'] > $last_attendance['tanggal']) {
-                                                    $last_attendance = $record;
-                                                }
+                                            // Debug: uncomment line below to see query
+                                            // echo "<!-- DEBUG Query: " . $query . " -->";
+                                            // echo "<!-- DEBUG Mapel Filter: '$mapel_filter' -->";
+                                            // echo "<!-- DEBUG Mapel Condition: '$mapel_condition' -->";
+                                            
+                                            $attendance = mysqli_query($GLOBALS["___mysqli_ston"], $query);
+                                            
+                                            if (!$attendance) {
+                                                echo "<!-- DEBUG Error: " . mysqli_error($GLOBALS["___mysqli_ston"]) . " -->";
                                             }
                                             
-                                            // Check if teacher has attendance today
-                                            $today_attendance = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], 
-                                                "SELECT * FROM absensi_guru WHERE nip = '{$data['nip']}' AND tanggal = '$selected_date'"));
+                                            $row_count = 0;
+                                            while ($data = mysqli_fetch_array($attendance)) {
+                                                $row_count++;
+                                                // Determine status for the selected day
+                                                if ($data['ijin']) {
+                                                    $status = 'permission';
+                                                    $status_text = "Izin";
+                                                    $status_class = 'status-permission';
+                                                } elseif ($data['status_tidak_masuk']) {
+                                                    $status = 'absent';
+                                                    $status_text = ucfirst($data['status_tidak_masuk']);
+                                                    $status_class = 'status-absent';
+                                                } elseif ($data['masuk']) {
+                                                    $status = 'present';
+                                                    $status_text = "Hadir";
+                                                    $status_class = 'status-present';
+                                                } else {
+                                                    $status = 'absent';
+                                                    $status_text = "Tidak Ada Data";
+                                                    $status_class = 'status-absent';
+                                                }
+                                                ?>
+                                                <tr data-status="<?= $status; ?>">
+                                                    <td><?= $no++; ?></td>
+                                                    <td>
+                                                        <img src="../images/guru/<?= $data['foto'] ?: 'default-avatar.png'; ?>" 
+                                                             alt="<?= $data['nama']; ?>" 
+                                                             class="student-avatar"
+                                                             onerror="this.src='../images/default-avatar.png'">
+                                                    </td>
+                                                    <td>
+                                                        <strong><?= $data['nama']; ?></strong>
+                                                        <br>
+                                                        <small class="text-muted"><?= $data['nip']; ?></small>
+                                                    </td>
+                                                    <td><?= $data['mata_pelajaran'] ?: 'Belum ditentukan'; ?></td>
+                                                    <td>
+                                                        <?php if ($data['masuk']) { ?>
+                                                            <span class="time-badge"><?= date('H:i', strtotime($data['masuk'])); ?></span>
+                                                        <?php } else { ?>
+                                                            <span class="text-muted">-</span>
+                                                        <?php } ?>
+                                                    </td>
+                                                    <td>
+                                                        <?php if ($data['pulang'] && $data['pulang'] != '0') { ?>
+                                                            <span class="time-badge"><?= date('H:i', strtotime($data['pulang'])); ?></span>
+                                                        <?php } else { ?>
+                                                            <span class="text-muted">-</span>
+                                                        <?php } ?>
+                                                    </td>
+                                                    <td>
+                                                        <span class="status-badge <?= $status_class; ?>">
+                                                            <?= $status_text; ?>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <?php if ($data['ijin']) { ?>
+                                                            <small>Keterangan: <?= $data['ijin']; ?></small>
+                                                        <?php } elseif ($data['status_tidak_masuk']) { ?>
+                                                            <small>Status: <?= ucfirst($data['status_tidak_masuk']); ?></small>
+                                                        <?php } else { ?>
+                                                            <span class="text-muted">-</span>
+                                                        <?php } ?>
+                                                    </td>
+                                                    <td>
+                                                        <?php if ($selected_date == $current_date && (!$data['masuk'] && !$data['ijin'] && !$data['status_tidak_masuk'])) { ?>
+                                                            <button class="btn-modern warning" onclick="markAbsent('<?= $data['nip']; ?>', '<?= $data['nama']; ?>')">
+                                                                <i class="fas fa-user-times"></i>
+                                                                Tandai Tidak Masuk
+                                                            </button>
+                                                        <?php } elseif ($selected_date == $current_date && $data['status_tidak_masuk']) { ?>
+                                                            <span class="status-badge status-permission">
+                                                                <?= ucfirst($data['status_tidak_masuk']); ?>
+                                                            </span>
+                                                            <br>
+                                                            <button class="btn-modern primary" style="font-size: 10px; padding: 4px 8px; margin-top: 5px;" onclick="markAbsent('<?= $data['nip']; ?>', '<?= $data['nama']; ?>', '<?= $data['status_tidak_masuk']; ?>')">
+                                                                <i class="fas fa-edit"></i>
+                                                                Edit
+                                                            </button>
+                                                        <?php } else { ?>
+                                                            <span class="text-muted">-</span>
+                                                        <?php } ?>
+                                                    </td>
+                                                </tr>
+                                                <?php
+                                            }
                                             
-                                            // Determine overall status for the month
-                                            if ($total_hadir > ($total_ijin + $total_alpha + $total_sakit)) {
-                                                $status = 'present';
-                                                $status_text = "Hadir ($total_hadir hari)";
-                                                $status_class = 'status-present';
-                                            } elseif (($total_ijin + $total_sakit + $total_alpha) > 0) {
-                                                $status = 'permission';
-                                                $absence_details = [];
-                                                if ($total_ijin > 0) $absence_details[] = "Izin: $total_ijin";
-                                                if ($total_sakit > 0) $absence_details[] = "Sakit: $total_sakit";
-                                                if ($total_alpha > 0) $absence_details[] = "Alpha: $total_alpha";
-                                                $status_text = implode(", ", $absence_details);
-                                                $status_class = 'status-permission';
+                                            // Debug: Show row count
+                                            if ($row_count == 0) {
+                                                echo "<!-- DEBUG: No rows found for daily filter. Query: SELECT g.*, a.tanggal, a.masuk, a.pulang, a.ijin, a.status_tidak_masuk FROM guru g LEFT JOIN absensi_guru a ON g.nip = a.nip AND a.tanggal = '$selected_date' WHERE 1=1 $mapel_condition ORDER BY g.nama ASC -->";
+                                                ?>
+                                                <tr>
+                                                    <td colspan="9" class="text-center text-muted">
+                                                        <i class="fas fa-info-circle me-2"></i>
+                                                        Tidak ada data guru ditemukan untuk filter yang dipilih.
+                                                        <br><small>Filter: <?= $mapel_filter ? "Mata Pelajaran: $mapel_filter, " : ""; ?>Tanggal: <?= $selected_date; ?></small>
+                                                    </td>
+                                                </tr>
+                                                <?php
                                             } else {
-                                                $status = 'absent';
-                                                $status_text = "Tidak Ada Data";
-                                                $status_class = 'status-absent';
+                                                echo "<!-- DEBUG: Found $row_count rows for daily filter -->";
                                             }
+                                        } else {
+                                            // Monthly filter (original code)
+                                            $selected_month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
+                                            $selected_date = date('Y-m-d'); // Today's date for checking attendance
+                                            
+                                            // Query untuk data absensi guru per bulan
+                                            $attendance = mysqli_query($GLOBALS["___mysqli_ston"], "
+                                                SELECT g.*, a.tanggal, a.masuk, a.pulang, a.ijin, a.status_tidak_masuk 
+                                                FROM guru g 
+                                                LEFT JOIN absensi_guru a ON g.nip = a.nip AND DATE_FORMAT(a.tanggal, '%Y-%m') = '$selected_month'
+                                                WHERE 1=1 $mapel_condition
+                                                ORDER BY g.nama ASC, a.tanggal DESC
+                                            ");
+                                            
+                                            $teacher_data = array();
+                                            while ($data = mysqli_fetch_array($attendance)) {
+                                                if (!isset($teacher_data[$data['nip']])) {
+                                                    $teacher_data[$data['nip']] = array(
+                                                        'info' => $data,
+                                                        'attendance' => array()
+                                                    );
+                                                }
+                                                if ($data['tanggal']) {
+                                                    $teacher_data[$data['nip']]['attendance'][] = $data;
+                                                }
+                                            }
+                                            
+                                            foreach ($teacher_data as $nip => $teacher) {
+                                                $data = $teacher['info'];
+                                                $attendance_records = $teacher['attendance'];
+                                                
+                                                $total_hadir = 0;
+                                                $total_ijin = 0;
+                                                $total_alpha = 0;
+                                                $total_sakit = 0;
+                                                $last_attendance = null;
+                                                
+                                                foreach ($attendance_records as $record) {
+                                                    if ($record['ijin']) {
+                                                        $total_ijin++;
+                                                    } elseif ($record['masuk']) {
+                                                        $total_hadir++;
+                                                    } elseif ($record['status_tidak_masuk']) {
+                                                        if ($record['status_tidak_masuk'] == 'alpha') $total_alpha++;
+                                                        elseif ($record['status_tidak_masuk'] == 'sakit') $total_sakit++;
+                                                        elseif ($record['status_tidak_masuk'] == 'izin') $total_ijin++;
+                                                    }
+                                                    if (!$last_attendance || $record['tanggal'] > $last_attendance['tanggal']) {
+                                                        $last_attendance = $record;
+                                                    }
+                                                }
+                                                
+                                                // Check if teacher has attendance today
+                                                $today_attendance = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], 
+                                                    "SELECT * FROM absensi_guru WHERE nip = '{$data['nip']}' AND tanggal = '$selected_date'"));
+                                                
+                                                // Determine overall status for the month
+                                                if ($total_hadir > ($total_ijin + $total_alpha + $total_sakit)) {
+                                                    $status = 'present';
+                                                    $status_text = "Hadir ($total_hadir hari)";
+                                                    $status_class = 'status-present';
+                                                } elseif (($total_ijin + $total_sakit + $total_alpha) > 0) {
+                                                    $status = 'permission';
+                                                    $absence_details = [];
+                                                    if ($total_ijin > 0) $absence_details[] = "Izin: $total_ijin";
+                                                    if ($total_sakit > 0) $absence_details[] = "Sakit: $total_sakit";
+                                                    if ($total_alpha > 0) $absence_details[] = "Alpha: $total_alpha";
+                                                    $status_text = implode(", ", $absence_details);
+                                                    $status_class = 'status-permission';
+                                                } else {
+                                                    $status = 'absent';
+                                                    $status_text = "Tidak Ada Data";
+                                                    $status_class = 'status-absent';
+                                                }
+                                                ?>
+                                                <tr data-status="<?= $status; ?>">
+                                                    <td><?= $no++; ?></td>
+                                                    <td>
+                                                        <img src="../images/guru/<?= $data['foto'] ?: 'default-avatar.png'; ?>" 
+                                                             alt="<?= $data['nama']; ?>" 
+                                                             class="student-avatar"
+                                                             onerror="this.src='../images/default-avatar.png'">
+                                                    </td>
+                                                    <td>
+                                                        <strong><?= $data['nama']; ?></strong>
+                                                        <br>
+                                                        <small class="text-muted"><?= $data['nip']; ?></small>
+                                                    </td>
+                                                    <td><?= $data['mata_pelajaran'] ?: 'Belum ditentukan'; ?></td>
+                                                    <td>
+                                                        <?php if ($last_attendance && $last_attendance['masuk']) { ?>
+                                                            <span class="time-badge"><?= date('H:i', strtotime($last_attendance['masuk'])); ?></span>
+                                                            <br><small class="text-muted"><?= date('d/m', strtotime($last_attendance['tanggal'])); ?></small>
+                                                        <?php } else { ?>
+                                                            <span class="text-muted">-</span>
+                                                        <?php } ?>
+                                                    </td>
+                                                    <td>
+                                                        <?php if ($last_attendance && $last_attendance['pulang'] && $last_attendance['pulang'] != '0') { ?>
+                                                            <span class="time-badge"><?= date('H:i', strtotime($last_attendance['pulang'])); ?></span>
+                                                            <br><small class="text-muted"><?= date('d/m', strtotime($last_attendance['tanggal'])); ?></small>
+                                                        <?php } else { ?>
+                                                            <span class="text-muted">-</span>
+                                                        <?php } ?>
+                                                    </td>
+                                                    <td>
+                                                        <span class="status-badge <?= $status_class; ?>">
+                                                            <?= $status_text; ?>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <div style="font-size: 12px;">
+                                                            <div>Hadir: <?= $total_hadir; ?> hari</div>
+                                                            <?php if ($total_ijin > 0) { ?>
+                                                                <div>Izin: <?= $total_ijin; ?> hari</div>
+                                                            <?php } ?>
+                                                            <?php if ($total_sakit > 0) { ?>
+                                                                <div>Sakit: <?= $total_sakit; ?> hari</div>
+                                                            <?php } ?>
+                                                            <?php if ($total_alpha > 0) { ?>
+                                                                <div>Alpha: <?= $total_alpha; ?> hari</div>
+                                                            <?php } ?>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <?php if (!$today_attendance || (!$today_attendance['masuk'] && !$today_attendance['ijin'] && !$today_attendance['status_tidak_masuk'])) { ?>
+                                                            <button class="btn-modern warning" onclick="markAbsent('<?= $data['nip']; ?>', '<?= $data['nama']; ?>')">
+                                                                <i class="fas fa-user-times"></i>
+                                                                Tandai Tidak Masuk
+                                                            </button>
+                                                        <?php } elseif ($today_attendance && $today_attendance['status_tidak_masuk']) { ?>
+                                                            <span class="status-badge status-permission">
+                                                                <?= ucfirst($today_attendance['status_tidak_masuk']); ?>
+                                                            </span>
+                                                            <br>
+                                                            <button class="btn-modern primary" style="font-size: 10px; padding: 4px 8px; margin-top: 5px;" onclick="markAbsent('<?= $data['nip']; ?>', '<?= $data['nama']; ?>', '<?= $today_attendance['status_tidak_masuk']; ?>')">
+                                                                <i class="fas fa-edit"></i>
+                                                                Edit
+                                                            </button>
+                                                        <?php } else { ?>
+                                                            <span class="text-muted">-</span>
+                                                        <?php } ?>
+                                                    </td>
+                                                </tr>
+                                                <?php 
+                                            }
+                                            
+                                            // Debug: Show teacher count for monthly filter
+                                            if (empty($teacher_data)) {
+                                                echo "<!-- DEBUG: No teachers found for monthly filter. Mapel condition: $mapel_condition -->";
+                                                ?>
+                                                <tr>
+                                                    <td colspan="9" class="text-center text-muted">
+                                                        <i class="fas fa-info-circle me-2"></i>
+                                                        Tidak ada data guru ditemukan untuk filter yang dipilih.
+                                                        <br><small>Filter: <?= $mapel_filter ? "Mata Pelajaran: $mapel_filter, " : ""; ?>Bulan: <?= date('F Y', strtotime($selected_month . '-01')); ?></small>
+                                                    </td>
+                                                </tr>
+                                                <?php
+                                            } else {
+                                                echo "<!-- DEBUG: Found " . count($teacher_data) . " teachers for monthly filter -->";
+                                            }
+                                        }
                                         ?>
-                                        <tr data-status="<?= $status; ?>">
-                                            <td><?= $no++; ?></td>
-                                            <td>
-                                                <img src="../images/guru/<?= $data['foto'] ?: 'default-avatar.png'; ?>" 
-                                                     alt="<?= $data['nama']; ?>" 
-                                                     class="student-avatar"
-                                                     onerror="this.src='../images/default-avatar.png'">
-                                            </td>
-                                            <td>
-                                                <strong><?= $data['nama']; ?></strong>
-                                                <br>
-                                                <small class="text-muted"><?= $data['nip']; ?></small>
-                                            </td>
-                                            <td><?= $data['mata_pelajaran'] ?: 'Belum ditentukan'; ?></td>
-                                            <td>
-                                                <?php if ($last_attendance && $last_attendance['masuk']) { ?>
-                                                    <span class="time-badge"><?= date('H:i', strtotime($last_attendance['masuk'])); ?></span>
-                                                    <br><small class="text-muted"><?= date('d/m', strtotime($last_attendance['tanggal'])); ?></small>
-                                                <?php } else { ?>
-                                                    <span class="text-muted">-</span>
-                                                <?php } ?>
-                                            </td>
-                                            <td>
-                                                <?php if ($last_attendance && $last_attendance['pulang'] && $last_attendance['pulang'] != '0') { ?>
-                                                    <span class="time-badge"><?= date('H:i', strtotime($last_attendance['pulang'])); ?></span>
-                                                    <br><small class="text-muted"><?= date('d/m', strtotime($last_attendance['tanggal'])); ?></small>
-                                                <?php } else { ?>
-                                                    <span class="text-muted">-</span>
-                                                <?php } ?>
-                                            </td>
-                                            <td>
-                                                <span class="status-badge <?= $status_class; ?>">
-                                                    <?= $status_text; ?>
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <div style="font-size: 12px;">
-                                                    <div>Hadir: <?= $total_hadir; ?> hari</div>
-                                                    <?php if ($total_ijin > 0) { ?>
-                                                        <div>Izin: <?= $total_ijin; ?> hari</div>
-                                                    <?php } ?>
-                                                    <?php if ($total_sakit > 0) { ?>
-                                                        <div>Sakit: <?= $total_sakit; ?> hari</div>
-                                                    <?php } ?>
-                                                    <?php if ($total_alpha > 0) { ?>
-                                                        <div>Alpha: <?= $total_alpha; ?> hari</div>
-                                                    <?php } ?>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <?php if (!$today_attendance || (!$today_attendance['masuk'] && !$today_attendance['ijin'] && !$today_attendance['status_tidak_masuk'])) { ?>
-                                                    <button class="btn-modern warning" onclick="markAbsent('<?= $data['nip']; ?>', '<?= $data['nama']; ?>')">
-                                                        <i class="fas fa-user-times"></i>
-                                                        Tandai Tidak Masuk
-                                                    </button>
-                                                <?php } elseif ($today_attendance && $today_attendance['status_tidak_masuk']) { ?>
-                                                    <span class="status-badge status-permission">
-                                                        <?= ucfirst($today_attendance['status_tidak_masuk']); ?>
-                                                    </span>
-                                                    <br>
-                                                    <button class="btn-modern primary" style="font-size: 10px; padding: 4px 8px; margin-top: 5px;" onclick="markAbsent('<?= $data['nip']; ?>', '<?= $data['nama']; ?>', '<?= $today_attendance['status_tidak_masuk']; ?>')">
-                                                        <i class="fas fa-edit"></i>
-                                                        Edit
-                                                    </button>
-                                                <?php } else { ?>
-                                                    <span class="text-muted">-</span>
-                                                <?php } ?>
-                                            </td>
-                                        </tr>
-                                        <?php } ?>
                                     </tbody>
                                 </table>
                             </div>
@@ -997,33 +1327,114 @@ $skr = date('Y-m-d');
         }
 
         function loadPeriodData() {
-            const selectedMonth = document.getElementById('monthYear').value;
-            window.location.href = `?month=${selectedMonth}`;
+            const filterType = document.getElementById('filterType').value;
+            const selectedMapel = document.getElementById('mapelFilter').value;
+            
+            let url = '';
+            if (filterType === 'daily') {
+                const selectedDate = document.getElementById('filterDate').value;
+                url = `?date=${selectedDate}`;
+            } else {
+                const selectedMonth = document.getElementById('monthYear').value;
+                url = `?month=${selectedMonth}`;
+            }
+            
+            if (selectedMapel) {
+                url += `&mata_pelajaran=${encodeURIComponent(selectedMapel)}`;
+            }
+            
+            window.location.href = url;
+        }
+
+        function toggleFilterOptions() {
+            const filterType = document.getElementById('filterType').value;
+            const dateFilter = document.getElementById('dateFilter');
+            const monthFilter = document.getElementById('monthFilter');
+            
+            if (filterType === 'daily') {
+                dateFilter.style.display = 'block';
+                monthFilter.style.display = 'none';
+            } else {
+                dateFilter.style.display = 'none';
+                monthFilter.style.display = 'block';
+            }
         }
 
         function exportData(format) {
-            const selectedMonth = document.getElementById('monthYear').value;
+            // Export berdasarkan filter yang sedang aktif
+            const filterType = document.getElementById('filterType').value;
             
+            if (filterType === 'daily') {
+                exportDailyData(format);
+            } else {
+                exportMonthlyData(format);
+            }
+        }
+
+        function exportDailyData(format) {
+            const selectedDate = document.getElementById('filterDate').value || '<?= date('Y-m-d'); ?>';
+            const selectedMapel = document.getElementById('mapelFilter').value;
+            
+            let url = '';
             if (format === 'excel') {
-                window.open(`absensi_export.php?format=excel&month=${selectedMonth}`, '_blank');
+                url = `absensi_guru_export.php?format=excel&date=${selectedDate}`;
+                if (selectedMapel) {
+                    url += `&mata_pelajaran=${encodeURIComponent(selectedMapel)}`;
+                }
+                window.open(url, '_blank');
             } else if (format === 'pdf') {
-                // Direct PDF export with better approach
-                window.open(`absensi_export_pdf_direct.php?month=${selectedMonth}&download=1`, '_blank');
+                url = `absensi_guru_export_pdf_direct.php?date=${selectedDate}&download=1`;
+                if (selectedMapel) {
+                    url += `&mata_pelajaran=${encodeURIComponent(selectedMapel)}`;
+                }
+                window.open(url, '_blank');
+            }
+        }
+
+        function exportMonthlyData(format) {
+            const selectedMonth = document.getElementById('monthYear').value || '<?= date('Y-m'); ?>';
+            const selectedMapel = document.getElementById('mapelFilter').value;
+            
+            let url = '';
+            if (format === 'excel') {
+                url = `absensi_guru_export.php?format=excel&month=${selectedMonth}`;
+                if (selectedMapel) {
+                    url += `&mata_pelajaran=${encodeURIComponent(selectedMapel)}`;
+                }
+                window.open(url, '_blank');
+            } else if (format === 'pdf') {
+                url = `absensi_guru_export_pdf_direct.php?month=${selectedMonth}&download=1`;
+                if (selectedMapel) {
+                    url += `&mata_pelajaran=${encodeURIComponent(selectedMapel)}`;
+                }
+                window.open(url, '_blank');
             }
         }
 
         function testPDFExport() {
-            const selectedMonth = document.getElementById('monthYear').value;
+            const filterType = document.getElementById('filterType').value;
+            const selectedMapel = document.getElementById('mapelFilter').value;
+            let dateParam = '';
+            
+            if (filterType === 'daily') {
+                dateParam = 'date=' + document.getElementById('filterDate').value;
+            } else {
+                dateParam = 'month=' + document.getElementById('monthYear').value;
+            }
+            
+            if (selectedMapel) {
+                dateParam += `&mata_pelajaran=${encodeURIComponent(selectedMapel)}`;
+            }
             
             // Show options to user
             const choice = confirm('Pilih PDF Export:\nOK = Direct PDF View\nCancel = Force Download');
             
             if (choice) {
                 // Direct PDF view
-                window.open(`absensi_export_pdf_direct.php?month=${selectedMonth}`, '_blank');
+                window.open(`absensi_guru_export_pdf_direct.php?${dateParam}`, '_blank');
             } else {
                 // Force download
-                window.open(`absensi_export_pdf_force.php?month=${selectedMonth}`, '_blank');
+                window.open(`absensi_guru_export_pdf_force.php?${dateParam}`, '_blank');
             }
         }
 

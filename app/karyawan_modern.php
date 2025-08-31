@@ -677,7 +677,7 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                                         <tr>
                                             <th>No</th>
                                             <th>Foto</th>
-                                            <th>NIK</th>
+                                            <th>NISN</th>
                                             <th>Nama</th>
                                             <th>Kelas</th>
                                             <th>Status</th>
@@ -896,10 +896,13 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                                         <option value="">-- Pilih Kelas --</option>
                                         <?php
                                         $sql_kelas = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM kelas WHERE status='aktif' ORDER BY tingkat ASC, kode_kelas ASC");
-                                        if(mysqli_num_rows($sql_kelas) != 0){
+                                        if($sql_kelas && mysqli_num_rows($sql_kelas) > 0){
                                             while($d_kelas = mysqli_fetch_assoc($sql_kelas)){
                                                 echo '<option value="'.$d_kelas['kode_kelas'].'">'.$d_kelas['nama_kelas'].' ('.$d_kelas['kode_kelas'].')</option>';
                                             }
+                                        } else {
+                                            echo '<option value="">-- Belum ada kelas aktif tersedia --</option>';
+                                            echo '<option value="">-- Silakan tambahkan kelas di Master Data > Kelas --</option>';
                                         }
                                         ?>
                                     </select>
@@ -1075,7 +1078,7 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                 const cells = row.querySelectorAll('td');
                 let found = false;
                 
-                // Search in NIK, Name, Class columns
+                // Search in NISN, Name, Class columns
                 for (let i = 2; i <= 4; i++) {
                     if (cells[i] && cells[i].textContent.toLowerCase().includes(filter)) {
                         found = true;

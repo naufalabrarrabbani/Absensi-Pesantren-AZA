@@ -588,7 +588,7 @@ $skr = date('Y-m-d');
                             class="scan-input" 
                             name="nik" 
                             id="nikInput"
-                            placeholder="Scan QR code atau ketik NIK..."
+                            placeholder="Scan QR code atau ketik NISN..."
                             autocomplete="off"
                             autofocus
                         />
@@ -620,7 +620,7 @@ $skr = date('Y-m-d');
                     <?php 
                     $s_absen1 = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from absensi where tanggal='$skr' AND masuk!='NULL' order by masuk DESC limit 5");
                     while ($d_absen = mysqli_fetch_array($s_absen1)) { 
-                        $peg = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from karyawan where nik='$d_absen[nik]'"));
+                        $peg = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT k.*, kls.nama_kelas from karyawan k LEFT JOIN kelas kls ON k.job_title = kls.kode_kelas where k.nik='$d_absen[nik]'"));
                     ?>
                     <div class="attendance-item">
                         <img src="app/images/<?= $peg['foto'] ?: 'default-avatar.png'; ?>" 
@@ -629,7 +629,7 @@ $skr = date('Y-m-d');
                              onerror="this.src='images/default-avatar.png'">
                         <div class="attendance-info">
                             <div class="attendance-name"><?= $peg['nama']; ?></div>
-                            <div class="attendance-details"><?= $peg['lokasi']; ?> - <?= $peg['area']; ?></div>
+                            <div class="attendance-details"><?= $peg['nama_kelas'] ?: 'Kelas tidak ditemukan'; ?></div>
                             <div class="attendance-time">
                                 <i class="fas fa-clock"></i> 
                                 <?= date('H:i', strtotime($d_absen['masuk'])); ?>

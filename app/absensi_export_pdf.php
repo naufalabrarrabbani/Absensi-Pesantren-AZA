@@ -132,7 +132,7 @@ header('Pragma: public');
         <thead>
             <tr>
                 <th width="5%">No</th>
-                <th width="12%">NIK</th>
+                <th width="12%">NISN</th>
                 <th width="25%">Nama Siswa</th>
                 <th width="15%">Kelas</th>
                 <th width="10%">Total Hadir</th>

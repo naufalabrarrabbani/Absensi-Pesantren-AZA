@@ -656,17 +656,35 @@ $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
                                         <i class="fas fa-file-pdf"></i>
                                         Export PDF
                                     </button>
-                                    <button class="btn-modern warning" onclick="testPDFExport()" style="background: linear-gradient(135deg, #ffc107, #e0a800); border: none; color: white;">
-                                        <i class="fas fa-vial"></i>
-                                        Test PDF
-                                    </button>
+                                    <div class="dropdown">
+                                        <button class="btn-modern warning dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background: linear-gradient(135deg, #ffc107, #e0a800); border: none; color: white;">
+                                            <i class="fas fa-download"></i>
+                                            Download Options
+                                        </button>
+                                        <ul class="dropdown-menu" style="border-radius: 12px; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                                            <li><h6 class="dropdown-header"><i class="fas fa-calendar-month me-1"></i>Laporan Bulanan</h6></li>
+                                            <li><a class="dropdown-item" href="#" onclick="exportData('excel')"><i class="fas fa-file-excel me-2 text-success"></i>Excel Bulanan</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="exportData('pdf')"><i class="fas fa-file-pdf me-2 text-danger"></i>PDF Bulanan</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><h6 class="dropdown-header"><i class="fas fa-calendar-day me-1"></i>Laporan Harian</h6></li>
+                                            <li><a class="dropdown-item" href="#" onclick="exportDailyData('excel')"><i class="fas fa-file-excel me-2 text-success"></i>Excel Harian</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="exportDailyData('pdf')"><i class="fas fa-file-pdf me-2 text-danger"></i>PDF Harian</a></li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
 
                             <!-- Period Selector -->
                             <div class="period-selector">
                                 <div class="row align-items-center">
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
+                                        <label class="form-label">Mode Export:</label>
+                                        <select class="form-modern" id="exportMode" onchange="toggleExportMode()">
+                                            <option value="monthly">Per Bulan</option>
+                                            <option value="daily">Per Hari</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3" id="monthlySelector">
                                         <label class="form-label">Pilih Periode:</label>
                                         <select class="form-modern" id="monthYear" onchange="loadPeriodData()">
                                             <?php
@@ -678,6 +696,10 @@ $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
                                             }
                                             ?>
                                         </select>
+                                    </div>
+                                    <div class="col-md-3" id="dailySelector" style="display: none;">
+                                        <label class="form-label">Pilih Tanggal:</label>
+                                        <input type="date" class="form-modern" id="selectedDate" value="<?= date('Y-m-d'); ?>" onchange="loadDailyData()">
                                     </div>
                                     <div class="col-md-3">
                                         <label class="form-label">Filter Kelas:</label>
@@ -695,7 +717,7 @@ $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
                                             ?>
                                         </select>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="period-stats">
                                             <div class="stat-item">
                                                 <span class="stat-label">Total Masuk</span>
@@ -1046,6 +1068,52 @@ $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
                     row.style.display = 'none';
                 }
             });
+        }
+
+        function toggleExportMode() {
+            const mode = document.getElementById('exportMode').value;
+            const monthlySelector = document.getElementById('monthlySelector');
+            const dailySelector = document.getElementById('dailySelector');
+            
+            if (mode === 'daily') {
+                monthlySelector.style.display = 'none';
+                dailySelector.style.display = 'block';
+            } else {
+                monthlySelector.style.display = 'block';
+                dailySelector.style.display = 'none';
+            }
+        }
+
+        function loadDailyData() {
+            const selectedDate = document.getElementById('selectedDate').value;
+            const selectedClass = document.getElementById('kelasFilter').value;
+            
+            let url = `?date=${selectedDate}&mode=daily`;
+            if (selectedClass) {
+                url += `&kelas=${selectedClass}`;
+            }
+            
+            window.location.href = url;
+        }
+
+        function exportDailyData(format) {
+            const selectedDate = document.getElementById('selectedDate').value || '<?= date('Y-m-d'); ?>';
+            const selectedClass = document.getElementById('kelasFilter').value;
+            
+            let url = '';
+            if (format === 'excel') {
+                url = `absensi_export_daily.php?format=excel&date=${selectedDate}`;
+                if (selectedClass) {
+                    url += `&kelas=${selectedClass}`;
+                }
+                window.open(url, '_blank');
+            } else if (format === 'pdf') {
+                url = `absensi_export_daily_pdf.php?date=${selectedDate}&download=1`;
+                if (selectedClass) {
+                    url += `&kelas=${selectedClass}`;
+                }
+                window.open(url, '_blank');
+            }
         }
 
         function loadPeriodData() {

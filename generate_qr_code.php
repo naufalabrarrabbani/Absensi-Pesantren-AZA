@@ -26,7 +26,7 @@ if (isset($_GET['nik'])) {
         imagedestroy($img);
     }
 } else {
-    // Return empty 1x1 pixel if no NIK provided
+    // Return empty 1x1 pixel if no NISN provided
     header('Content-Type: image/png');
     $img = imagecreate(1, 1);
     $white = imagecolorallocate($img, 255, 255, 255);

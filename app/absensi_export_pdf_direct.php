@@ -237,7 +237,7 @@ ob_start();
             <thead>
                 <tr>
                     <th style="width: 5%;">No</th>
-                    <th style="width: 12%;">NIK</th>
+                    <th style="width: 12%;">NISN</th>
                     <th style="width: 25%;">Nama Siswa</th>
                     <th style="width: 12%;">Kelas</th>
                     <th style="width: 11%;">Total Hadir</th>
