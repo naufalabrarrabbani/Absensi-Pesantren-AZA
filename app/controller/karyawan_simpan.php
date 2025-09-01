@@ -17,14 +17,19 @@ if (isset($_FILES['file']) && $_FILES['file']['error'] == 0) {
     if (in_array($file_type, $allowed_types)) {
         $file_extension = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
         $photo = "student_" . $nik . "_" . date("YmdHis") . "." . $file_extension;
-        $target = "../../images/$photo";
+        $target = "../images/$photo"; // Fixed path - relative to controller directory
         
         // Create images directory if it doesn't exist
-        if (!file_exists('../../images')) {
-            mkdir('../../images', 0755, true);
+        if (!file_exists('../images')) {
+            mkdir('../images', 0755, true);
         }
         
-        move_uploaded_file($_FILES['file']['tmp_name'], $target);
+        if (move_uploaded_file($_FILES['file']['tmp_name'], $target)) {
+            // File uploaded successfully
+        } else {
+            header('location:../karyawan_modern.php?error=' . base64_encode('Gagal mengupload foto. Silakan coba lagi'));
+            exit();
+        }
     } else {
         header('location:../karyawan_modern.php?error=' . base64_encode('Format file tidak didukung. Gunakan JPG, PNG, atau GIF'));
         exit();

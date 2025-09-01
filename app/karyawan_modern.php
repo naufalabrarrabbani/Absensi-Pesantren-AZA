@@ -729,7 +729,7 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                                                     <a href="karyawan_edit_modern.php?id=<?= $student['nik']; ?>" class="btn-modern warning">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
-                                                    <a href="karyawan_delete.php?id=<?= $student['id']; ?>" class="btn-modern danger" onclick="return confirm('Yakin ingin menghapus?')">
+                                                    <a href="controller/karyawan_hapus.php?id=<?= $student['id']; ?>" class="btn-modern danger" onclick="return confirm('Yakin ingin menghapus siswa <?= $student['nama']; ?>?')">
                                                         <i class="fas fa-trash"></i>
                                                     </a>
                                                 </div>
