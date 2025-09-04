@@ -413,6 +413,22 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
         .action-buttons {
             display: flex;
             gap: 5px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .action-buttons .btn-modern {
+            min-width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+        }
+
+        .action-buttons .btn-modern i {
+            font-size: 14px;
+            line-height: 1;
         }
 
         .modal-modern {
@@ -510,6 +526,43 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
             max-height: 100px;
             border-radius: 8px;
             margin-top: 10px;
+        }
+
+        /* Search Enhancement Styles */
+        .search-highlight {
+            background: #fff3cd !important;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        .nav-input-group .btn-nav-input {
+            transition: all 0.3s ease;
+        }
+
+        .nav-input-group .btn-nav-input:hover {
+            background: rgba(70, 64, 222, 0.1);
+            border-radius: 50%;
+        }
+
+        #searchResults, #searchResultsMapel {
+            font-size: 12px;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        /* No results message */
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: #ABB3C4;
+            font-style: italic;
+        }
+
+        .no-results i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
         }
     </style>
 
@@ -611,7 +664,10 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
 
                 <div class="d-flex justify-content-between align-items-center nav-input-container">
                     <div class="nav-input-group">
-                        <input type="text" class="nav-input" placeholder="Search students..." id="searchInput" onkeyup="searchStudents()">
+                        <input type="text" class="nav-input" placeholder="Cari siswa (NISN, nama, kelas, telepon)..." id="searchInput" onkeyup="searchStudents()">
+                        <button class="btn-nav-input" onclick="clearSearch()" id="clearSearchBtn" style="display: none;">
+                            <i class="fas fa-times" style="color: #ABB3C4;"></i>
+                        </button>
                         <button class="btn-nav-input">
                             <i class="fas fa-search" style="color: #ABB3C4;"></i>
                         </button>
@@ -664,6 +720,10 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                                         <div>
                                             <h3 class="content-title mb-0">Daftar Siswa</h3>
                                             <p class="content-desc mb-0">Kelola data siswa di sistem absensi</p>
+                                            <small id="searchResults" class="text-muted" style="display: none;">
+                                                <i class="fas fa-search me-1"></i>
+                                                <span id="searchResultsText"></span>
+                                            </small>
                                         </div>
                                         <a href="#" class="btn-modern primary" data-bs-toggle="modal" data-bs-target="#addStudentModal">
                                             <i class="fas fa-plus"></i>
@@ -797,6 +857,19 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                         <div>
                             <h3 class="content-title mb-0">Daftar Mata Pelajaran</h3>
                             <p class="content-desc mb-0">Semua mata pelajaran yang tersedia</p>
+                            <small id="searchResultsMapel" class="text-muted" style="display: none;">
+                                <i class="fas fa-search me-1"></i>
+                                <span id="searchResultsMapelText"></span>
+                            </small>
+                        </div>
+                        <div class="nav-input-group" style="width: 300px;">
+                            <input type="text" class="nav-input" placeholder="Cari mata pelajaran..." id="searchMapelInput" onkeyup="searchMapel()">
+                            <button class="btn-nav-input" onclick="clearMapelSearch()" id="clearMapelSearchBtn" style="display: none;">
+                                <i class="fas fa-times" style="color: #ABB3C4;"></i>
+                            </button>
+                            <button class="btn-nav-input">
+                                <i class="fas fa-search" style="color: #ABB3C4;"></i>
+                            </button>
                         </div>
                     </div>
                     <div class="table-responsive">
@@ -1067,32 +1140,244 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
             document.getElementById('end_date').value = endDate.toISOString().split('T')[0];
         });
 
-        // Search functionality
+        // Enhanced Search functionality for Students
         function searchStudents() {
             const input = document.getElementById('searchInput');
-            const filter = input.value.toLowerCase();
+            const filter = input.value.toLowerCase().trim();
             const table = document.querySelector('.modern-table tbody');
             const rows = table.querySelectorAll('tr');
+            const clearBtn = document.getElementById('clearSearchBtn');
+            const searchResults = document.getElementById('searchResults');
+            const searchResultsText = document.getElementById('searchResultsText');
+            
+            let visibleCount = 0;
+            let totalCount = rows.length;
+
+            // Show/hide clear button
+            if (filter.length > 0) {
+                clearBtn.style.display = 'block';
+                searchResults.style.display = 'block';
+            } else {
+                clearBtn.style.display = 'none';
+                searchResults.style.display = 'none';
+            }
 
             rows.forEach(row => {
                 const cells = row.querySelectorAll('td');
                 let found = false;
                 
-                // Search in NISN, Name, Class columns
-                for (let i = 2; i <= 4; i++) {
-                    if (cells[i] && cells[i].textContent.toLowerCase().includes(filter)) {
-                        found = true;
-                        break;
+                if (filter === '') {
+                    found = true;
+                } else {
+                    // Search in specific columns only: NISN (index 2), Name (index 3), Class (index 4)
+                    let searchableText = '';
+                    
+                    // NISN
+                    if (cells[2]) {
+                        searchableText += ' ' + cells[2].textContent.toLowerCase();
                     }
+                    
+                    // Name and phone (in index 3)
+                    if (cells[3]) {
+                        searchableText += ' ' + cells[3].textContent.toLowerCase();
+                    }
+                    
+                    // Class
+                    if (cells[4]) {
+                        searchableText += ' ' + cells[4].textContent.toLowerCase();
+                    }
+                    
+                    found = searchableText.includes(filter);
                 }
                 
-                if (found || filter === '') {
+                if (found) {
                     row.style.display = '';
+                    visibleCount++;
+                    
+                    // Highlight search terms only if there's a filter
+                    if (filter.length > 0) {
+                        highlightSearchTerm(row, filter);
+                    } else {
+                        removeHighlight(row);
+                    }
+                } else {
+                    row.style.display = 'none';
+                    removeHighlight(row); // Remove any existing highlights
+                }
+            });
+
+            // Update search results text
+            if (filter.length > 0) {
+                if (visibleCount === 0) {
+                    searchResultsText.textContent = `Tidak ada hasil untuk "${filter}"`;
+                    searchResultsText.style.color = '#F44336';
+                } else if (visibleCount === totalCount) {
+                    searchResultsText.textContent = `Menampilkan semua ${totalCount} siswa`;
+                    searchResultsText.style.color = '#4CAF50';
+                } else {
+                    searchResultsText.textContent = `Ditemukan ${visibleCount} dari ${totalCount} siswa`;
+                    searchResultsText.style.color = '#4640DE';
+                }
+            }
+        }
+
+        // Clear search function
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            searchStudents();
+            document.getElementById('searchInput').focus();
+        }
+
+        // Enhanced Search functionality for Mata Pelajaran
+        function searchMapel() {
+            const input = document.getElementById('searchMapelInput');
+            const filter = input.value.toLowerCase().trim();
+            const table = document.getElementById('mapelTable').querySelector('tbody');
+            const rows = table.querySelectorAll('tr');
+            const clearBtn = document.getElementById('clearMapelSearchBtn');
+            const searchResults = document.getElementById('searchResultsMapel');
+            const searchResultsText = document.getElementById('searchResultsMapelText');
+            
+            let visibleCount = 0;
+            let totalCount = rows.length;
+
+            // Show/hide clear button
+            if (filter.length > 0) {
+                clearBtn.style.display = 'block';
+                searchResults.style.display = 'block';
+            } else {
+                clearBtn.style.display = 'none';
+                searchResults.style.display = 'none';
+            }
+
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                let found = false;
+                
+                if (filter === '') {
+                    found = true;
+                } else {
+                    // Search in Kode (index 1) and Nama Mata Pelajaran (index 2)
+                    const searchableText = [
+                        cells[1] ? cells[1].textContent.toLowerCase() : '', // Kode
+                        cells[2] ? cells[2].textContent.toLowerCase() : ''  // Nama
+                    ].join(' ');
+                    
+                    found = searchableText.includes(filter);
+                }
+                
+                if (found) {
+                    row.style.display = '';
+                    visibleCount++;
+                    
+                    // Highlight search terms
+                    if (filter.length > 0) {
+                        highlightSearchTerm(row, filter);
+                    } else {
+                        removeHighlight(row);
+                    }
                 } else {
                     row.style.display = 'none';
                 }
             });
+
+            // Update search results text
+            if (filter.length > 0) {
+                if (visibleCount === 0) {
+                    searchResultsText.textContent = `Tidak ada mata pelajaran untuk "${filter}"`;
+                    searchResultsText.style.color = '#F44336';
+                } else if (visibleCount === totalCount) {
+                    searchResultsText.textContent = `Menampilkan semua ${totalCount} mata pelajaran`;
+                    searchResultsText.style.color = '#4CAF50';
+                } else {
+                    searchResultsText.textContent = `Ditemukan ${visibleCount} dari ${totalCount} mata pelajaran`;
+                    searchResultsText.style.color = '#4640DE';
+                }
+            }
         }
+
+        // Clear mata pelajaran search
+        function clearMapelSearch() {
+            document.getElementById('searchMapelInput').value = '';
+            searchMapel();
+            document.getElementById('searchMapelInput').focus();
+        }
+
+        // Highlight search terms
+        function highlightSearchTerm(row, searchTerm) {
+            const cells = row.querySelectorAll('td');
+            cells.forEach((cell, index) => {
+                // Skip action buttons column (last column) and photo column (index 1)
+                if (index === cells.length - 1 || index === 1) {
+                    return;
+                }
+                
+                if (cell.dataset.originalText === undefined) {
+                    cell.dataset.originalText = cell.innerHTML;
+                }
+                
+                const originalText = cell.dataset.originalText;
+                // Only highlight text content, avoid HTML tags
+                const textContent = cell.textContent || cell.innerText || '';
+                const regex = new RegExp(`(${escapeRegExp(searchTerm)})`, 'gi');
+                
+                if (textContent.toLowerCase().includes(searchTerm.toLowerCase())) {
+                    const highlightedText = originalText.replace(regex, '<mark style="background: #fff3cd; padding: 2px 4px; border-radius: 3px; font-weight: 600;">$1</mark>');
+                    cell.innerHTML = highlightedText;
+                }
+            });
+        }
+
+        // Remove highlight
+        function removeHighlight(row) {
+            const cells = row.querySelectorAll('td');
+            cells.forEach((cell, index) => {
+                // Skip action buttons column and photo column
+                if (index === cells.length - 1 || index === 1) {
+                    return;
+                }
+                
+                if (cell.dataset.originalText !== undefined) {
+                    cell.innerHTML = cell.dataset.originalText;
+                }
+            });
+        }
+
+        // Escape special regex characters
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        // Search on Enter key press
+        document.addEventListener('DOMContentLoaded', function() {
+            // Student search
+            document.getElementById('searchInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.blur(); // Remove focus to trigger any onblur events
+                }
+            });
+
+            // Mata pelajaran search
+            document.getElementById('searchMapelInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.blur(); // Remove focus to trigger any onblur events
+                }
+            });
+
+            // Add escape key to clear search
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    const activeElement = document.activeElement;
+                    if (activeElement.id === 'searchInput') {
+                        clearSearch();
+                    } else if (activeElement.id === 'searchMapelInput') {
+                        clearMapelSearch();
+                    }
+                }
+            });
+        });
 
         // Auto-hide alerts after 5 seconds
         setTimeout(function() {
@@ -1114,6 +1399,14 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                     if (data.success) {
                         const student = data.student;
                         
+                        // Format dates
+                        const startDate = student.start_date ? new Date(student.start_date).toLocaleDateString('id-ID') : '-';
+                        const endDate = student.end_date ? new Date(student.end_date).toLocaleDateString('id-ID') : '-';
+                        
+                        // Format status
+                        const status = student.end_date && new Date(student.end_date) > new Date() ? 'Aktif' : 'Tidak Aktif';
+                        const statusClass = status === 'Aktif' ? 'status-active' : 'status-inactive';
+                        
                         // Populate modal with student data
                         document.getElementById('studentDetailModal').innerHTML = `
                             <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -1132,7 +1425,8 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                                                      style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid #667eea; box-shadow: 0 10px 30px rgba(0,0,0,0.1);"
                                                      onerror="this.src='images/default-avatar.png'">
                                                 <h4 style="margin-top: 20px; color: #2c3e50; font-weight: 600;">${student.nama}</h4>
-                                                <p style="color: #7f8c8d; margin: 0;">${student.nik}</p>
+                                                <p style="color: #7f8c8d; margin: 0;">NISN: ${student.nik}</p>
+                                                <span class="status-badge ${statusClass}" style="margin-top: 10px; display: inline-block;">${status}</span>
                                             </div>
                                             <div class="col-md-8">
                                                 <div class="row g-3">
@@ -1145,40 +1439,44 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                                                     <div class="col-sm-6">
                                                         <div class="detail-item">
                                                             <label style="font-weight: 600; color: #2c3e50; font-size: 14px;">Kelas</label>
-                                                            <p style="margin: 5px 0 0 0; color: #34495e; font-size: 16px;">${student.lokasi}</p>
+                                                            <p style="margin: 5px 0 0 0; color: #34495e; font-size: 16px;">${student.formatted_class || student.job_title || '-'}</p>
                                                         </div>
                                                     </div>
                                                     <div class="col-sm-6">
                                                         <div class="detail-item">
-                                                            <label style="font-weight: 600; color: #2c3e50; font-size: 14px;">Alamat</label>
-                                                            <p style="margin: 5px 0 0 0; color: #34495e; font-size: 16px;">${student.alamat || '-'}</p>
+                                                            <label style="font-weight: 600; color: #2c3e50; font-size: 14px;">Jenis Kelamin</label>
+                                                            <p style="margin: 5px 0 0 0; color: #34495e; font-size: 16px;">${student.jenis_kelamin || '-'}</p>
                                                         </div>
                                                     </div>
                                                     <div class="col-sm-6">
                                                         <div class="detail-item">
-                                                            <label style="font-weight: 600; color: #2c3e50; font-size: 14px;">Area</label>
-                                                            <p style="margin: 5px 0 0 0; color: #34495e; font-size: 16px;">${student.area || '-'}</p>
+                                                            <label style="font-weight: 600; color: #2c3e50; font-size: 14px;">No. Telepon</label>
+                                                            <p style="margin: 5px 0 0 0; color: #34495e; font-size: 16px;">${student.no_telp || '-'}</p>
                                                         </div>
                                                     </div>
                                                     <div class="col-sm-6">
                                                         <div class="detail-item">
-                                                            <label style="font-weight: 600; color: #2c3e50; font-size: 14px;">Email</label>
-                                                            <p style="margin: 5px 0 0 0; color: #34495e; font-size: 16px;">${student.email || '-'}</p>
+                                                            <label style="font-weight: 600; color: #2c3e50; font-size: 14px;">Tanggal Mulai</label>
+                                                            <p style="margin: 5px 0 0 0; color: #34495e; font-size: 16px;">${startDate}</p>
                                                         </div>
                                                     </div>
                                                     <div class="col-sm-6">
                                                         <div class="detail-item">
-                                                            <label style="font-weight: 600; color: #2c3e50; font-size: 14px;">Telepon</label>
-                                                            <p style="margin: 5px 0 0 0; color: #34495e; font-size: 16px;">${student.telepon || '-'}</p>
+                                                            <label style="font-weight: 600; color: #2c3e50; font-size: 14px;">Tanggal Selesai</label>
+                                                            <p style="margin: 5px 0 0 0; color: #34495e; font-size: 16px;">${endDate}</p>
                                                         </div>
                                                     </div>
                                                     <div class="col-12">
                                                         <div class="detail-item">
                                                             <label style="font-weight: 600; color: #2c3e50; font-size: 14px;">QR Code</label>
                                                             <div style="margin-top: 10px;">
-                                                                <img src="../generate_qr_code.php?nik=${student.nik}" 
-                                                                     alt="QR Code" 
-                                                                     style="width: 120px; height: 120px; border-radius: 10px; border: 2px solid #e9ecef;">
+                                                                <img src="generate_qr.php?nik=${student.nik}" 
+                                                                     alt="QR Code ${student.nik}" 
+                                                                     style="width: 120px; height: 120px; border-radius: 10px; border: 2px solid #e9ecef;"
+                                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                                                <div style="display: none; width: 120px; height: 120px; border-radius: 10px; border: 2px solid #e9ecef; background: #f8f9fa; display: flex; align-items: center; justify-content: center; color: #6c757d;">
+                                                                    <small>QR Code<br>Tidak Tersedia</small>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1202,7 +1500,7 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
                         const modal = new bootstrap.Modal(document.getElementById('studentDetailModal'));
                         modal.show();
                     } else {
-                        alert('Gagal memuat data siswa');
+                        alert('Gagal memuat data siswa: ' + (data.message || 'Unknown error'));
                     }
                 })
                 .catch(error => {

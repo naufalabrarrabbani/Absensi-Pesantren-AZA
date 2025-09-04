@@ -32,6 +32,19 @@ if ($stmt) {
             $student['formatted_class'] = $student['job_title'];
         }
         
+        // Add formatted status
+        $today = date('Y-m-d');
+        $student['is_active'] = ($student['end_date'] && $student['end_date'] > $today);
+        $student['status_text'] = $student['is_active'] ? 'Aktif' : 'Tidak Aktif';
+        
+        // Format dates for display
+        if ($student['start_date']) {
+            $student['start_date_formatted'] = date('d/m/Y', strtotime($student['start_date']));
+        }
+        if ($student['end_date']) {
+            $student['end_date_formatted'] = date('d/m/Y', strtotime($student['end_date']));
+        }
+        
         echo json_encode([
             'success' => true,
             'student' => $student
@@ -47,7 +60,7 @@ if ($stmt) {
 } else {
     echo json_encode([
         'success' => false,
-        'message' => 'Error dalam query database'
+        'message' => 'Error dalam query database: ' . mysqli_error($GLOBALS["___mysqli_ston"])
     ]);
 }
 ?>
