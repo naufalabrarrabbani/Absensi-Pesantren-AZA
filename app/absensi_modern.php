@@ -17,7 +17,9 @@ $d_aplikasi = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELEC
 $skr = date('Y-m-d');
 
 // Get selected filters
+$export_mode = isset($_GET['mode']) ? $_GET['mode'] : 'monthly';
 $selected_month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
+$selected_date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
 $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
 ?>
 <!doctype html>
@@ -635,7 +637,11 @@ $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
                                 <div>
                                     <h3 class="content-title mb-0">Data Absensi</h3>
                                     <p class="content-desc mb-0">
-                                        Monitor dan kelola data absensi siswa per bulan
+                                        <?php if ($export_mode == 'daily'): ?>
+                                            Monitor dan kelola data absensi siswa tanggal <strong><?= date('d F Y', strtotime($selected_date)); ?></strong>
+                                        <?php else: ?>
+                                            Monitor dan kelola data absensi siswa bulan <strong><?= date('F Y', strtotime($selected_month . '-01')); ?></strong>
+                                        <?php endif; ?>
                                         <?php if ($selected_class): ?>
                                             <?php
                                             $kelas_name = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT nama_kelas FROM kelas WHERE kode_kelas = '$selected_class'"));
@@ -680,8 +686,8 @@ $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
                                     <div class="col-md-2">
                                         <label class="form-label">Mode Export:</label>
                                         <select class="form-modern" id="exportMode" onchange="toggleExportMode()">
-                                            <option value="monthly">Per Bulan</option>
-                                            <option value="daily">Per Hari</option>
+                                            <option value="monthly" <?= $export_mode == 'monthly' ? 'selected' : ''; ?>>Per Bulan</option>
+                                            <option value="daily" <?= $export_mode == 'daily' ? 'selected' : ''; ?>>Per Hari</option>
                                         </select>
                                     </div>
                                     <div class="col-md-3" id="monthlySelector">
@@ -697,9 +703,9 @@ $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
                                             ?>
                                         </select>
                                     </div>
-                                    <div class="col-md-3" id="dailySelector" style="display: none;">
+                                    <div class="col-md-3" id="dailySelector" style="display: <?= $export_mode == 'daily' ? 'block' : 'none'; ?>;">
                                         <label class="form-label">Pilih Tanggal:</label>
-                                        <input type="date" class="form-modern" id="selectedDate" value="<?= date('Y-m-d'); ?>" onchange="loadDailyData()">
+                                        <input type="date" class="form-modern" id="selectedDate" value="<?= $selected_date; ?>" onchange="loadDailyData()">
                                     </div>
                                     <div class="col-md-3">
                                         <label class="form-label">Filter Kelas:</label>
@@ -724,9 +730,18 @@ $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
                                                 <span class="stat-value" id="totalMasuk">
                                                     <?php
                                                     $class_filter = $selected_class ? " AND k.job_title = '$selected_class'" : "";
-                                                    $total_masuk = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], 
-                                                        "SELECT * FROM absensi a INNER JOIN karyawan k ON a.nik = k.nik 
-                                                         WHERE DATE_FORMAT(a.tanggal, '%Y-%m') = '$selected_month' AND a.masuk IS NOT NULL AND a.ijin IS NULL AND a.status_tidak_masuk IS NULL $class_filter"));
+                                                    
+                                                    if ($export_mode == 'daily') {
+                                                        // Query untuk mode harian
+                                                        $total_masuk = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], 
+                                                            "SELECT * FROM absensi a INNER JOIN karyawan k ON a.nik = k.nik 
+                                                             WHERE a.tanggal = '$selected_date' AND a.masuk IS NOT NULL AND a.ijin IS NULL AND a.status_tidak_masuk IS NULL $class_filter"));
+                                                    } else {
+                                                        // Query untuk mode bulanan
+                                                        $total_masuk = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], 
+                                                            "SELECT * FROM absensi a INNER JOIN karyawan k ON a.nik = k.nik 
+                                                             WHERE DATE_FORMAT(a.tanggal, '%Y-%m') = '$selected_month' AND a.masuk IS NOT NULL AND a.ijin IS NULL AND a.status_tidak_masuk IS NULL $class_filter"));
+                                                    }
                                                     echo $total_masuk;
                                                     ?>
                                                 </span>
@@ -735,9 +750,17 @@ $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
                                                 <span class="stat-label">Total Sakit/Izin/Alpha</span>
                                                 <span class="stat-value" id="totalTidakMasuk">
                                                     <?php
-                                                    $total_tidak_masuk_all = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], 
-                                                        "SELECT * FROM absensi a INNER JOIN karyawan k ON a.nik = k.nik 
-                                                         WHERE DATE_FORMAT(a.tanggal, '%Y-%m') = '$selected_month' AND (a.ijin IS NOT NULL OR a.status_tidak_masuk IS NOT NULL) $class_filter"));
+                                                    if ($export_mode == 'daily') {
+                                                        // Query untuk mode harian
+                                                        $total_tidak_masuk_all = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], 
+                                                            "SELECT * FROM absensi a INNER JOIN karyawan k ON a.nik = k.nik 
+                                                             WHERE a.tanggal = '$selected_date' AND (a.ijin IS NOT NULL OR a.status_tidak_masuk IS NOT NULL) $class_filter"));
+                                                    } else {
+                                                        // Query untuk mode bulanan
+                                                        $total_tidak_masuk_all = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], 
+                                                            "SELECT * FROM absensi a INNER JOIN karyawan k ON a.nik = k.nik 
+                                                             WHERE DATE_FORMAT(a.tanggal, '%Y-%m') = '$selected_month' AND (a.ijin IS NOT NULL OR a.status_tidak_masuk IS NOT NULL) $class_filter"));
+                                                    }
                                                     echo $total_tidak_masuk_all;
                                                     ?>
                                                 </span>
@@ -799,19 +822,31 @@ $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
                                     <tbody>
                                         <?php
                                         $no = 1;
-                                        $selected_date = date('Y-m-d'); // Today's date for checking attendance
+                                        $today = date('Y-m-d'); // Today's date for checking attendance
                                         
                                         // Add class filter to query
                                         $class_filter = $selected_class ? " AND k.job_title = '$selected_class'" : "";
                                         
-                                        // Query untuk data absensi per bulan dengan filter kelas
-                                        $attendance = mysqli_query($GLOBALS["___mysqli_ston"], "
-                                            SELECT k.*, a.tanggal, a.masuk, a.pulang, a.ijin, a.status_tidak_masuk 
-                                            FROM karyawan k 
-                                            LEFT JOIN absensi a ON k.nik = a.nik AND DATE_FORMAT(a.tanggal, '%Y-%m') = '$selected_month'
-                                            WHERE 1=1 $class_filter
-                                            ORDER BY k.nama ASC, a.tanggal DESC
-                                        ");
+                                        // Query untuk data absensi berdasarkan mode
+                                        if ($export_mode == 'daily') {
+                                            // Query untuk mode harian - hanya tampilkan data tanggal yang dipilih
+                                            $attendance = mysqli_query($GLOBALS["___mysqli_ston"], "
+                                                SELECT k.*, a.tanggal, a.masuk, a.pulang, a.ijin, a.status_tidak_masuk 
+                                                FROM karyawan k 
+                                                LEFT JOIN absensi a ON k.nik = a.nik AND a.tanggal = '$selected_date'
+                                                WHERE 1=1 $class_filter
+                                                ORDER BY k.nama ASC
+                                            ");
+                                        } else {
+                                            // Query untuk mode bulanan
+                                            $attendance = mysqli_query($GLOBALS["___mysqli_ston"], "
+                                                SELECT k.*, a.tanggal, a.masuk, a.pulang, a.ijin, a.status_tidak_masuk 
+                                                FROM karyawan k 
+                                                LEFT JOIN absensi a ON k.nik = a.nik AND DATE_FORMAT(a.tanggal, '%Y-%m') = '$selected_month'
+                                                WHERE 1=1 $class_filter
+                                                ORDER BY k.nama ASC, a.tanggal DESC
+                                            ");
+                                        }
                                         
                                         $student_data = array();
                                         while ($data = mysqli_fetch_array($attendance)) {
@@ -852,8 +887,9 @@ $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
                                             }
                                             
                                             // Check if student has attendance today
+                                            $check_date = ($export_mode == 'daily') ? $selected_date : $today;
                                             $today_attendance = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], 
-                                                "SELECT * FROM absensi WHERE nik = '$nik' AND tanggal = '$selected_date'"));
+                                                "SELECT * FROM absensi WHERE nik = '$nik' AND tanggal = '$check_date'"));
                                             
                                             // Determine overall status for the month
                                             if ($total_hadir > ($total_ijin + $total_alpha + $total_sakit)) {
@@ -1120,7 +1156,7 @@ $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
             const selectedMonth = document.getElementById('monthYear').value;
             const selectedClass = document.getElementById('kelasFilter').value;
             
-            let url = `?month=${selectedMonth}`;
+            let url = `?month=${selectedMonth}&mode=monthly`;
             if (selectedClass) {
                 url += `&kelas=${selectedClass}`;
             }
