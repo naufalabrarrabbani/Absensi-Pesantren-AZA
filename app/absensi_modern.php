@@ -690,7 +690,7 @@ $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
                                             <option value="daily" <?= $export_mode == 'daily' ? 'selected' : ''; ?>>Per Hari</option>
                                         </select>
                                     </div>
-                                    <div class="col-md-3" id="monthlySelector">
+                                    <div class="col-md-3" id="monthlySelector" style="display: <?= $export_mode == 'monthly' ? 'block' : 'none'; ?>;">
                                         <label class="form-label">Pilih Periode:</label>
                                         <select class="form-modern" id="monthYear" onchange="loadPeriodData()">
                                             <?php
@@ -709,7 +709,7 @@ $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
                                     </div>
                                     <div class="col-md-3">
                                         <label class="form-label">Filter Kelas:</label>
-                                        <select class="form-modern" id="kelasFilter" onchange="loadPeriodData()">
+                                        <select class="form-modern" id="kelasFilter" onchange="filterByClass()">
                                             <option value="">-- Semua Kelas --</option>
                                             <?php
                                             $query_kelas = "SELECT DISTINCT k.kode_kelas, k.nama_kelas FROM kelas k 
@@ -1164,6 +1164,16 @@ $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
             window.location.href = url;
         }
 
+        function filterByClass() {
+            const mode = document.getElementById('exportMode').value;
+            
+            if (mode === 'daily') {
+                loadDailyData();
+            } else {
+                loadPeriodData();
+            }
+        }
+
         function exportData(format) {
             const selectedMonth = document.getElementById('monthYear').value;
             const selectedClass = document.getElementById('kelasFilter').value;
@@ -1236,10 +1246,14 @@ $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
 
         function cancelAbsent(nik, name) {
             if (confirm(`Yakin ingin membatalkan status tidak masuk untuk siswa ${name}?\n\nStatus akan dihapus dan siswa dapat ditandai hadir kembali.`)) {
+                // Get selected date from date picker or use today
+                const mode = document.getElementById('exportMode').value;
+                const selectedDate = mode === 'daily' ? document.getElementById('selectedDate').value : '<?= date('Y-m-d'); ?>';
+                
                 const formData = new FormData();
                 formData.append('nik', nik);
                 formData.append('action', 'cancel');
-                formData.append('tanggal', '<?= date('Y-m-d'); ?>');
+                formData.append('tanggal', selectedDate);
                 
                 fetch('controller/cancel_absent.php', {
                     method: 'POST',
@@ -1269,10 +1283,14 @@ $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
                 return;
             }
             
+            // Get selected date from date picker or use today
+            const mode = document.getElementById('exportMode').value;
+            const selectedDate = mode === 'daily' ? document.getElementById('selectedDate').value : '<?= date('Y-m-d'); ?>';
+            
             const formData = new FormData();
             formData.append('nik', currentStudentNik);
             formData.append('status', selectedStatus.value);
-            formData.append('tanggal', '<?= date('Y-m-d'); ?>');
+            formData.append('tanggal', selectedDate);
             
             fetch('controller/mark_absent.php', {
                 method: 'POST',
@@ -1298,6 +1316,9 @@ $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
 
         // Add styles for checked radio buttons
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize export mode UI
+            toggleExportMode();
+            
             document.querySelectorAll('input[name="absentStatus"]').forEach(radio => {
                 radio.addEventListener('change', function() {
                     document.querySelectorAll('.form-check').forEach(check => {
