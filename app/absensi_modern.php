@@ -971,10 +971,18 @@ $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
                                             </td>
                                             <td>
                                                 <?php if (!$today_attendance || (!$today_attendance['masuk'] && !$today_attendance['ijin'] && !$today_attendance['status_tidak_masuk'])) { ?>
-                                                    <button class="btn-modern warning" onclick="markAbsent('<?= $data['nik']; ?>', '<?= $data['nama']; ?>')">
-                                                        <i class="fas fa-user-times"></i>
-                                                        Tandai Tidak Masuk
+                                                    <button class="btn-modern primary" onclick="markAbsent('<?= $data['nik']; ?>', '<?= $data['nama']; ?>')">
+                                                        <i class="fas fa-user-edit"></i>
+                                                        Ubah Kehadiran
                                                     </button>
+                                                <?php } elseif ($today_attendance && $today_attendance['masuk'] && !$today_attendance['status_tidak_masuk']) { ?>
+                                                    <span class="status-badge status-present">Hadir</span>
+                                                    <div class="btn-group-actions">
+                                                        <button class="btn-modern primary" style="font-size: 10px; padding: 4px 8px;" onclick="markAbsent('<?= $data['nik']; ?>', '<?= $data['nama']; ?>', 'hadir', '<?= date('H:i', strtotime($today_attendance['masuk'])); ?>')">
+                                                            <i class="fas fa-edit"></i>
+                                                            Edit
+                                                        </button>
+                                                    </div>
                                                 <?php } elseif ($today_attendance && $today_attendance['status_tidak_masuk']) { ?>
                                                     <span class="status-badge status-permission">
                                                         <?= ucfirst($today_attendance['status_tidak_masuk']); ?>
@@ -1005,14 +1013,14 @@ $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
         </div>
     </div>
 
-    <!-- Modal for marking absent students -->
+    <!-- Modal Ubah Status Kehadiran -->
     <div class="modal fade" id="absentModal" tabindex="-1" aria-labelledby="absentModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content" style="border-radius: 16px;">
                 <div class="modal-header" style="border-bottom: 1px solid #f0f0f0;">
                     <h5 class="modal-title" id="absentModalLabel">
-                        <i class="fas fa-user-times me-2"></i>
-                        Tandai Siswa Tidak Masuk
+                        <i class="fas fa-user-edit me-2"></i>
+                        Ubah Status Kehadiran
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -1021,34 +1029,47 @@ $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
                         <p>Siswa: <strong id="studentName"></strong></p>
                         <p class="text-muted">Tanggal: <?= date('d F Y'); ?></p>
                     </div>
-                    
+
                     <div class="mb-3">
-                        <label class="form-label">Pilih Status Ketidakhadiran:</label>
+                        <label class="form-label fw-semibold">Pilih Status Kehadiran:</label>
                         <div class="row">
                             <div class="col-12 mb-2">
-                                <div class="form-check" style="padding: 10px; border: 2px solid #E0E0E0; border-radius: 8px;">
-                                    <input class="form-check-input" type="radio" name="absentStatus" id="statusAlpha" value="alpha">
-                                    <label class="form-check-label" for="statusAlpha">
-                                        <strong>Alpha</strong><br>
-                                        <small class="text-muted">Tidak masuk tanpa keterangan</small>
+                                <div class="form-check" style="padding: 10px; border: 2px solid #E0E0E0; border-radius: 8px; cursor: pointer;" data-status-color="#4CAF50" data-status-bg="rgba(76,175,80,0.07)">
+                                    <input class="form-check-input" type="radio" name="absentStatus" id="statusHadir" value="hadir">
+                                    <label class="form-check-label w-100" for="statusHadir" style="cursor: pointer;">
+                                        <strong style="color: #4CAF50;"><i class="fas fa-check-circle me-1"></i>Hadir / Masuk Manual</strong><br>
+                                        <small class="text-muted">Tandai siswa hadir dengan input jam masuk</small>
                                     </label>
+                                    <div id="jamMasukContainer" style="display:none; margin-top: 10px;">
+                                        <label class="form-label mb-1" style="font-size: 13px; font-weight: 500;">Jam Masuk:</label>
+                                        <input type="time" class="form-modern" id="jamMasuk" style="max-width: 160px; padding: 6px 10px;">
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-12 mb-2">
-                                <div class="form-check" style="padding: 10px; border: 2px solid #E0E0E0; border-radius: 8px;">
+                                <div class="form-check" style="padding: 10px; border: 2px solid #E0E0E0; border-radius: 8px; cursor: pointer;" data-status-color="#2196F3" data-status-bg="rgba(33,150,243,0.07)">
                                     <input class="form-check-input" type="radio" name="absentStatus" id="statusSakit" value="sakit">
-                                    <label class="form-check-label" for="statusSakit">
-                                        <strong>Sakit</strong><br>
+                                    <label class="form-check-label w-100" for="statusSakit" style="cursor: pointer;">
+                                        <strong style="color: #2196F3;"><i class="fas fa-heartbeat me-1"></i>Sakit</strong><br>
                                         <small class="text-muted">Tidak masuk karena sakit</small>
                                     </label>
                                 </div>
                             </div>
                             <div class="col-12 mb-2">
-                                <div class="form-check" style="padding: 10px; border: 2px solid #E0E0E0; border-radius: 8px;">
+                                <div class="form-check" style="padding: 10px; border: 2px solid #E0E0E0; border-radius: 8px; cursor: pointer;" data-status-color="#FF9800" data-status-bg="rgba(255,152,0,0.07)">
                                     <input class="form-check-input" type="radio" name="absentStatus" id="statusIzin" value="izin">
-                                    <label class="form-check-label" for="statusIzin">
-                                        <strong>Izin</strong><br>
+                                    <label class="form-check-label w-100" for="statusIzin" style="cursor: pointer;">
+                                        <strong style="color: #FF9800;"><i class="fas fa-clipboard-check me-1"></i>Izin</strong><br>
                                         <small class="text-muted">Tidak masuk dengan izin</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-12 mb-2">
+                                <div class="form-check" style="padding: 10px; border: 2px solid #E0E0E0; border-radius: 8px; cursor: pointer;" data-status-color="#F44336" data-status-bg="rgba(244,67,54,0.07)">
+                                    <input class="form-check-input" type="radio" name="absentStatus" id="statusAlpha" value="alpha">
+                                    <label class="form-check-label w-100" for="statusAlpha" style="cursor: pointer;">
+                                        <strong style="color: #F44336;"><i class="fas fa-times-circle me-1"></i>Alpha</strong><br>
+                                        <small class="text-muted">Tidak masuk tanpa keterangan</small>
                                     </label>
                                 </div>
                             </div>
@@ -1056,7 +1077,7 @@ $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
                     </div>
                 </div>
                 <div class="modal-footer" style="border-top: 1px solid #f0f0f0;">
-                    <button type="button" class="btn-modern secondary" data-bs-dismiss="modal">
+                    <button type="button" class="btn-modern" data-bs-dismiss="modal" style="background: #f0f0f0; color: #333;">
                         <i class="fas fa-times"></i>
                         Batal
                     </button>
@@ -1224,22 +1245,42 @@ $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
         let currentStudentNik = '';
         let currentStudentName = '';
 
-        function markAbsent(nik, name, currentStatus = '') {
+        function markAbsent(nik, name, currentStatus = '', currentJamMasuk = '') {
             currentStudentNik = nik;
             currentStudentName = name;
-            
+
             document.getElementById('studentName').textContent = name;
-            
-            // Clear previous selections
+
+            // Reset all options
             document.querySelectorAll('input[name="absentStatus"]').forEach(radio => {
                 radio.checked = false;
+                const fc = radio.closest('.form-check');
+                fc.style.borderColor = '#E0E0E0';
+                fc.style.backgroundColor = 'white';
             });
-            
-            // If editing existing status, select the current one
+            document.getElementById('jamMasukContainer').style.display = 'none';
+
+            // Default jam masuk to current time
+            const now = new Date();
+            document.getElementById('jamMasuk').value =
+                now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+
+            // Pre-select current status if editing
             if (currentStatus) {
-                document.getElementById('status' + currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)).checked = true;
+                const radioId = 'status' + currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1);
+                const radio = document.getElementById(radioId);
+                if (radio) {
+                    radio.checked = true;
+                    const fc = radio.closest('.form-check');
+                    fc.style.borderColor = fc.dataset.statusColor;
+                    fc.style.backgroundColor = fc.dataset.statusBg;
+                    if (currentStatus === 'hadir') {
+                        document.getElementById('jamMasukContainer').style.display = 'block';
+                        if (currentJamMasuk) document.getElementById('jamMasuk').value = currentJamMasuk;
+                    }
+                }
             }
-            
+
             const modal = new bootstrap.Modal(document.getElementById('absentModal'));
             modal.show();
         }
@@ -1277,21 +1318,27 @@ $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
 
         function saveAbsentStatus() {
             const selectedStatus = document.querySelector('input[name="absentStatus"]:checked');
-            
+
             if (!selectedStatus) {
-                alert('Mohon pilih status ketidakhadiran');
+                alert('Mohon pilih status kehadiran');
                 return;
             }
-            
-            // Get selected date from date picker or use today
+
             const mode = document.getElementById('exportMode').value;
             const selectedDate = mode === 'daily' ? document.getElementById('selectedDate').value : '<?= date('Y-m-d'); ?>';
-            
+
             const formData = new FormData();
             formData.append('nik', currentStudentNik);
             formData.append('status', selectedStatus.value);
             formData.append('tanggal', selectedDate);
-            
+
+            if (selectedStatus.value === 'hadir') {
+                formData.append('jam_masuk', document.getElementById('jamMasuk').value);
+            }
+
+            const modal = bootstrap.Modal.getInstance(document.getElementById('absentModal'));
+            modal.hide();
+
             fetch('controller/mark_absent.php', {
                 method: 'POST',
                 body: formData
@@ -1299,7 +1346,7 @@ $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Status ketidakhadiran berhasil disimpan');
+                    alert('Status kehadiran berhasil disimpan');
                     location.reload();
                 } else {
                     alert('Error: ' + data.message);
@@ -1309,26 +1356,28 @@ $selected_class = isset($_GET['kelas']) ? $_GET['kelas'] : '';
                 console.error('Error:', error);
                 alert('Terjadi kesalahan saat menyimpan data');
             });
-            
-            const modal = bootstrap.Modal.getInstance(document.getElementById('absentModal'));
-            modal.hide();
         }
 
-        // Add styles for checked radio buttons
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize export mode UI
             toggleExportMode();
-            
+
             document.querySelectorAll('input[name="absentStatus"]').forEach(radio => {
                 radio.addEventListener('change', function() {
-                    document.querySelectorAll('.form-check').forEach(check => {
-                        check.style.borderColor = '#E0E0E0';
-                        check.style.backgroundColor = 'white';
+                    // Reset all option styles
+                    document.querySelectorAll('input[name="absentStatus"]').forEach(r => {
+                        const fc = r.closest('.form-check');
+                        fc.style.borderColor = '#E0E0E0';
+                        fc.style.backgroundColor = 'white';
                     });
-                    
+                    document.getElementById('jamMasukContainer').style.display = 'none';
+
                     if (this.checked) {
-                        this.closest('.form-check').style.borderColor = '#4640DE';
-                        this.closest('.form-check').style.backgroundColor = 'rgba(70, 64, 222, 0.05)';
+                        const fc = this.closest('.form-check');
+                        fc.style.borderColor = fc.dataset.statusColor;
+                        fc.style.backgroundColor = fc.dataset.statusBg;
+                        if (this.value === 'hadir') {
+                            document.getElementById('jamMasukContainer').style.display = 'block';
+                        }
                     }
                 });
             });

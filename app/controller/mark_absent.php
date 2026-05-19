@@ -22,6 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $nik = mysqli_real_escape_string($GLOBALS["___mysqli_ston"], $_POST['nik']);
 $status = mysqli_real_escape_string($GLOBALS["___mysqli_ston"], $_POST['status']);
 $tanggal = mysqli_real_escape_string($GLOBALS["___mysqli_ston"], $_POST['tanggal']);
+$jam_masuk = isset($_POST['jam_masuk']) ? mysqli_real_escape_string($GLOBALS["___mysqli_ston"], $_POST['jam_masuk']) : date('H:i');
 
 // Validate required fields
 if (empty($nik) || empty($status) || empty($tanggal)) {
@@ -30,7 +31,7 @@ if (empty($nik) || empty($status) || empty($tanggal)) {
 }
 
 // Validate status
-$allowed_status = ['alpha', 'sakit', 'izin'];
+$allowed_status = ['alpha', 'sakit', 'izin', 'hadir'];
 if (!in_array($status, $allowed_status)) {
     echo json_encode(['success' => false, 'message' => 'Status tidak valid']);
     exit();
@@ -48,19 +49,27 @@ $check_attendance = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM abse
 
 if (mysqli_num_rows($check_attendance) > 0) {
     // Update existing record
-    $update_query = "UPDATE absensi SET status_tidak_masuk = '$status' WHERE nik = '$nik' AND tanggal = '$tanggal'";
+    if ($status === 'hadir') {
+        $update_query = "UPDATE absensi SET masuk = '$jam_masuk', status_tidak_masuk = NULL WHERE nik = '$nik' AND tanggal = '$tanggal'";
+    } else {
+        $update_query = "UPDATE absensi SET status_tidak_masuk = '$status', masuk = NULL, pulang = NULL WHERE nik = '$nik' AND tanggal = '$tanggal'";
+    }
     
     if (mysqli_query($GLOBALS["___mysqli_ston"], $update_query)) {
-        echo json_encode(['success' => true, 'message' => 'Status ketidakhadiran berhasil diupdate']);
+        echo json_encode(['success' => true, 'message' => 'Status kehadiran berhasil diupdate']);
     } else {
         echo json_encode(['success' => false, 'message' => 'Gagal mengupdate status: ' . mysqli_error($GLOBALS["___mysqli_ston"])]);
     }
 } else {
-    // Insert new record for absent student
-    $insert_query = "INSERT INTO absensi (nik, tanggal, status_tidak_masuk) VALUES ('$nik', '$tanggal', '$status')";
+    // Insert new record
+    if ($status === 'hadir') {
+        $insert_query = "INSERT INTO absensi (nik, tanggal, masuk) VALUES ('$nik', '$tanggal', '$jam_masuk')";
+    } else {
+        $insert_query = "INSERT INTO absensi (nik, tanggal, status_tidak_masuk) VALUES ('$nik', '$tanggal', '$status')";
+    }
     
     if (mysqli_query($GLOBALS["___mysqli_ston"], $insert_query)) {
-        echo json_encode(['success' => true, 'message' => 'Status ketidakhadiran berhasil disimpan']);
+        echo json_encode(['success' => true, 'message' => 'Status kehadiran berhasil disimpan']);
     } else {
         echo json_encode(['success' => false, 'message' => 'Gagal menyimpan status: ' . mysqli_error($GLOBALS["___mysqli_ston"])]);
     }

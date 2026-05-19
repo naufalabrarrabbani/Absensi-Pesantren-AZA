@@ -35,7 +35,8 @@ $skr = date('Y-m-d');
 
         .attendance-grid {
             display: grid;
-            grid-template-columns: 1fr 400px 1fr;
+            grid-template-columns: 350px 500px;
+            justify-content: center;
             gap: 20px;
             max-width: 1400px;
             margin: 0 auto;
@@ -567,6 +568,17 @@ $skr = date('Y-m-d');
                         </div>
                     </div>
                 </div>
+
+                <div class="navigation-buttons">
+                    <a href="index.php" class="nav-btn btn-home">
+                        <i class="fas fa-home"></i>
+                        Kembali ke Home
+                    </a>
+                    <a href="login.php" class="nav-btn btn-admin">
+                        <i class="fas fa-user-shield"></i>
+                        Login Admin
+                    </a>
+                </div>
             </div>
 
             <!-- Main - Attendance Form -->
@@ -576,8 +588,6 @@ $skr = date('Y-m-d');
                         <i class="fas fa-sign-out-alt"></i>
                         Absen Pulang Siswa
                     </h1>
-                    <p class="attendance-subtitle">Khusus untuk Siswa-Siswi</p>
-                    <p style="color: #7f8c8d; margin: 0;">Scan QR Code untuk melakukan absensi pulang</p>
                 </div>
 
                 <div class="qr-section">
@@ -600,22 +610,9 @@ $skr = date('Y-m-d');
                     </p>
                 </div>
 
-                <div class="navigation-buttons">
-                    <a href="index.php" class="nav-btn btn-home">
-                        <i class="fas fa-home"></i>
-                        Kembali ke Home
-                    </a>
-                    <a href="login.php" class="nav-btn btn-admin">
-                        <i class="fas fa-user-shield"></i>
-                        Login Admin
-                    </a>
-                </div>
-            </div>
-
-            <!-- Right Side - Recent Attendance -->
-            <div class="side-card">
-                <div class="recent-attendance">
-                    <h3 class="recent-title">
+                <!-- Recent Attendance Details (Moved below navigation) -->
+                <div class="recent-attendance" style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-top: 25px; border: 1px solid #e9ecef; text-align: left;">
+                    <h3 class="recent-title" style="margin-bottom: 15px; border-bottom: 2px solid #f8f9fa; padding-bottom: 10px;">
                         <i class="fas fa-sign-out-alt"></i> Pulang Siswa Terakhir
                     </h3>
                     <?php 
@@ -623,22 +620,26 @@ $skr = date('Y-m-d');
                     while ($d_absen = mysqli_fetch_array($s_absen1)) { 
                         $peg = mysqli_fetch_array(mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * from karyawan where nik='$d_absen[nik]'"));
                     ?>
-                    <div class="attendance-item">
-                        <img src="app/images/<?= $peg['foto'] ?: 'default-avatar.png'; ?>" 
-                             alt="<?= $peg['nama']; ?>" 
-                             class="attendance-avatar"
-                             onerror="this.src='images/default-avatar.png'">
-                        <div class="attendance-info">
-                            <div class="attendance-name"><?= $peg['nama']; ?></div>
-                            <div class="attendance-details"><?= $peg['lokasi']; ?> - <?= $peg['area']; ?> - <?= $peg['sub_area']; ?></div>
-                            <div class="attendance-time">
-                                <i class="fas fa-clock"></i> 
-                                <?= date('H:i', strtotime($d_absen['pulang'])); ?>
+                    <div class="attendance-item" style="display: flex; justify-content: space-between; align-items: center; border-radius: 12px; padding: 10px 15px; transition: all 0.2s;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <img src="app/images/<?= $peg['foto'] ?: 'default-avatar.png'; ?>" 
+                                 alt="<?= $peg['nama']; ?>" 
+                                 class="attendance-avatar"
+                                 style="width: 45px; height: 45px;"
+                                 onerror="this.src='images/default-avatar.png'">
+                            <div class="attendance-info">
+                                <div class="attendance-name" style="font-size: 15px;"><?= $peg['nama']; ?></div>
+                                <div class="attendance-details" style="font-size: 12px;"><?= $peg['lokasi']; ?> - <?= $peg['area']; ?></div>
                             </div>
+                        </div>
+                        <div class="attendance-time" style="background: #eef2ff; padding: 5px 10px; border-radius: 8px; font-size: 12px;">
+                            <i class="fas fa-clock"></i> 
+                            <?= date('H:i', strtotime($d_absen['pulang'])); ?>
                         </div>
                     </div>
                     <?php } ?>
                 </div>
+
             </div>
         </div>
     </div>
