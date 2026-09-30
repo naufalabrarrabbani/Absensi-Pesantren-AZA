@@ -641,6 +641,31 @@ $skr = date('Y-m-d');
                     <?php } ?>
                 </div>
 
+                <div class="recent-attendance" style="background: #fff8e1; border-radius: 16px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-top: 25px; border: 1px solid #ffe082; text-align: left;">
+                    <h3 class="recent-title" style="margin-bottom: 15px; border-bottom: 2px solid #ffecb3; padding-bottom: 10px;">
+                        <i class="fas fa-user-clock"></i> Belum Absen Masuk
+                    </h3>
+                    <?php
+                    $s_belum_masuk = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT k.*, kls.nama_kelas FROM karyawan k LEFT JOIN kelas kls ON k.job_title = kls.kode_kelas WHERE NOT EXISTS (SELECT 1 FROM absensi a WHERE a.nik = k.nik AND a.tanggal = '$skr' AND a.masuk IS NOT NULL) ORDER BY k.nama ASC");
+                    if (mysqli_num_rows($s_belum_masuk) === 0) {
+                        echo '<p style="text-align: center; color: #6c757d; margin: 0;">Semua siswa sudah absen masuk.</p>';
+                    }
+                    while ($d_belum_masuk = mysqli_fetch_array($s_belum_masuk)) {
+                    ?>
+                    <div class="attendance-item" style="display: flex; align-items: center; gap: 15px; border-radius: 12px; padding: 10px 15px; transition: all 0.2s;">
+                        <img src="app/images/<?= $d_belum_masuk['foto'] ?: 'default-avatar.png'; ?>"
+                             alt="<?= htmlspecialchars($d_belum_masuk['nama']); ?>"
+                             class="attendance-avatar"
+                             style="width: 45px; height: 45px;"
+                             onerror="this.src='images/default-avatar.png'">
+                        <div class="attendance-info">
+                            <div class="attendance-name" style="font-size: 15px;"><?= htmlspecialchars($d_belum_masuk['nama']); ?></div>
+                            <div class="attendance-details" style="font-size: 12px;"><?= htmlspecialchars($d_belum_masuk['nama_kelas'] ?: 'Kelas tidak ditemukan'); ?></div>
+                        </div>
+                    </div>
+                    <?php } ?>
+                </div>
+
             </div>
         </div>
     </div>

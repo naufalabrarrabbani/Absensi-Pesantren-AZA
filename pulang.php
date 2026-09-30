@@ -640,6 +640,31 @@ $skr = date('Y-m-d');
                     <?php } ?>
                 </div>
 
+                <div class="recent-attendance" style="background: #fff8e1; border-radius: 16px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-top: 25px; border: 1px solid #ffe082; text-align: left;">
+                    <h3 class="recent-title" style="margin-bottom: 15px; border-bottom: 2px solid #ffecb3; padding-bottom: 10px;">
+                        <i class="fas fa-user-clock"></i> Belum Absen Pulang
+                    </h3>
+                    <?php
+                    $s_belum_pulang = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT k.*, k.lokasi, k.area FROM karyawan k WHERE EXISTS (SELECT 1 FROM absensi a WHERE a.nik = k.nik AND a.tanggal = '$skr' AND a.masuk IS NOT NULL) AND NOT EXISTS (SELECT 1 FROM absensi a WHERE a.nik = k.nik AND a.tanggal = '$skr' AND a.masuk IS NOT NULL AND a.pulang IS NOT NULL AND a.pulang != '0') ORDER BY k.nama ASC");
+                    if (mysqli_num_rows($s_belum_pulang) === 0) {
+                        echo '<p style="text-align: center; color: #6c757d; margin: 0;">Semua siswa sudah absen pulang.</p>';
+                    }
+                    while ($d_belum_pulang = mysqli_fetch_array($s_belum_pulang)) {
+                    ?>
+                    <div class="attendance-item" style="display: flex; align-items: center; gap: 15px; border-radius: 12px; padding: 10px 15px; transition: all 0.2s;">
+                        <img src="app/images/<?= $d_belum_pulang['foto'] ?: 'default-avatar.png'; ?>"
+                             alt="<?= htmlspecialchars($d_belum_pulang['nama']); ?>"
+                             class="attendance-avatar"
+                             style="width: 45px; height: 45px;"
+                             onerror="this.src='images/default-avatar.png'">
+                        <div class="attendance-info">
+                            <div class="attendance-name" style="font-size: 15px;"><?= htmlspecialchars($d_belum_pulang['nama']); ?></div>
+                            <div class="attendance-details" style="font-size: 12px;"><?= htmlspecialchars(($d_belum_pulang['lokasi'] ?: '-') . ' - ' . ($d_belum_pulang['area'] ?: '-')); ?></div>
+                        </div>
+                    </div>
+                    <?php } ?>
+                </div>
+
             </div>
         </div>
     </div>
